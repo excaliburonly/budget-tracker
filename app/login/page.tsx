@@ -59,7 +59,7 @@ export default async function LoginPage(props: {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          Don't have an account?{" "}
+          Don&lsquot have an account?{" "}
           <Link className="text-blue-600 hover:underline font-medium" href="/signup">
             Sign Up
           </Link>
