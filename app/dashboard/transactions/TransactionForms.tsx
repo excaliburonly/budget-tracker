@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { addTransaction, addCategory } from "./actions";
+import { Category } from "@/types/database";
 
-export function AddTransactionForm({ categories }: { categories: any[] }) {
+export function AddTransactionForm({ categories }: { categories: Category[] }) {
   const [type, setType] = useState<"income" | "expense">("expense");
+
+  const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setType(e.target.value as "income" | "expense");
+  };
 
   return (
     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm mb-8">
@@ -27,7 +32,7 @@ export function AddTransactionForm({ categories }: { categories: any[] }) {
           <select
             name="type"
             value={type}
-            onChange={(e) => setType(e.target.value as any)}
+            onChange={handleTypeChange}
             className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
           >
             <option value="expense">Expense</option>

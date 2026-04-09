@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { getTransactions } from "./transactions/actions";
+import { Transaction } from "@/types/database";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -70,7 +71,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <ul className="divide-y divide-gray-100 dark:divide-gray-800">
-                {transactions.slice(0, 5).map((t: any) => (
+                {transactions.slice(0, 5).map((t: Transaction) => (
                   <li key={t.id} className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors">
                     <div className="flex flex-col">
                       <span className="text-sm font-semibold text-gray-900 dark:text-white">{t.notes || t.categories?.name || 'Uncategorized'}</span>

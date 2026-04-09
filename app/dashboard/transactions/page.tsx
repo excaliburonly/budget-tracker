@@ -1,5 +1,6 @@
 import { getCategories, getTransactions } from "./actions";
 import { AddTransactionForm, AddCategoryForm } from "./TransactionForms";
+import { Transaction } from "@/types/database";
 
 export default async function TransactionsPage() {
   const categories = await getCategories();
@@ -35,7 +36,7 @@ export default async function TransactionsPage() {
                   </td>
                 </tr>
               ) : (
-                transactions.map((t: any) => (
+                transactions.map((t: Transaction) => (
                   <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
                       {new Date(t.date).toLocaleDateString()}

@@ -3,8 +3,9 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { Category, Transaction } from "@/types/database";
 
-export async function getCategories() {
+export async function getCategories(): Promise<Category[]> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -14,7 +15,7 @@ export async function getCategories() {
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);
-  return data || [];
+  return (data as Category[]) || [];
 }
 
 export async function addCategory(formData: FormData) {
@@ -68,7 +69,7 @@ export async function addTransaction(formData: FormData) {
   revalidatePath("/dashboard/transactions");
 }
 
-export async function getTransactions() {
+export async function getTransactions(): Promise<Transaction[]> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -84,5 +85,5 @@ export async function getTransactions() {
     .order("date", { ascending: false });
 
   if (error) throw new Error(error.message);
-  return data || [];
+  return (data as Transaction[]) || [];
 }
