@@ -2,9 +2,15 @@
 
 import { ChangeEvent, useState } from "react";
 import { addTransaction, addCategory } from "./actions";
-import { Category } from "@/types/database";
+import { Category, EmergencyFund } from "@/types/database";
 
-export function AddTransactionForm({ categories }: { categories: Category[] }) {
+export function AddTransactionForm({ 
+  categories, 
+  emergencyFunds = [] 
+}: { 
+  categories: Category[], 
+  emergencyFunds?: EmergencyFund[] 
+}) {
   const [type, setType] = useState<"income" | "expense">("expense");
 
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -15,6 +21,7 @@ export function AddTransactionForm({ categories }: { categories: Category[] }) {
     <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm mb-8">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Transaction</h3>
       <form action={addTransaction} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* ... (amount, type fields) ... */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
           <input
@@ -58,6 +65,21 @@ export function AddTransactionForm({ categories }: { categories: Category[] }) {
         </div>
 
         <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Link to Emergency Fund</label>
+          <select
+            name="emergency_fund_id"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+          >
+            <option value="">Not for emergency fund</option>
+            {emergencyFunds.map((f) => (
+              <option key={f.id} value={f.id}>
+                {f.name} ({f.instrument_type})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
           <input
             type="date"
@@ -68,7 +90,7 @@ export function AddTransactionForm({ categories }: { categories: Category[] }) {
           />
         </div>
 
-        <div className="flex flex-col gap-1.5 lg:col-span-2">
+        <div className="flex flex-col gap-1.5 lg:col-span-1">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
           <input
             type="text"

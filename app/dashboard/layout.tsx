@@ -27,6 +27,9 @@ export default function DashboardLayout({
           <Link href="/dashboard/investments" className="px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 transition-colors font-medium text-sm">
             Investments
           </Link>
+          <Link href="/dashboard/emergency-funds" className="px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 transition-colors font-medium text-sm">
+            Emergency Funds
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-800">

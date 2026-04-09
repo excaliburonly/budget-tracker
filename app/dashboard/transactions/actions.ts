@@ -51,6 +51,7 @@ export async function addTransaction(formData: FormData) {
   const amount = parseFloat(formData.get("amount") as string);
   const type = formData.get("type") as "income" | "expense";
   const category_id = formData.get("category_id") as string;
+  const emergency_fund_id = formData.get("emergency_fund_id") as string;
   const date = formData.get("date") as string;
   const notes = formData.get("notes") as string;
 
@@ -59,6 +60,7 @@ export async function addTransaction(formData: FormData) {
     amount,
     type,
     category_id: category_id || null,
+    emergency_fund_id: emergency_fund_id || null,
     date,
     notes,
   });
@@ -67,6 +69,7 @@ export async function addTransaction(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/transactions");
+  revalidatePath("/dashboard/emergency-funds");
 }
 
 export async function getTransactions(): Promise<Transaction[]> {

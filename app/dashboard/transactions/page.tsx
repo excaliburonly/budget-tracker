@@ -1,4 +1,5 @@
 import { getCategories, getTransactions } from "./actions";
+import { getEmergencyFunds } from "../emergency-funds/actions";
 import { AddTransactionForm, AddCategoryForm } from "./TransactionForms";
 import { Transaction } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
@@ -20,6 +21,7 @@ export default async function TransactionsPage() {
 
   const categories = await getCategories();
   const transactions = await getTransactions();
+  const emergencyFunds = await getEmergencyFunds();
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -29,7 +31,7 @@ export default async function TransactionsPage() {
       </header>
 
       <AddCategoryForm />
-      <AddTransactionForm categories={categories} />
+      <AddTransactionForm categories={categories} emergencyFunds={emergencyFunds} />
 
       <section>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">History</h3>
