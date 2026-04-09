@@ -57,7 +57,7 @@ export default async function BudgetsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {budgets.map((budget: any) => {
+              {budgets.map((budget: Budget) => {
                 const spent = spendingByCategory[budget.category_id] || 0;
                 const percentage = Math.min((spent / budget.amount) * 100, 100);
                 const isOver = spent > budget.amount;

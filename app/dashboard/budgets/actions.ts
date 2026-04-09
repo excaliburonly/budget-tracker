@@ -1,11 +1,10 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { Budget } from "@/types/database";
+import {createClient} from "@/utils/supabase/server";
+import {cookies} from "next/headers";
+import {revalidatePath} from "next/cache";
 
-export async function getBudgets(month?: string) {
+export async function getBudgets(month?: string): Promise<Budget[]> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -31,10 +30,10 @@ export async function getBudgets(month?: string) {
     return [];
   }
 
-  return data;
+  return (data as Budget[]) || [];
 }
 
-export async function createBudget(formData: FormData) {
+export async function createBudget(formData: FormData): Promise<{ error?: string; success?: boolean }> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -64,7 +63,7 @@ export async function createBudget(formData: FormData) {
   return { success: true };
 }
 
-export async function updateBudget(id: string, amount: number) {
+export async function updateBudget(id: string, amount: number): Promise<{ error?: string; success?: boolean }> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -83,7 +82,7 @@ export async function updateBudget(id: string, amount: number) {
   return { success: true };
 }
 
-export async function deleteBudget(id: string) {
+export async function deleteBudget(id: string): Promise<{ error?: string; success?: boolean }> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 

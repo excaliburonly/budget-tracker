@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { getTransactions } from "./transactions/actions";
 import { getBudgets } from "./budgets/actions";
-import { Transaction } from "@/types/database";
+import { Transaction, Budget } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
 
 export default async function DashboardPage() {
@@ -141,11 +141,11 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-6">
-                {budgets.slice(0, 3).map((budget: any) => {
+                {budgets.slice(0, 3).map((budget: Budget) => {
                   const spent = spendingByCategory[budget.category_id] || 0;
                   const percentage = Math.min((spent / budget.amount) * 100, 100);
                   const isOver = spent > budget.amount;
-                  
+
                   return (
                     <div key={budget.id} className="space-y-2">
                       <div className="flex justify-between items-center">
