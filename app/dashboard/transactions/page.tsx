@@ -1,8 +1,23 @@
 import { getCategories, getTransactions } from "./actions";
 import { AddTransactionForm, AddCategoryForm } from "./TransactionForms";
 import { Transaction } from "@/types/database";
+import { formatCurrency } from "@/utils/format";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
 export default async function TransactionsPage() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('currency')
+    .eq('id', user?.id)
+    .single();
+
+  const currency = profile?.currency || 'INR';
+
   const categories = await getCategories();
   const transactions = await getTransactions();
 
@@ -56,7 +71,7 @@ export default async function TransactionsPage() {
                       {t.notes || '-'}
                     </td>
                     <td className={`px-6 py-4 text-sm font-bold text-right ${t.type === 'income' ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {t.type === 'income' ? '+' : '-'}${Number(t.amount).toFixed(2)}
+                      {t.type === 'income' ? '+' : '-'}{formatCurrency(Number(t.amount), currency)}
                     </td>
                   </tr>
                 ))
