@@ -46,32 +46,32 @@ export default function InvestmentsPage() {
 
     return (<div className="max-w-6xl mx-auto py-8">
             <header className="mb-10 flex items-center gap-3">
-                <ChartBarIcon className="w-8 h-8 text-blue-600"/>
+                <ChartBarIcon className="w-8 h-8 text-primary"/>
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Investments</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Track your portfolio performance and assets</p>
+                    <h1 className="text-3xl font-bold text-foreground">Investments</h1>
+                    <p className="text-text-muted mt-1">Track your portfolio performance and assets</p>
                 </div>
             </header>
 
             {/* Portfolio Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <div
-                    className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Value</span>
-                    <div className="text-3xl font-black text-gray-900 dark:text-white mt-1">
+                    className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm">
+                    <span className="text-xs font-bold text-text-muted/60 uppercase tracking-widest">Total Value</span>
+                    <div className="text-3xl font-black text-foreground mt-1">
                         {formatCurrency(totalValue, currency)}
                     </div>
                 </div>
                 <div
-                    className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Invested</span>
-                    <div className="text-3xl font-black text-gray-900 dark:text-white mt-1">
+                    className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm">
+                    <span className="text-xs font-bold text-text-muted/60 uppercase tracking-widest">Total Invested</span>
+                    <div className="text-3xl font-black text-foreground mt-1">
                         {formatCurrency(totalInvested, currency)}
                     </div>
                 </div>
                 <div
-                    className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Total Gain/Loss</span>
+                    className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm">
+                    <span className="text-xs font-bold text-text-muted/60 uppercase tracking-widest">Total Gain/Loss</span>
                     <div className={`text-3xl font-black mt-1 ${totalGain >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                         {formatCurrency(totalGain, currency)}
                         <span className="text-sm ml-2 font-bold">
@@ -84,21 +84,21 @@ export default function InvestmentsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
                     <div
-                        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                        className="bg-surface rounded-2xl border border-surface-border shadow-sm overflow-hidden">
                         <table className="w-full text-left">
                             <thead
-                                className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
+                                className="bg-background/50 border-b border-surface-border">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Asset</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Qty</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Value</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Gain</th>
-                                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider">Asset</th>
+                                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">Qty</th>
+                                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">Value</th>
+                                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">Gain</th>
+                                <th className="px-6 py-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">Actions</th>
                             </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                            <tbody className="divide-y divide-surface-border">
                             {investments.length === 0 ? (<tr>
-                                    <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-400">
+                                    <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted/60">
                                         No investments added yet.
                                     </td>
                                 </tr>) : (investments.map((inv) => {
@@ -111,19 +111,19 @@ export default function InvestmentsPage() {
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col">
                                                     <span
-                                                        className="text-sm font-bold text-gray-900 dark:text-white">{inv.asset_name}</span>
+                                                        className="text-sm font-bold text-foreground">{inv.asset_name}</span>
                                                     <span
-                                                        className="text-xs text-gray-500 font-mono">{inv.symbol || 'N/A'}</span>
+                                                        className="text-xs text-text-muted font-mono">{inv.symbol || 'N/A'}</span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 text-right font-medium">
+                                            <td className="px-6 py-4 text-sm text-text-muted text-right font-medium">
                                                 {inv.quantity}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="text-sm font-bold text-gray-900 dark:text-white">
+                                                <div className="text-sm font-bold text-foreground">
                                                     {formatCurrency(Number(inv.current_value), currency)}
                                                 </div>
-                                                <div className="text-[10px] text-gray-400">
+                                                <div className="text-[10px] text-text-muted/60">
                                                     Avg: {formatCurrency(inv.average_buy_price, currency)}
                                                 </div>
                                             </td>
@@ -135,7 +135,7 @@ export default function InvestmentsPage() {
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button
                                                         onClick={() => setEditingInvestment(inv)}
-                                                        className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                        className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
                                                         title="Edit Investment"
                                                     >
                                                         <PencilSquareIcon className="w-4 h-4"/>
@@ -147,7 +147,7 @@ export default function InvestmentsPage() {
                                                                 refreshInvestments();
                                                             }
                                                         }}
-                                                        className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors"
+                                                        className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
                                                         title="Delete Investment"
                                                     >
                                                         <TrashIcon className="w-4 h-4"/>

@@ -42,8 +42,7 @@ export const updateSession = async (request: NextRequest) => {
   // 1. If user is NOT logged in and trying to access a protected route (e.g. /dashboard)
   // 2. If user IS logged in and trying to access an auth route (e.g. /login)
   
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard') || 
-                           request.nextUrl.pathname === '/';
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard');
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 
                       request.nextUrl.pathname.startsWith('/signup');
 

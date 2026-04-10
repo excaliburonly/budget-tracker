@@ -20,25 +20,25 @@ export function AddEmergencyFundForm() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm mb-8">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">New Emergency Fund / Goal</h3>
+    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm mb-8">
+      <h3 className="text-lg font-semibold text-foreground mb-4">New Emergency Fund / Goal</h3>
       <form action={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Goal Name</label>
+          <label className="text-sm font-medium text-foreground/80">Goal Name</label>
           <input
             type="text"
             name="name"
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="Main Emergency Fund..."
             required
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Instrument Type</label>
+          <label className="text-sm font-medium text-foreground/80">Instrument Type</label>
           <select
             name="instrument_type"
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             required
           >
             <option value="Savings Account">Savings Account</option>
@@ -50,22 +50,22 @@ export function AddEmergencyFundForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Institution (Optional)</label>
+          <label className="text-sm font-medium text-foreground/80">Institution (Optional)</label>
           <input
             type="text"
             name="institution_name"
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="HDFC, Chase, etc."
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Target Amount</label>
+          <label className="text-sm font-medium text-foreground/80">Target Amount</label>
           <input
             type="number"
             step="0.01"
             name="target_amount"
-            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="0.00"
             required
           />
@@ -104,26 +104,26 @@ export function EditEmergencyFundModal({ fund, onCloseAction }: { fund: Emergenc
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl max-w-lg w-full">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Edit Fund Goal</h3>
+      <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
+        <h3 className="text-xl font-bold text-foreground mb-6">Edit Fund Goal</h3>
         <form action={handleSubmit} className="space-y-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Goal Name</label>
+            <label className="text-sm font-medium text-foreground/80">Goal Name</label>
             <input
               type="text"
               name="name"
               defaultValue={fund.name}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
               required
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Instrument Type</label>
+            <label className="text-sm font-medium text-foreground/80">Instrument Type</label>
             <select
               name="instrument_type"
               defaultValue={fund.instrument_type}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
               required
             >
               <option value="Savings Account">Savings Account</option>
@@ -135,23 +135,23 @@ export function EditEmergencyFundModal({ fund, onCloseAction }: { fund: Emergenc
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Institution</label>
+            <label className="text-sm font-medium text-foreground/80">Institution</label>
             <input
               type="text"
               name="institution_name"
               defaultValue={fund.institution_name || ""}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Target Amount</label>
+            <label className="text-sm font-medium text-foreground/80">Target Amount</label>
             <input
               type="number"
               step="0.01"
               name="target_amount"
               defaultValue={fund.target_amount}
-              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
               required
             />
           </div>
@@ -160,7 +160,7 @@ export function EditEmergencyFundModal({ fund, onCloseAction }: { fund: Emergenc
             <button
               type="button"
               onClick={onCloseAction}
-              className="px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors text-sm"
+              className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel
             </button>

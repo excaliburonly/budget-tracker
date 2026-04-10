@@ -1,31 +1,122 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-surface: #f9fafb;
-  --color-surface-border: #e5e7eb;
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar-bg);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-text-muted: var(--text-muted);
+  --color-link-hover-bg: var(--link-hover-bg);
+  --color-link-hover-text: var(--link-hover-text);
+  --color-input: var(--input-bg);
+  --color-input-border: var(--input-border);
   
   --radius-lg: 0.75rem;
   --radius-md: 0.5rem;
 }
 
-/* Custom base styles if needed */
-@layer base {
-  body {
-    @apply bg-white text-gray-900 antialiased;
-  }
+:root {
+  --background: #f9fafb;
+  --foreground: #111827;
+  --surface: #ffffff;
+  --surface-border: #e5e7eb;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e5e7eb;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --text-muted: #6b7280;
+  --link-hover-bg: #eff6ff;
+  --link-hover-text: #2563eb;
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-surface: #111827;
-    --color-surface-border: #1f2937;
-  }
-  
-  @layer base {
-    body {
-      @apply bg-gray-950 text-gray-50;
-    }
+.theme-dark {
+  --background: #030712;
+  --foreground: #f9fafb;
+  --surface: #111827;
+  --surface-border: #1f2937;
+  --sidebar-bg: #111827;
+  --sidebar-border: #1f2937;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --text-muted: #9ca3af;
+  --link-hover-bg: rgba(30, 58, 138, 0.2);
+  --link-hover-text: #3b82f6;
+  --input-bg: #1f2937;
+  --input-border: #374151;
+}
+
+.theme-solarized-light {
+  --background: #fdf6e3;
+  --foreground: #657b83;
+  --surface: #eee8d5;
+  --surface-border: #d5c4a1;
+  --sidebar-bg: #eee8d5;
+  --sidebar-border: #d5c4a1;
+  --primary: #268bd2;
+  --primary-hover: #2176b3;
+  --text-muted: #93a1a1;
+  --link-hover-bg: rgba(213, 196, 161, 0.2);
+  --link-hover-text: #268bd2;
+  --input-bg: #fdf6e3;
+  --input-border: #d5c4a1;
+}
+
+.theme-solarized-dark {
+  --background: #002b36;
+  --foreground: #839496;
+  --surface: #073642;
+  --surface-border: #586e75;
+  --sidebar-bg: #073642;
+  --sidebar-border: #586e75;
+  --primary: #268bd2;
+  --primary-hover: #2176b3;
+  --text-muted: #586e75;
+  --link-hover-bg: rgba(88, 110, 117, 0.2);
+  --link-hover-text: #268bd2;
+  --input-bg: #002b36;
+  --input-border: #586e75;
+}
+
+.theme-dracula {
+  --background: #282a36;
+  --foreground: #f8f8f2;
+  --surface: #44475a;
+  --surface-border: #6272a4;
+  --sidebar-bg: #44475a;
+  --sidebar-border: #6272a4;
+  --primary: #bd93f9;
+  --primary-hover: #ff79c6;
+  --text-muted: #6272a4;
+  --link-hover-bg: rgba(98, 114, 164, 0.2);
+  --link-hover-text: #bd93f9;
+  --input-bg: #282a36;
+  --input-border: #6272a4;
+}
+
+.theme-nord {
+  --background: #2e3440;
+  --foreground: #eceff4;
+  --surface: #3b4252;
+  --surface-border: #434c5e;
+  --sidebar-bg: #3b4252;
+  --sidebar-border: #434c5e;
+  --primary: #88c0d0;
+  --primary-hover: #81a1c1;
+  --text-muted: #4c566a;
+  --link-hover-bg: rgba(67, 76, 94, 0.2);
+  --link-hover-text: #88c0d0;
+  --input-bg: #2e3440;
+  --input-border: #4c566a;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased transition-colors duration-200;
   }
 }

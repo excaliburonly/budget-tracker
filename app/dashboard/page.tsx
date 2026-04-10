@@ -55,53 +55,53 @@ export default async function DashboardPage() {
 
     return (<div className="max-w-6xl mx-auto">
             <header className="mb-10">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Welcome back, {user?.email}</p>
+                <h1 className="text-3xl font-bold text-foreground">Dashboard Overview</h1>
+                <p className="text-text-muted mt-1">Welcome back, {user?.email}</p>
             </header>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <div
-                    className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
+                    className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm transition-all hover:shadow-md">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                            <BanknotesIcon className="w-5 h-5 text-gray-600 dark:text-gray-400"/>
+                        <div className="p-2 bg-background rounded-lg">
+                            <BanknotesIcon className="w-5 h-5 text-text-muted"/>
                         </div>
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Balance</span>
+                        <span className="text-sm font-medium text-text-muted uppercase tracking-wider">Total Balance</span>
                     </div>
                     <div
-                        className={`text-3xl font-bold mt-2 ${totalBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'}`}>
+                        className={`text-3xl font-bold mt-2 ${totalBalance >= 0 ? 'text-foreground' : 'text-red-600'}`}>
                         {formatCurrency(totalBalance, currency)}
                     </div>
-                    <span className="text-xs text-gray-400 mt-2 inline-block">Sum of all accounts</span>
+                    <span className="text-xs text-text-muted mt-2 inline-block">Sum of all accounts</span>
                 </div>
 
                 <div
-                    className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
+                    className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm transition-all hover:shadow-md">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                        <div className="p-2 bg-emerald-500/10 rounded-lg">
                             <ArrowTrendingUpIcon className="w-5 h-5 text-emerald-600"/>
                         </div>
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monthly Income</span>
+                        <span className="text-sm font-medium text-text-muted uppercase tracking-wider">Monthly Income</span>
                     </div>
                     <div className="text-3xl font-bold text-emerald-600 mt-2">
                         {formatCurrency(income, currency)}
                     </div>
-                    <span className="text-xs text-gray-400 mt-2 inline-block">Total earnings</span>
+                    <span className="text-xs text-text-muted mt-2 inline-block">Total earnings</span>
                 </div>
 
                 <div
-                    className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
+                    className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm transition-all hover:shadow-md">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
                             <ArrowTrendingDownIcon className="w-5 h-5 text-red-600"/>
                         </div>
-                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monthly Expenses</span>
+                        <span className="text-sm font-medium text-text-muted uppercase tracking-wider">Monthly Expenses</span>
                     </div>
                     <div className="text-3xl font-bold text-red-600 mt-2">
                         {formatCurrency(expenses, currency)}
                     </div>
-                    <span className="text-xs text-gray-400 mt-2 inline-block">Total spending</span>
+                    <span className="text-xs text-text-muted mt-2 inline-block">Total spending</span>
                 </div>
             </div>
 
@@ -110,27 +110,27 @@ export default async function DashboardPage() {
                 <section className="lg:col-span-3">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <CreditCardIcon className="w-6 h-6 text-gray-900 dark:text-white"/>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Your Accounts</h3>
+                            <CreditCardIcon className="w-6 h-6 text-foreground"/>
+                            <h3 className="text-xl font-bold text-foreground">Your Accounts</h3>
                         </div>
                         <Link href="/dashboard/accounts"
-                              className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full flex items-center gap-1">
+                              className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors bg-link-hover-bg px-3 py-1.5 rounded-full flex items-center gap-1">
                             Manage
                             <ChevronRightIcon className="w-4 h-4"/>
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {accounts.slice(0, 4).map((account) => (<div key={account.id}
-                                                                     className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                                                                     className="bg-surface p-4 rounded-xl border border-surface-border shadow-sm">
                                 <span
-                                    className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{account.type}</span>
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">{account.name}</h4>
-                                <div className="text-lg font-black text-gray-900 dark:text-white mt-1">
+                                    className="text-[10px] font-bold text-primary uppercase tracking-widest">{account.type}</span>
+                                <h4 className="text-sm font-bold text-foreground truncate">{account.name}</h4>
+                                <div className="text-lg font-black text-foreground mt-1">
                                     {formatCurrency(account.balance, currency)}
                                 </div>
                             </div>))}
                         {accounts.length === 0 && (<div
-                                className="col-span-full py-4 text-center text-sm text-gray-400 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+                                className="col-span-full py-4 text-center text-sm text-text-muted border border-dashed border-surface-border rounded-xl">
                                 No accounts added yet.
                             </div>)}
                     </div>
@@ -140,27 +140,27 @@ export default async function DashboardPage() {
                 <section className="lg:col-span-2">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <ClockIcon className="w-6 h-6 text-gray-900 dark:text-white"/>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Recent Transactions</h3>
+                            <ClockIcon className="w-6 h-6 text-foreground"/>
+                            <h3 className="text-xl font-bold text-foreground">Recent Transactions</h3>
                         </div>
                         <Link href="/dashboard/transactions"
-                              className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full flex items-center gap-1">
+                              className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors bg-link-hover-bg px-3 py-1.5 rounded-full flex items-center gap-1">
                             View All
                             <ChevronRightIcon className="w-4 h-4"/>
                         </Link>
                     </div>
                     <div
-                        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden min-h-64">
+                        className="bg-surface rounded-2xl border border-surface-border shadow-sm overflow-hidden min-h-64">
                         {transactions.length === 0 ? (
                             <div className="h-64 flex flex-col items-center justify-center space-y-3">
                                 <div
-                                    className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                                    <ClockIcon className="w-6 h-6 text-gray-300"/>
+                                    className="w-12 h-12 bg-background rounded-full flex items-center justify-center">
+                                    <ClockIcon className="w-6 h-6 text-text-muted"/>
                                 </div>
-                                <p className="text-sm text-gray-400">No recent transactions to display.</p>
-                            </div>) : (<ul className="divide-y divide-gray-100 dark:divide-gray-800">
+                                <p className="text-sm text-text-muted">No recent transactions to display.</p>
+                            </div>) : (<ul className="divide-y divide-surface-border">
                                 {transactions.slice(0, 6).map((t: Transaction) => (<li key={t.id}
-                                                                                       className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/20 transition-colors">
+                                                                                       className="p-4 flex items-center justify-between hover:bg-background/50 transition-colors">
                                         <div className="flex items-center gap-4">
                                             <div
                                                 className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold"
@@ -169,11 +169,11 @@ export default async function DashboardPage() {
                                                 {t.categories?.name?.charAt(0) || 'T'}
                                             </div>
                                             <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                        <span className="text-sm font-bold text-foreground leading-tight">
                           {t.notes || t.categories?.name || 'Uncategorized'}
                         </span>
                                                 <span
-                                                    className="text-xs text-gray-500 font-medium">{new Date(t.date).toLocaleDateString(undefined, {
+                                                    className="text-xs text-text-muted font-medium">{new Date(t.date).toLocaleDateString(undefined, {
                                                     month: 'short',
                                                     day: 'numeric'
                                                 })}</span>
@@ -192,23 +192,23 @@ export default async function DashboardPage() {
                 <section>
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                            <ChartPieIcon className="w-6 h-6 text-gray-900 dark:text-white"/>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Budget Overview</h3>
+                            <ChartPieIcon className="w-6 h-6 text-foreground"/>
+                            <h3 className="text-xl font-bold text-foreground">Budget Overview</h3>
                         </div>
                         <Link href="/dashboard/budgets"
-                              className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full flex items-center gap-1">
+                              className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors bg-link-hover-bg px-3 py-1.5 rounded-full flex items-center gap-1">
                             Edit
                             <ChevronRightIcon className="w-4 h-4"/>
                         </Link>
                     </div>
                     <div
-                        className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm p-6 min-h-64">
+                        className="bg-surface rounded-2xl border border-surface-border shadow-sm p-6 min-h-64">
                         {budgets.length === 0 ? (<div
                                 className="h-full flex flex-col items-center justify-center text-center space-y-4 pt-10">
-                                <p className="text-sm text-gray-400">Track your spending by setting your first monthly
+                                <p className="text-sm text-text-muted">Track your spending by setting your first monthly
                                     budget.</p>
                                 <Link href="/dashboard/budgets"
-                                      className="text-sm font-bold text-blue-600 hover:underline">
+                                      className="text-sm font-bold text-primary hover:underline">
                                     Set a Budget &rarr;
                                 </Link>
                             </div>) : (<div className="space-y-6">
@@ -220,21 +220,21 @@ export default async function DashboardPage() {
                                     return (<div key={budget.id} className="space-y-2">
                                             <div className="flex justify-between items-center">
                                                 <span
-                                                    className="text-sm font-bold text-gray-700 dark:text-gray-300">{budget.categories?.name}</span>
-                                                <span className="text-xs font-medium text-gray-500">
+                                                    className="text-sm font-bold text-foreground/80">{budget.categories?.name}</span>
+                                                <span className="text-xs font-medium text-text-muted">
                           {formatCurrency(spent, currency)} / {formatCurrency(Number(budget.amount), currency)}
                         </span>
                                             </div>
                                             <div
-                                                className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
+                                                className="w-full bg-background rounded-full h-2 overflow-hidden">
                                                 <div
-                                                    className={`h-full transition-all duration-700 ease-out ${isOver ? 'bg-red-500' : percentage > 90 ? 'bg-amber-500' : 'bg-blue-500'}`}
+                                                    className={`h-full transition-all duration-700 ease-out ${isOver ? 'bg-red-500' : percentage > 90 ? 'bg-amber-500' : 'bg-primary'}`}
                                                     style={{width: `${percentage}%`}}
                                                 />
                                             </div>
                                         </div>);
                                 })}
-                                {budgets.length > 3 && (<p className="text-xs text-center text-gray-400 font-medium">
+                                {budgets.length > 3 && (<p className="text-xs text-center text-text-muted font-medium">
                                         + {budgets.length - 3} more budgets
                                     </p>)}
                             </div>)}
@@ -242,4 +242,5 @@ export default async function DashboardPage() {
                 </section>
             </div>
         </div>);
+
 }

@@ -31,18 +31,18 @@ export default function BudgetForm({ categories }: BudgetFormProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Budget Limit</h3>
+    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm">
+      <h3 className="text-lg font-semibold text-foreground mb-4">Add Budget Limit</h3>
       <form id="budget-form" action={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="category_id" className="block text-sm font-medium text-foreground/80 mb-1">
             Category
           </label>
           <select
             name="category_id"
             id="category_id"
             required
-            className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Select a category</option>
             {categories
@@ -56,11 +56,11 @@ export default function BudgetForm({ categories }: BudgetFormProps) {
         </div>
 
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="amount" className="block text-sm font-medium text-foreground/80 mb-1">
             Monthly Limit
           </label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">₹</span>
             <input
               type="number"
               step="0.01"
@@ -68,13 +68,13 @@ export default function BudgetForm({ categories }: BudgetFormProps) {
               id="amount"
               required
               placeholder="0.00"
-              className="w-full pl-8 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-8 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="month" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label htmlFor="month" className="block text-sm font-medium text-foreground/80 mb-1">
             Month
           </label>
           <input
@@ -83,7 +83,7 @@ export default function BudgetForm({ categories }: BudgetFormProps) {
             id="month"
             defaultValue={new Date().toISOString().slice(0, 7)}
             required
-            className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -92,7 +92,7 @@ export default function BudgetForm({ categories }: BudgetFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? "Adding..." : "Set Budget"}
         </button>
@@ -132,11 +132,11 @@ export function EditBudgetModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl max-w-lg w-full">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Edit Budget Limit</h3>
+      <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
+        <h3 className="text-xl font-bold text-foreground mb-6">Edit Budget Limit</h3>
         <form action={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="category_id_edit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="category_id_edit" className="block text-sm font-medium text-foreground/80 mb-1">
               Category
             </label>
             <select
@@ -144,7 +144,7 @@ export function EditBudgetModal({
               id="category_id_edit"
               required
               defaultValue={budget.category_id}
-              className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+              className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             >
               {categories
                 .filter((c) => c.type === "expense")
@@ -157,11 +157,11 @@ export function EditBudgetModal({
           </div>
 
           <div>
-            <label htmlFor="amount_edit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="amount_edit" className="block text-sm font-medium text-foreground/80 mb-1">
               Monthly Limit
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">₹</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">₹</span>
               <input
                 type="number"
                 step="0.01"
@@ -169,13 +169,13 @@ export function EditBudgetModal({
                 id="amount_edit"
                 required
                 defaultValue={budget.amount}
-                className="w-full pl-8 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-8 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="month_edit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="month_edit" className="block text-sm font-medium text-foreground/80 mb-1">
               Month
             </label>
             <input
@@ -184,7 +184,7 @@ export function EditBudgetModal({
               id="month_edit"
               required
               defaultValue={budget.month}
-              className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+              className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
@@ -194,14 +194,14 @@ export function EditBudgetModal({
             <button
               type="button"
               onClick={onCloseAction}
-              className="px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors text-sm"
+              className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Changes"}
             </button>

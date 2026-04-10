@@ -57,10 +57,10 @@ export default function TransactionsPage() {
 
     return (<div className="max-w-6xl mx-auto">
             <header className="mb-10 flex items-center gap-3">
-                <ArrowsRightLeftIcon className="w-8 h-8 text-blue-600"/>
+                <ArrowsRightLeftIcon className="w-8 h-8 text-primary"/>
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Transactions</h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your income and expenses</p>
+                    <h1 className="text-3xl font-bold text-foreground">Transactions</h1>
+                    <p className="text-text-muted mt-1">Manage your income and expenses</p>
                 </div>
             </header>
 
@@ -73,34 +73,34 @@ export default function TransactionsPage() {
             />
 
             <section>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">History</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-4">History</h3>
                 <div
-                    className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                    className="bg-surface rounded-2xl border border-surface-border shadow-sm overflow-hidden">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Details</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Account</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Amount</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                        <tr className="bg-background/50 border-b border-surface-border">
+                            <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Date</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Details</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider">Account</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">Amount</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-text-muted uppercase tracking-wider text-right">Actions</th>
                         </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                        <tbody className="divide-y divide-surface-border">
                         {transactions.length === 0 ? (<tr>
-                                <td colSpan={5} className="px-6 py-10 text-center text-sm text-gray-400">
+                                <td colSpan={5} className="px-6 py-10 text-center text-sm text-text-muted/60">
                                     No transactions yet.
                                 </td>
                             </tr>) : (transactions.map((t: Transaction) => (<tr key={t.id}
-                                                                                className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors group">
-                                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                                                                className="hover:bg-background/30 transition-colors group">
+                                    <td className="px-6 py-4 text-sm text-text-muted">
                                         {new Date(t.date).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                        <span className="text-sm font-medium text-foreground">
                           {t.type === 'transfer' ? (<span
-                                  className="text-indigo-600 dark:text-indigo-400 font-bold">Transfer</span>) : (t.notes || '-')}
+                                  className="text-primary font-bold">Transfer</span>) : (t.notes || '-')}
                         </span>
                                             {t.type !== 'transfer' && (<span
                                                     className="inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider w-fit"
@@ -115,22 +115,22 @@ export default function TransactionsPage() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col">
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <span className="text-sm text-foreground/80">
                           {t.accounts?.name || 'Unknown'}
                         </span>
-                                            {t.type === 'transfer' && (<span className="text-xs text-gray-400">
+                                            {t.type === 'transfer' && (<span className="text-xs text-text-muted/60">
                             → {t.to_accounts?.name || 'Unknown'}
                           </span>)}
                                         </div>
                                     </td>
-                                    <td className={`px-6 py-4 text-sm font-bold text-right ${t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-red-600' : 'text-gray-500'}`}>
+                                    <td className={`px-6 py-4 text-sm font-bold text-right ${t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-red-600' : 'text-text-muted'}`}>
                                         {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatCurrency(Number(t.amount), currency)}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => setEditingTransaction(t)}
-                                                className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
                                                 title="Edit Transaction"
                                             >
                                                 <PencilSquareIcon className="w-4 h-4"/>
@@ -142,7 +142,7 @@ export default function TransactionsPage() {
                                                         refreshData();
                                                     }
                                                 }}
-                                                className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors"
+                                                className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
                                                 title="Delete Transaction"
                                             >
                                                 <TrashIcon className="w-4 h-4"/>
