@@ -15,25 +15,25 @@ export function Hero({ user }: { user: User | null }) {
               The simple, secure way to build your financial future.
             </p>
           </div>
-          <div className="space-x-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             {user ? (
               <Link
                 href="/dashboard"
-                className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 Go to Dashboard
               </Link>
             ) : (
               <Link
                 href="/signup"
-                className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 Start Tracking Now
               </Link>
             )}
             <Link
               href="#features"
-              className="inline-flex h-11 items-center justify-center rounded-md border border-surface-border bg-surface text-foreground px-8 text-sm font-medium shadow-sm transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full sm:w-auto inline-flex h-11 items-center justify-center rounded-md border border-surface-border bg-surface text-foreground px-8 text-sm font-medium shadow-sm transition-colors hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               Learn More
             </Link>

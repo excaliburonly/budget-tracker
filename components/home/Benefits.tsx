@@ -31,11 +31,11 @@ export function Benefits() {
               </li>
             </ul>
           </div>
-          <div className="bg-surface p-8 rounded-xl border border-surface-border shadow-sm">
+          <div className="bg-surface p-4 sm:p-8 rounded-xl border border-surface-border shadow-sm">
              <div className="space-y-4">
                 <div className="h-4 w-1/3 bg-background rounded animate-pulse" />
                 <div className="h-8 w-full bg-background rounded" />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <div className="h-24 bg-link-hover-bg rounded-lg border border-blue-100 dark:border-blue-900/30 flex flex-col justify-center px-4">
                       <span className="text-xs text-primary font-medium">Monthly Savings</span>
                       <span className="text-lg font-bold text-foreground">$2,450.00</span>
@@ -44,7 +44,7 @@ export function Benefits() {
                       <span className="text-xs text-emerald-600 font-medium">Net Worth</span>
                       <span className="text-lg font-bold text-emerald-600">$45,210.00</span>
                    </div>
-                   </div>
+                </div>
                    <div className="h-32 bg-background rounded-lg border border-surface-border p-4">
                    <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-medium text-text-muted">Groceries Budget</span>

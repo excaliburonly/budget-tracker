@@ -47,7 +47,7 @@ export default function EmergencyFundsPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
             <header className="mb-10 flex items-center gap-3">
                 <ShieldCheckIcon className="w-8 h-8 text-emerald-600" />
                 <div>

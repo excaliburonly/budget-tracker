@@ -54,9 +54,11 @@ export default async function DashboardPage() {
         }, {});
 
     return (<div className="max-w-6xl mx-auto">
-            <header className="mb-10">
-                <h1 className="text-3xl font-bold text-foreground">Dashboard Overview</h1>
-                <p className="text-text-muted mt-1">Welcome back, {user?.email}</p>
+            <header className="mb-8 md:mb-10">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Dashboard Overview</h1>
+                <p className="text-text-muted mt-1 text-sm md:text-base break-all md:break-normal line-clamp-1 md:line-clamp-none">
+                    Welcome back, {user?.email}
+                </p>
             </header>
 
             {/* Stats Grid */}
@@ -70,7 +72,7 @@ export default async function DashboardPage() {
                         <span className="text-sm font-medium text-text-muted uppercase tracking-wider">Total Balance</span>
                     </div>
                     <div
-                        className={`text-3xl font-bold mt-2 ${totalBalance >= 0 ? 'text-foreground' : 'text-red-600'}`}>
+                        className={`text-2xl md:text-3xl font-bold mt-2 ${totalBalance >= 0 ? 'text-foreground' : 'text-red-600'}`}>
                         {formatCurrency(totalBalance, currency)}
                     </div>
                     <span className="text-xs text-text-muted mt-2 inline-block">Sum of all accounts</span>
@@ -84,7 +86,7 @@ export default async function DashboardPage() {
                         </div>
                         <span className="text-sm font-medium text-text-muted uppercase tracking-wider">Monthly Income</span>
                     </div>
-                    <div className="text-3xl font-bold text-emerald-600 mt-2">
+                    <div className="text-2xl md:text-3xl font-bold text-emerald-600 mt-2">
                         {formatCurrency(income, currency)}
                     </div>
                     <span className="text-xs text-text-muted mt-2 inline-block">Total earnings</span>
@@ -98,7 +100,7 @@ export default async function DashboardPage() {
                         </div>
                         <span className="text-sm font-medium text-text-muted uppercase tracking-wider">Monthly Expenses</span>
                     </div>
-                    <div className="text-3xl font-bold text-red-600 mt-2">
+                    <div className="text-2xl md:text-3xl font-bold text-red-600 mt-2">
                         {formatCurrency(expenses, currency)}
                     </div>
                     <span className="text-xs text-text-muted mt-2 inline-block">Total spending</span>
@@ -168,8 +170,8 @@ export default async function DashboardPage() {
                                             >
                                                 {t.categories?.name?.charAt(0) || 'T'}
                                             </div>
-                                            <div className="flex flex-col">
-                        <span className="text-sm font-bold text-foreground leading-tight">
+                                            <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-sm font-bold text-foreground leading-tight truncate">
                           {t.notes || t.categories?.name || 'Uncategorized'}
                         </span>
                                                 <span

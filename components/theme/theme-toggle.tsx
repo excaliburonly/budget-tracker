@@ -5,7 +5,7 @@ import { THEMES } from '@/utils/theme';
 import { SwatchIcon } from '@heroicons/react/24/outline';
 import { useState, useRef, useEffect } from 'react';
 
-export function ThemeToggle({ align = 'bottom', side = 'left' }: { align?: 'top' | 'bottom', side?: 'left' | 'right' }) {
+export function ThemeToggle({ align = 'bottom', side = 'left', showLabelOnMobile = false }: { align?: 'top' | 'bottom', side?: 'left' | 'right', showLabelOnMobile?: boolean }) {
   const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export function ThemeToggle({ align = 'bottom', side = 'left' }: { align?: 'top'
         aria-label="Select theme"
       >
         <SwatchIcon className="w-5 h-5 shrink-0" />
-        <span className="hidden sm:inline truncate">{formatThemeName(theme)}</span>
+        <span className={`${showLabelOnMobile ? 'inline' : 'hidden sm:inline'} truncate`}>{formatThemeName(theme)}</span>
       </button>
 
       {isOpen && (

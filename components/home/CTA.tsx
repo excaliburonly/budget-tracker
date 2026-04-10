@@ -14,14 +14,14 @@ export function CTA({ user }: { user: User | null }) {
         {user ? (
            <Link
             href="/dashboard"
-            className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-10 text-base font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="w-full sm:w-auto inline-flex h-12 items-center justify-center rounded-md bg-primary px-10 text-base font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             Go to Dashboard
           </Link>
         ) : (
           <Link
             href="/signup"
-            className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-10 text-base font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            className="w-full sm:w-auto inline-flex h-12 items-center justify-center rounded-md bg-primary px-10 text-base font-medium text-white shadow transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             Create Your Free Account
           </Link>
