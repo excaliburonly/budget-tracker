@@ -3,8 +3,18 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { getTransactions } from "./transactions/actions";
 import { getBudgets } from "./budgets/actions";
-import { Transaction, Budget } from "@/types/database";
+import { getAccounts } from "./accounts/actions";
+import { Transaction, Budget, Account } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
+import { 
+  BanknotesIcon, 
+  ArrowTrendingUpIcon, 
+  ArrowTrendingDownIcon, 
+  CreditCardIcon,
+  ClockIcon,
+  ChartPieIcon,
+  ChevronRightIcon
+} from "@heroicons/react/24/outline";
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -21,8 +31,11 @@ export default async function DashboardPage() {
   const currency = profile?.currency || 'INR';
   
   const currentMonth = new Date().toISOString().slice(0, 7);
-  const transactions = await getTransactions();
-  const budgets = await getBudgets(currentMonth);
+  const [transactions, budgets, accounts] = await Promise.all([
+    getTransactions(),
+    getBudgets(currentMonth),
+    getAccounts()
+  ]);
   
   const income = transactions
     .filter(t => t.type === 'income')
@@ -32,7 +45,7 @@ export default async function DashboardPage() {
     .filter(t => t.type === 'expense')
     .reduce((acc, t) => acc + Number(t.amount), 0);
     
-  const balance = income - expenses;
+  const totalBalance = accounts.reduce((acc, a) => acc + Number(a.balance), 0);
 
   // Budget calculations
   const spendingByCategory = transactions
@@ -54,15 +67,25 @@ export default async function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Balance</span>
-          <div className={`text-3xl font-bold mt-2 ${balance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'}`}>
-            {formatCurrency(balance, currency)}
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+              <BanknotesIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            </div>
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total Balance</span>
           </div>
-          <span className="text-xs text-gray-400 mt-2 inline-block">Net position</span>
+          <div className={`text-3xl font-bold mt-2 ${totalBalance >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'}`}>
+            {formatCurrency(totalBalance, currency)}
+          </div>
+          <span className="text-xs text-gray-400 mt-2 inline-block">Sum of all accounts</span>
         </div>
 
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monthly Income</span>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+              <ArrowTrendingUpIcon className="w-5 h-5 text-emerald-600" />
+            </div>
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monthly Income</span>
+          </div>
           <div className="text-3xl font-bold text-emerald-600 mt-2">
             {formatCurrency(income, currency)}
           </div>
@@ -70,7 +93,12 @@ export default async function DashboardPage() {
         </div>
 
         <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm transition-all hover:shadow-md">
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monthly Expenses</span>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <ArrowTrendingDownIcon className="w-5 h-5 text-red-600" />
+            </div>
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Monthly Expenses</span>
+          </div>
           <div className="text-3xl font-bold text-red-600 mt-2">
             {formatCurrency(expenses, currency)}
           </div>
@@ -79,19 +107,53 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Accounts Overview */}
+        <section className="lg:col-span-3">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+               <CreditCardIcon className="w-6 h-6 text-gray-900 dark:text-white" />
+               <h3 className="text-xl font-bold text-gray-900 dark:text-white">Your Accounts</h3>
+            </div>
+            <Link href="/dashboard/accounts" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full flex items-center gap-1">
+              Manage
+              <ChevronRightIcon className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {accounts.slice(0, 4).map((account) => (
+              <div key={account.id} className="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">{account.type}</span>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">{account.name}</h4>
+                <div className="text-lg font-black text-gray-900 dark:text-white mt-1">
+                  {formatCurrency(account.balance, currency)}
+                </div>
+              </div>
+            ))}
+            {accounts.length === 0 && (
+              <div className="col-span-full py-4 text-center text-sm text-gray-400 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+                No accounts added yet.
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* Recent Activity */}
         <section className="lg:col-span-2">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Recent Transactions</h3>
-            <Link href="/dashboard/transactions" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full">
+            <div className="flex items-center gap-3">
+              <ClockIcon className="w-6 h-6 text-gray-900 dark:text-white" />
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Recent Transactions</h3>
+            </div>
+            <Link href="/dashboard/transactions" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full flex items-center gap-1">
               View All
+              <ChevronRightIcon className="w-4 h-4" />
             </Link>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden min-h-64">
             {transactions.length === 0 ? (
               <div className="h-64 flex flex-col items-center justify-center space-y-3">
                 <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-gray-300">!</span>
+                   <ClockIcon className="w-6 h-6 text-gray-300" />
                 </div>
                 <p className="text-sm text-gray-400">No recent transactions to display.</p>
               </div>
@@ -126,9 +188,13 @@ export default async function DashboardPage() {
         {/* Budget Status */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">Budget Overview</h3>
-            <Link href="/dashboard/budgets" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full">
+            <div className="flex items-center gap-3">
+              <ChartPieIcon className="w-6 h-6 text-gray-900 dark:text-white" />
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Budget Overview</h3>
+            </div>
+            <Link href="/dashboard/budgets" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 dark:bg-blue-900/20 px-3 py-1.5 rounded-full flex items-center gap-1">
               Edit
+              <ChevronRightIcon className="w-4 h-4" />
             </Link>
           </div>
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm p-6 min-h-64">

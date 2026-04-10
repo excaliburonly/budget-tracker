@@ -56,6 +56,37 @@ export async function addInvestment(formData: FormData): Promise<{ error?: strin
   return { success: true };
 }
 
+export async function updateInvestment(id: string, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const asset_name = formData.get("asset_name") as string;
+  const symbol = formData.get("symbol") as string;
+  const quantity = parseFloat(formData.get("quantity") as string);
+  const average_buy_price = parseFloat(formData.get("average_buy_price") as string);
+  const current_value = parseFloat(formData.get("current_value") as string);
+
+  const { error } = await supabase
+    .from("investments")
+    .update({
+      asset_name,
+      symbol: symbol || null,
+      quantity,
+      average_buy_price,
+      current_value,
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error updating investment:", error);
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard/investments");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
 export async function updateInvestmentValue(id: string, current_value: number): Promise<{ error?: string; success?: boolean }> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);

@@ -55,6 +55,34 @@ export async function createEmergencyFund(formData: FormData): Promise<{ error?:
   return { success: true };
 }
 
+export async function updateEmergencyFund(id: string, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const name = formData.get("name") as string;
+  const instrument_type = formData.get("instrument_type") as string;
+  const institution_name = formData.get("institution_name") as string;
+  const target_amount = parseFloat(formData.get("target_amount") as string);
+
+  const { error } = await supabase
+    .from("emergency_funds")
+    .update({
+      name,
+      instrument_type,
+      institution_name: institution_name || null,
+      target_amount,
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error updating fund:", error);
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard/emergency-funds");
+  return { success: true };
+}
+
 export async function deleteEmergencyFund(id: string): Promise<{ error?: string; success?: boolean }> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);

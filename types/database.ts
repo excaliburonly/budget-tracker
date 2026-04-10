@@ -14,14 +14,24 @@ export interface Transaction {
   amount: number;
   date: string;
   category_id?: string | null;
+  emergency_fund_id?: string | null;
+  investment_id?: string | null;
+  account_id?: string | null;
+  to_account_id?: string | null;
   notes?: string | null;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'transfer';
   created_at: string;
   // Relation fields
   categories?: {
     name: string;
     color: string | null;
     icon?: string | null;
+  } | null;
+  accounts?: {
+    name: string;
+  } | null;
+  to_accounts?: {
+    name: string;
   } | null;
 }
 
@@ -56,6 +66,27 @@ export interface EmergencyFund {
   institution_name: string | null;
   target_amount: number;
   current_amount: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Investment {
+  id: string;
+  user_id: string;
+  asset_name: string;
+  symbol: string | null;
+  quantity: number;
+  average_buy_price: number;
+  current_value: number;
+  created_at: string;
+}
+
+export interface Account {
+  id: string;
+  user_id: string;
+  name: string;
+  type: string;
+  balance: number;
   created_at: string;
   updated_at: string;
 }

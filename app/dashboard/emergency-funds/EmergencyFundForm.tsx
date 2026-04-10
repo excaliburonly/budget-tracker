@@ -1,103 +1,179 @@
 "use client";
 
+import { createEmergencyFund, updateEmergencyFund } from "./actions";
 import { useState } from "react";
-import { createEmergencyFund } from "./actions";
+import { EmergencyFund } from "@/types/database";
 
-export default function EmergencyFundForm() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function AddEmergencyFundForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    setError(null);
+    setIsSubmitting(true);
     try {
-      const res = await createEmergencyFund(formData);
-      if (res?.error) {
-        setError(res.error);
-      } else {
-        (document.getElementById("fund-form") as HTMLFormElement).reset();
+      const result = await createEmergencyFund(formData);
+      if (result.error) {
+        alert(result.error);
       }
-    } catch (e: any) {
-      setError(e.message);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">New Emergency Fund Goal</h3>
-      <form id="fund-form" action={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Fund Name
-          </label>
+    <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm mb-8">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">New Emergency Fund / Goal</h3>
+      <form action={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Goal Name</label>
           <input
             type="text"
             name="name"
-            id="name"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            placeholder="Main Emergency Fund..."
             required
-            placeholder="e.g. 6-Month Rainy Day Fund"
-            className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
-        <div>
-          <label htmlFor="instrument_type" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Instrument Type
-          </label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Instrument Type</label>
           <select
             name="instrument_type"
-            id="instrument_type"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             required
-            className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="Savings Account">Savings Account</option>
-            <option value="Fixed Deposit (FD)">Fixed Deposit (FD)</option>
-            <option value="Recurring Deposit (RD)">Recurring Deposit (RD)</option>
-            <option value="Liquid Mutual Fund">Liquid Mutual Fund</option>
+            <option value="Fixed Deposit">Fixed Deposit</option>
+            <option value="Liquid Fund">Liquid Fund</option>
             <option value="Cash">Cash</option>
             <option value="Other">Other</option>
           </select>
         </div>
 
-        <div>
-          <label htmlFor="institution_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Institution Name
-          </label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Institution (Optional)</label>
           <input
             type="text"
             name="institution_name"
-            id="institution_name"
-            placeholder="e.g. HDFC Bank, Zerodha"
-            className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            placeholder="HDFC, Chase, etc."
           />
         </div>
 
-        <div>
-          <label htmlFor="target_amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Target Goal (₹)
-          </label>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Target Amount</label>
           <input
             type="number"
+            step="0.01"
             name="target_amount"
-            id="target_amount"
-            required
+            className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="0.00"
-            className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+            required
           />
         </div>
 
-        {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50"
-        >
-          {loading ? "Creating..." : "Set Fund Goal"}
-        </button>
+        <div className="lg:col-span-4 flex justify-end">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+          >
+            {isSubmitting ? "Creating..." : "Create Fund Goal"}
+          </button>
+        </div>
       </form>
+    </div>
+  );
+}
+
+export function EditEmergencyFundModal({ fund, onClose }: { fund: EmergencyFund, onClose: () => void }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(formData: FormData) {
+    setIsSubmitting(true);
+    try {
+      const result = await updateEmergencyFund(fund.id, formData);
+      if (result.error) {
+        alert(result.error);
+      } else {
+        onClose();
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl max-w-lg w-full">
+        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Edit Fund Goal</h3>
+        <form action={handleSubmit} className="space-y-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Goal Name</label>
+            <input
+              type="text"
+              name="name"
+              defaultValue={fund.name}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+              required
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Instrument Type</label>
+            <select
+              name="instrument_type"
+              defaultValue={fund.instrument_type}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+              required
+            >
+              <option value="Savings Account">Savings Account</option>
+              <option value="Fixed Deposit">Fixed Deposit</option>
+              <option value="Liquid Fund">Liquid Fund</option>
+              <option value="Cash">Cash</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Institution</label>
+            <input
+              type="text"
+              name="institution_name"
+              defaultValue={fund.institution_name || ""}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Target Amount</label>
+            <input
+              type="number"
+              step="0.01"
+              name="target_amount"
+              defaultValue={fund.target_amount}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
+              required
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+            >
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

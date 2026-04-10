@@ -1,31 +1,65 @@
-import { getBudgets } from "./actions";
+"use client";
+
+import { getBudgets, deleteBudget } from "./actions";
 import { getCategories, getTransactions } from "../transactions/actions";
-import BudgetForm from "./BudgetForm";
-import { Budget, Transaction } from "@/types/database";
+import BudgetForm, { EditBudgetModal } from "./BudgetForm";
+import { Budget, Category, Transaction } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/client";
+import { useEffect, useState } from "react";
 
-export default async function BudgetsPage() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-  const { data: { user } } = await supabase.auth.getUser();
+import {
+  ChartPieIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  PlusIcon,
+  ExclamationCircleIcon
+} from "@heroicons/react/24/outline";
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('currency')
-    .eq('id', user?.id)
-    .single();
-
-  const currency = profile?.currency || 'INR';
+export default function BudgetsPage() {
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [currency, setCurrency] = useState('INR');
+  const [loading, setLoading] = useState(true);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
   const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-04"
-  const budgets = await getBudgets(currentMonth);
-  const categories = await getCategories();
-  const transactions = await getTransactions();
+
+  const fetchData = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('currency')
+      .eq('id', user?.id)
+      .single();
+
+    setCurrency(profile?.currency || 'INR');
+
+    const [budgetsData, categoriesData, transactionsData] = await Promise.all([
+      getBudgets(currentMonth),
+      getCategories(),
+      getTransactions()
+    ]);
+
+    setBudgets(budgetsData);
+    setCategories(categoriesData);
+    setTransactions(transactionsData);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const refreshData = () => {
+    fetchData();
+  };
 
   // Filter transactions for current month and expenses
-  const currentMonthTransactions = transactions.filter(t => 
+  const currentMonthTransactions = transactions.filter(t =>
     t.date.startsWith(currentMonth) && t.type === 'expense'
   );
 
@@ -37,11 +71,18 @@ export default async function BudgetsPage() {
     return acc;
   }, {});
 
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">Loading budgets...</div>;
+  }
+
   return (
     <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <header className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Monthly Budgets</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your spending limits for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date())}</p>
+      <header className="mb-10 flex items-center gap-3">
+        <ChartPieIcon className="w-8 h-8 text-blue-600" />
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Monthly Budgets</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage your spending limits for {new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date())}</p>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -49,7 +90,7 @@ export default async function BudgetsPage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Budgets</h3>
           </div>
-          
+
           {budgets.length === 0 ? (
             <div className="bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 h-48 flex flex-col items-center justify-center p-6 text-center">
               <p className="text-gray-500 dark:text-gray-400">No budgets set for this month yet.</p>
@@ -71,7 +112,7 @@ export default async function BudgetsPage() {
                     )}
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div 
+                        <div
                           className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
                           style={{ backgroundColor: budget.categories?.color || '#3b82f6' }}
                         >
@@ -82,6 +123,28 @@ export default async function BudgetsPage() {
                           <span className="text-xs text-gray-500">{budget.month}</span>
                         </div>
                       </div>
+
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => setEditingBudget(budget)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          title="Edit Budget"
+                        >
+                          <PencilSquareIcon className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={async () => {
+                            if (confirm('Delete this budget limit?')) {
+                              await deleteBudget(budget.id);
+                              refreshData();
+                            }
+                          }}
+                          className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors"
+                          title="Delete Budget"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-3">
@@ -89,10 +152,10 @@ export default async function BudgetsPage() {
                         <span className="text-gray-500">Spent: {formatCurrency(spent, currency)}</span>
                         <span className="text-gray-900 dark:text-white font-medium">Limit: {formatCurrency(Number(budget.amount), currency)}</span>
                       </div>
-                      
+
                       {/* Progress Bar */}
                       <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 overflow-hidden">
-                        <div 
+                        <div
                           className={`h-full transition-all duration-500 ease-out ${
                             isOver ? 'bg-red-500' : percentage > 85 ? 'bg-amber-500' : 'bg-blue-500'
                           }`}
@@ -122,6 +185,18 @@ export default async function BudgetsPage() {
           <BudgetForm categories={categories} />
         </div>
       </div>
+
+      {editingBudget && (
+        <EditBudgetModal
+          budget={editingBudget}
+          categories={categories}
+          onClose={() => {
+            setEditingBudget(null);
+            refreshData();
+          }}
+        />
+      )}
     </div>
   );
 }
+

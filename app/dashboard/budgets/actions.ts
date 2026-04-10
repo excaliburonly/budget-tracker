@@ -3,6 +3,7 @@
 import {createClient} from "@/utils/supabase/server";
 import {cookies} from "next/headers";
 import {revalidatePath} from "next/cache";
+import { Budget } from "@/types/database";
 
 export async function getBudgets(month?: string): Promise<Budget[]> {
   const cookieStore = await cookies();
@@ -63,13 +64,17 @@ export async function createBudget(formData: FormData): Promise<{ error?: string
   return { success: true };
 }
 
-export async function updateBudget(id: string, amount: number): Promise<{ error?: string; success?: boolean }> {
+export async function updateBudget(id: string, formData: FormData): Promise<{ error?: string; success?: boolean }> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  const amount = parseFloat(formData.get("amount") as string);
+  const category_id = formData.get("category_id") as string;
+  const month = formData.get("month") as string;
+
   const { error } = await supabase
     .from("budgets")
-    .update({ amount })
+    .update({ amount, category_id, month })
     .eq("id", id);
 
   if (error) {
