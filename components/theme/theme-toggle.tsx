@@ -36,7 +36,7 @@ export function ThemeToggle({ align = 'bottom', side = 'left' }: { align?: 'top'
       </button>
 
       {isOpen && (
-        <div className={`absolute ${side === 'left' ? 'left-0' : 'right-0'} w-48 bg-surface border border-surface-border rounded-lg shadow-lg z-50 overflow-hidden ${
+        <div className={`absolute ${side === 'left' ? 'left-0' : 'right-0'} w-48 bg-surface border border-surface-border rounded-lg shadow-lg z-[100] overflow-hidden ${
           align === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
         }`}>
           {THEMES.map((t) => (

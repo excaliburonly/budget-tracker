@@ -9,12 +9,12 @@ export default async function LoginPage(props: {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background w-full overflow-x-hidden">
       {/* 60% Info Side (Left) */}
-      <div className="hidden lg:block lg:flex-1 h-full">
+      <div className="hidden lg:flex lg:flex-1 flex-col">
         <AuthInfo />
       </div>
 
       {/* 40% Form Side (Right) */}
-      <div className="w-full lg:w-[40%] shrink-0 flex items-center justify-center p-6 sm:p-12 lg:p-16 min-h-screen">
+      <div className="w-full lg:w-[40%] shrink-0 flex items-center justify-center p-6 sm:p-12 lg:p-16">
         <div className="w-full max-w-[400px]">
           <div className="mb-10">
             <h2 className="text-3xl font-bold text-foreground mb-3">Sign In</h2>
