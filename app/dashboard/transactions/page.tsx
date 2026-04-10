@@ -1,6 +1,9 @@
 "use client";
 
-import { getAccounts, getCategories, getEmergencyFunds, getInvestments, getTransactions } from "@/actions/transactions";
+import { getCategories, getTransactions } from "@/actions/transactions";
+import { getAccounts } from "@/actions/accounts";
+import { getEmergencyFunds } from "@/actions/emergency-funds";
+import { getInvestments } from "@/actions/investments";
 import { AddCategoryForm, AddTransactionForm, EditTransactionModal } from "@/components/forms/TransactionForms";
 import { TransactionRow } from "@/components/dashboard/TransactionRow";
 import { Account, Category, EmergencyFund, Investment, Transaction } from "@/types/database";

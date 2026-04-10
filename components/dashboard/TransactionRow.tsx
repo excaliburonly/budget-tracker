@@ -47,9 +47,9 @@ export function TransactionRow({ transaction, currency, onEdit, onRefresh }: Tra
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-foreground font-medium">
           {transaction.accounts?.name || 'Unknown'}
-          {transaction.type === 'transfer' && transaction.to_account && (
+          {transaction.type === 'transfer' && transaction.to_accounts && (
             <span className="text-text-muted font-normal ml-1">
-              → {transaction.to_account.name}
+              → {transaction.to_accounts.name}
             </span>
           )}
         </div>
