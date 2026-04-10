@@ -1,0 +1,84 @@
+"use client";
+
+import { Transaction } from "@/types/database";
+import { formatCurrency } from "@/utils/format";
+import { PencilSquareIcon, TrashIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
+import { deleteTransaction } from "@/actions/transactions";
+
+interface TransactionRowProps {
+  transaction: Transaction;
+  currency: string;
+  onEdit: (transaction: Transaction) => void;
+  onRefresh: () => void;
+}
+
+export function TransactionRow({ transaction, currency, onEdit, onRefresh }: TransactionRowProps) {
+  const handleDelete = async () => {
+    if (confirm('Delete this transaction?')) {
+      await deleteTransaction(transaction.id);
+      onRefresh();
+    }
+  };
+
+  return (
+    <tr className="hover:bg-background/50 transition-colors group">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm font-medium text-foreground">{transaction.date}</div>
+        <div className="text-xs text-text-muted">{transaction.notes || '-'}</div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        {transaction.type === 'transfer' ? (
+          <div className="flex items-center gap-1.5 text-indigo-600 font-medium text-sm">
+            <ArrowsRightLeftIcon className="w-3.5 h-3.5" />
+            Transfer
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: transaction.categories?.color || '#ccc' }}
+            />
+            <span className="text-sm text-foreground">
+              {transaction.categories?.name || 'Uncategorized'}
+            </span>
+          </div>
+        )}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-foreground font-medium">
+          {transaction.accounts?.name || 'Unknown'}
+          {transaction.type === 'transfer' && transaction.to_account && (
+            <span className="text-text-muted font-normal ml-1">
+              → {transaction.to_account.name}
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className={`text-sm font-bold ${
+          transaction.type === 'income' ? 'text-green-600' : 
+          transaction.type === 'transfer' ? 'text-indigo-600' : 'text-foreground'
+        }`}>
+          {transaction.type === 'income' ? '+' : transaction.type === 'transfer' ? '' : '-'}
+          {formatCurrency(transaction.amount, currency)}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={() => onEdit(transaction)}
+            className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
+          >
+            <PencilSquareIcon className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleDelete}
+            className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
