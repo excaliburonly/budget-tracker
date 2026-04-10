@@ -23,8 +23,8 @@ export default function BudgetForm({ categories }: BudgetFormProps) {
         // Reset form or close modal if needed
         (document.getElementById("budget-form") as HTMLFormElement).reset();
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -104,11 +104,11 @@ export default function BudgetForm({ categories }: BudgetFormProps) {
 export function EditBudgetModal({
   budget,
   categories,
-  onClose
+  onCloseAction
 }: {
   budget: Budget,
   categories: Category[],
-  onClose: () => void
+  onCloseAction: () => void
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -121,10 +121,10 @@ export function EditBudgetModal({
       if (res?.error) {
         setError(res.error);
       } else {
-        onClose();
+        onCloseAction();
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -193,7 +193,7 @@ export function EditBudgetModal({
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel

@@ -85,7 +85,7 @@ export function AddEmergencyFundForm() {
   );
 }
 
-export function EditEmergencyFundModal({ fund, onClose }: { fund: EmergencyFund, onClose: () => void }) {
+export function EditEmergencyFundModal({ fund, onCloseAction }: { fund: EmergencyFund, onCloseAction: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(formData: FormData) {
@@ -95,7 +95,7 @@ export function EditEmergencyFundModal({ fund, onClose }: { fund: EmergencyFund,
       if (result.error) {
         alert(result.error);
       } else {
-        onClose();
+        onCloseAction();
       }
     } finally {
       setIsSubmitting(false);
@@ -159,7 +159,7 @@ export function EditEmergencyFundModal({ fund, onClose }: { fund: EmergencyFund,
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel

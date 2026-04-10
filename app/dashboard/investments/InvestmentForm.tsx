@@ -18,8 +18,8 @@ export default function InvestmentForm() {
       } else {
         (document.getElementById("investment-form") as HTMLFormElement).reset();
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ export default function InvestmentForm() {
   );
 }
 
-export function EditInvestmentModal({ investment, onClose }: { investment: Investment, onClose: () => void }) {
+export function EditInvestmentModal({ investment, onCloseAction }: { investment: Investment, onCloseAction: () => void }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -129,10 +129,10 @@ export function EditInvestmentModal({ investment, onClose }: { investment: Inves
       if (res?.error) {
         setError(res.error);
       } else {
-        onClose();
+        onCloseAction();
       }
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -207,7 +207,7 @@ export function EditInvestmentModal({ investment, onClose }: { investment: Inves
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel

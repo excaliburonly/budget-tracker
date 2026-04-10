@@ -7,7 +7,7 @@ import {
   ChartBarIcon, 
   ChartPieIcon, 
   ShieldCheckIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightStartOnRectangleIcon
 } from "@heroicons/react/24/outline";
 
 export default function DashboardLayout({
@@ -56,7 +56,7 @@ export default function DashboardLayout({
         <div className="p-4 border-t border-gray-200 dark:border-gray-800">
           <form action={signOut}>
             <button className="flex items-center gap-3 w-full px-4 py-2 text-left text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors">
-              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+              <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
               Sign Out
             </button>
           </form>

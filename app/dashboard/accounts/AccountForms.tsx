@@ -75,7 +75,7 @@ export function AddAccountForm() {
   );
 }
 
-export function EditAccountModal({ account, onClose }: { account: Account, onClose: () => void }) {
+export function EditAccountModal({ account, onCloseAction }: { account: Account, onCloseAction: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(formData: FormData) {
@@ -85,7 +85,7 @@ export function EditAccountModal({ account, onClose }: { account: Account, onClo
       if (result.error) {
         alert(result.error);
       } else {
-        onClose();
+        onCloseAction();
       }
     } finally {
       setIsSubmitting(false);
@@ -139,7 +139,7 @@ export function EditAccountModal({ account, onClose }: { account: Account, onClo
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-6 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel
