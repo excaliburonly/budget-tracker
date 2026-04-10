@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { signOut } from "@/app/auth/actions";
-import { ThemeToggle } from "../../components/theme-toggle";
+import { signOut } from "@/actions/auth";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { 
   HomeIcon, 
   BanknotesIcon, 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { login } from "@/app/auth/actions";
+import { login } from '@/actions/auth'
 
 export default async function LoginPage(props: {
   searchParams: Promise<{ message: string; error: string }>;

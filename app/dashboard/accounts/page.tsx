@@ -1,36 +1,39 @@
 "use client";
 
-import {deleteAccount, getAccounts} from "./actions";
-import {AddAccountForm, EditAccountModal} from "./AccountForms";
-import {formatCurrency} from "@/utils/format";
-import {createClient} from "@/utils/supabase/client";
-import {useEffect, useState} from "react";
-import {Account} from "@/types/database";
-import {BanknotesIcon, PencilSquareIcon, TrashIcon} from "@heroicons/react/24/outline";
+import { getAccounts } from "@/actions/accounts";
+import { AddAccountForm, EditAccountModal } from "@/components/forms/AccountForms";
+import { AccountCard } from "@/components/dashboard/AccountCard";
+import { createClient } from "@/utils/supabase/client";
+import { useEffect, useState } from "react";
+import { Account } from "@/types/database";
+import { BanknotesIcon } from "@heroicons/react/24/outline";
 
 export default function AccountsPage() {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [currency, setCurrency] = useState('INR');
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
+    async function fetchData() {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('currency')
+            .eq('id', user?.id)
+            .single();
+
+        setCurrency(profile?.currency || 'INR');
+
+        const data = await getAccounts();
+        setAccounts(data);
+    }
+
     useEffect(() => {
-        async function fetchData() {
-            const supabase = createClient();
-            const {data: {user}} = await supabase.auth.getUser();
-
-            const {data: profile} = await supabase
-                .from('profiles')
-                .select('currency')
-                .eq('id', user?.id)
-                .single();
-
-            setCurrency(profile?.currency || 'INR');
-
-            const data = await getAccounts();
-            setAccounts(data);
-        }
-
-        fetchData();
+        const init = async () => {
+            await fetchData();
+        };
+        init();
     }, []);
 
     const refreshAccounts = async () => {
@@ -38,75 +41,50 @@ export default function AccountsPage() {
         setAccounts(data);
     };
 
-    return (<div className="max-w-6xl mx-auto">
+    return (
+        <div className="max-w-6xl mx-auto">
             <header className="mb-10 flex justify-between items-end">
                 <div>
                     <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                        <BanknotesIcon className="w-8 h-8 text-primary"/>
+                        <BanknotesIcon className="w-8 h-8 text-primary" />
                         Bank Accounts
                     </h1>
-                    <p className="text-text-muted mt-1">Manage your multiple bank accounts and their
-                        balances</p>
+                    <p className="text-text-muted mt-1">Manage your multiple bank accounts and their balances</p>
                 </div>
             </header>
 
-            <AddAccountForm/>
+            <AddAccountForm onAccountAdded={refreshAccounts} />
 
             <section>
                 <h3 className="text-lg font-semibold text-foreground mb-4">Your Accounts</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {accounts.length === 0 ? (<div className="col-span-full py-10 text-center text-sm text-text-muted/60">
+                    {accounts.length === 0 ? (
+                        <div className="col-span-full py-10 text-center text-sm text-text-muted/60">
                             No accounts added yet.
-                        </div>) : (accounts.map((account) => (<div
+                        </div>
+                    ) : (
+                        accounts.map((account) => (
+                            <AccountCard
                                 key={account.id}
-                                className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm transition-all hover:shadow-md relative group"
-                            >
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                    <span
-                        className="text-xs font-semibold text-primary uppercase tracking-wider bg-link-hover-bg px-2 py-0.5 rounded-full">
-                      {account.type}
-                    </span>
-                                        <h4 className="text-xl font-bold text-foreground mt-1">{account.name}</h4>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setEditingAccount(account)}
-                                            className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
-                                            title="Edit Account"
-                                        >
-                                            <PencilSquareIcon className="w-4 h-4"/>
-                                        </button>
-                                        <button
-                                            onClick={async () => {
-                                                if (confirm('Are you sure you want to delete this account?')) {
-                                                    await deleteAccount(account.id);
-                                                    refreshAccounts();
-                                                }
-                                            }}
-                                            className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
-                                            title="Delete Account"
-                                        >
-                                            <TrashIcon className="w-4 h-4"/>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="text-2xl font-extrabold text-foreground">
-                                    {formatCurrency(account.balance, currency)}
-                                </div>
-                                <p className="text-xs text-text-muted/60 mt-1">Current Balance</p>
-                            </div>)))}
+                                account={account}
+                                currency={currency}
+                                onEdit={setEditingAccount}
+                                onRefresh={refreshAccounts}
+                            />
+                        ))
+                    )}
                 </div>
             </section>
 
-            {editingAccount && (<EditAccountModal
+            {editingAccount && (
+                <EditAccountModal
                     account={editingAccount}
                     onCloseAction={() => {
                         setEditingAccount(null);
                         refreshAccounts();
                     }}
-                />)}
-        </div>);
+                />
+            )}
+        </div>
+    );
 }

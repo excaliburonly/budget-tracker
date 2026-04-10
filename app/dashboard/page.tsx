@@ -1,9 +1,9 @@
 import {createClient} from "@/utils/supabase/server";
 import {cookies} from "next/headers";
 import Link from "next/link";
-import {getTransactions} from "./transactions/actions";
-import {getBudgets} from "./budgets/actions";
-import {getAccounts} from "./accounts/actions";
+import { getTransactions } from "@/actions/transactions";
+import { getBudgets } from "@/actions/budgets";
+import { getAccounts } from "@/actions/accounts";
 import {Budget, Transaction} from "@/types/database";
 import {formatCurrency} from "@/utils/format";
 import {

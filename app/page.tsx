@@ -1,11 +1,11 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
-import { Navbar } from '@/components/Navbar'
-import { Hero } from '@/components/Hero'
-import { Features } from '@/components/Features'
-import { Benefits } from '@/components/Benefits'
-import { CTA } from '@/components/CTA'
-import { Footer } from '@/components/Footer'
+import { Navbar } from '@/components/home/Navbar'
+import { Hero } from '@/components/home/Hero'
+import { Features } from '@/components/home/Features'
+import { Benefits } from '@/components/home/Benefits'
+import { CTA } from '@/components/home/CTA'
+import { Footer } from '@/components/home/Footer'
 
 export default async function Page() {
   const cookieStore = await cookies()

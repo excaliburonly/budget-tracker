@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { signup } from "@/app/auth/actions";
+import { signup } from '@/actions/auth'
 
 export default async function SignupPage(props: {
   searchParams: Promise<{ error: string }>;
