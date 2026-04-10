@@ -1,79 +1,88 @@
 import Link from "next/link";
 import { signup } from '@/actions/auth'
+import { AuthInfo } from "@/components/auth/AuthInfo";
 
 export default async function SignupPage(props: {
   searchParams: Promise<{ error: string }>;
 }) {
   const searchParams = await props.searchParams;
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="w-full max-width-[400px] p-8 bg-surface border border-surface-border rounded-xl shadow-lg">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Ledgr</h1>
-          <p className="text-text-muted text-sm">Create your new account</p>
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+      {/* 40% Form Side (Left) */}
+      <div className="w-full lg:w-2/5 flex items-center justify-center p-6 sm:p-12 lg:p-16">
+        <div className="w-full max-w-[400px]">
+          <div className="mb-10 text-left">
+            <h2 className="text-3xl font-bold text-foreground mb-3 tracking-tight">Create Account</h2>
+            <p className="text-text-muted">Start your journey to financial freedom today.</p>
+          </div>
+
+          {searchParams.error && (
+            <div className="mb-8 p-4 text-sm text-red-600 bg-red-500/10 border border-red-500/20 rounded-xl animate-fade-in-down">
+              {searchParams.error}
+            </div>
+          )}
+
+          <form className="space-y-6" action={signup}>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground/90" htmlFor="fullName">
+                Full Name
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-xl border border-input-border bg-input text-base focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-foreground placeholder:text-text-muted/50"
+                id="fullName"
+                name="fullName"
+                type="text"
+                placeholder="John Doe"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground/90" htmlFor="email">
+                Email Address
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-xl border border-input-border bg-input text-base focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-foreground placeholder:text-text-muted/50"
+                id="email"
+                name="email"
+                type="email"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground/90" htmlFor="password">
+                Password
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-xl border border-input-border bg-input text-base focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-foreground placeholder:text-text-muted/50"
+                id="password"
+                name="password"
+                type="password"
+                placeholder="••••••••"
+                minLength={6}
+                required
+              />
+            </div>
+
+            <button className="w-full py-3.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-[0.98] transition-all" type="submit">
+              Get Started
+            </button>
+          </form>
+
+          <div className="mt-10 text-center text-base text-text-muted">
+            Already have an account?{" "}
+            <Link className="text-primary hover:underline font-bold" href="/login">
+              Sign In
+            </Link>
+          </div>
         </div>
+      </div>
 
-        {searchParams.error && (
-          <div className="mb-6 p-3 text-sm text-red-600 bg-red-500/10 border border-red-500/20 rounded-lg">
-            {searchParams.error}
-          </div>
-        )}
-
-        <form className="flex flex-col gap-5" action={signup}>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80" htmlFor="fullName">
-              Full Name
-            </label>
-            <input
-              className="px-4 py-2.5 rounded-lg border border-input-border bg-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
-              id="fullName"
-              name="fullName"
-              type="text"
-              placeholder="John Doe"
-              required
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80" htmlFor="email">
-              Email Address
-            </label>
-            <input
-              className="px-4 py-2.5 rounded-lg border border-input-border bg-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
-              id="email"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80" htmlFor="password">
-              Password
-            </label>
-            <input
-              className="px-4 py-2.5 rounded-lg border border-input-border bg-input text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground"
-              id="password"
-              name="password"
-              type="password"
-              placeholder="••••••••"
-              minLength={6}
-              required
-            />
-          </div>
-
-          <button className="mt-2 w-full py-2.5 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors" type="submit">
-            Create Account
-          </button>
-        </form>
-
-        <div className="mt-6 text-center text-sm text-text-muted">
-          Already have an account?{" "}
-          <Link className="text-primary hover:underline font-medium" href="/login">
-            Sign In
-          </Link>
-        </div>
+      {/* 60% Info Side (Right) */}
+      <div className="hidden lg:flex lg:w-3/5">
+        <AuthInfo />
       </div>
     </div>
   );
