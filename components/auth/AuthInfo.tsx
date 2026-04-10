@@ -33,7 +33,7 @@ export function AuthInfo() {
   ]
 
   return (
-    <div className="flex flex-col h-full justify-center p-12 lg:p-16 text-white bg-linear-to-br from-primary to-blue-700 dark:from-primary dark:to-blue-900">
+    <div className="flex flex-col w-full h-full justify-center p-12 lg:p-16 text-white bg-linear-to-br from-primary to-blue-700 dark:from-primary dark:to-blue-900">
       <div className="mb-12">
         <h1 className="text-4xl font-bold mb-4 tracking-tight">Ledgr</h1>
         <p className="text-xl text-blue-50/80 max-w-md">

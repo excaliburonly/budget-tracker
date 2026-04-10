@@ -7,14 +7,14 @@ export default async function LoginPage(props: {
 }) {
   const searchParams = await props.searchParams;
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background w-full overflow-x-hidden">
       {/* 60% Info Side (Left) */}
-      <div className="hidden lg:flex lg:w-3/5">
+      <div className="hidden lg:block lg:flex-1 h-full">
         <AuthInfo />
       </div>
 
       {/* 40% Form Side (Right) */}
-      <div className="w-full lg:w-2/5 flex items-center justify-center p-6 sm:p-12 lg:p-16">
+      <div className="w-full lg:w-[40%] shrink-0 flex items-center justify-center p-6 sm:p-12 lg:p-16 min-h-screen">
         <div className="w-full max-w-[400px]">
           <div className="mb-10">
             <h2 className="text-3xl font-bold text-foreground mb-3">Sign In</h2>

@@ -5,7 +5,7 @@ import { THEMES } from '@/utils/theme';
 import { SwatchIcon } from '@heroicons/react/24/outline';
 import { useState, useRef, useEffect } from 'react';
 
-export function ThemeToggle({ align = 'bottom' }: { align?: 'top' | 'bottom' }) {
+export function ThemeToggle({ align = 'bottom', side = 'left' }: { align?: 'top' | 'bottom', side?: 'left' | 'right' }) {
   const { theme, setTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,7 +36,7 @@ export function ThemeToggle({ align = 'bottom' }: { align?: 'top' | 'bottom' }) 
       </button>
 
       {isOpen && (
-        <div className={`absolute left-0 w-48 bg-surface border border-surface-border rounded-lg shadow-lg z-50 overflow-hidden ${
+        <div className={`absolute ${side === 'left' ? 'left-0' : 'right-0'} w-48 bg-surface border border-surface-border rounded-lg shadow-lg z-50 overflow-hidden ${
           align === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
         }`}>
           {THEMES.map((t) => (

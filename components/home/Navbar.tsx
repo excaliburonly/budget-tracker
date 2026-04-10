@@ -35,7 +35,7 @@ export function Navbar({ user }: { user: User | null }) {
           </>
         )}
         <div className="border-l border-surface-border pl-4">
-          <ThemeToggle />
+          <ThemeToggle side="right" />
         </div>
       </nav>
     </header>
