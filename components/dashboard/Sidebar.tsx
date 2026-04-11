@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/actions/auth";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { Logo } from "@/components/brand/Logo";
 import {
     HomeIcon,
     BanknotesIcon,
@@ -29,9 +30,7 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
         <>
             <div className="p-8 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                        <ChartBarIcon className="w-5 h-5 text-white" />
-                    </div>
+                    <Logo size={32} />
                     <h2 className="text-2xl font-extrabold text-primary tracking-tight">Ledgr</h2>
                 </div>
                 {onCloseAction && (

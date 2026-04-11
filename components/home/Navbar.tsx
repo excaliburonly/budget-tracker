@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { CurrencyDollarIcon } from '@heroicons/react/24/outline'
+import { Logo } from '@/components/brand/Logo'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { User } from '@supabase/supabase-js'
 
@@ -7,7 +7,7 @@ export function Navbar({ user }: { user: User | null }) {
   return (
     <header className="px-4 lg:px-6 h-16 flex items-center border-b border-surface-border bg-surface">
       <Link className="flex items-center justify-center" href="/">
-        <CurrencyDollarIcon className="h-8 w-8 text-primary" />
+        <Logo size={32} />
         <span className="ml-2 text-xl font-bold tracking-tight text-foreground">Ledgr</span>
       </Link>
       <nav className="ml-auto flex items-center gap-2 sm:gap-6">
