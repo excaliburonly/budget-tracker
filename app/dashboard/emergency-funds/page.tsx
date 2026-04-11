@@ -52,7 +52,7 @@ export default function EmergencyFundsPage() {
                 </div>
 
                 <div>
-                    <AddEmergencyFundForm onFundAdded={refreshEmergencyFunds} />
+                    <AddEmergencyFundForm />
                 </div>
             </div>
 
@@ -61,7 +61,6 @@ export default function EmergencyFundsPage() {
                     fund={editingFund}
                     onClose={() => setEditingFund(null)}
                     onFundUpdated={() => {
-                        refreshEmergencyFunds();
                         setEditingFund(null);
                     }}
                 />

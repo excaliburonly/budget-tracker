@@ -52,7 +52,7 @@ export default function InvestmentsPage() {
                 </div>
 
                 <div>
-                    <AddInvestmentForm onInvestmentAdded={refreshInvestments} />
+                    <AddInvestmentForm />
                 </div>
             </div>
 
@@ -61,7 +61,6 @@ export default function InvestmentsPage() {
                     investment={editingInvestment}
                     onClose={() => setEditingInvestment(null)}
                     onInvestmentUpdated={() => {
-                        refreshInvestments();
                         setEditingInvestment(null);
                     }}
                 />

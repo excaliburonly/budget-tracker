@@ -79,7 +79,7 @@ export function AddAccountForm({ onAccountAdded }: { onAccountAdded?: () => void
   );
 }
 
-export function EditAccountModal({ account, onClose }: { account: Account, onClose: () => void }) {
+export function EditAccountModal({ account, onClose, onAccountUpdated }: { account: Account, onClose: () => void, onAccountUpdated?: () => void }) {
   const { refreshAccounts, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -90,7 +90,11 @@ export function EditAccountModal({ account, onClose }: { account: Account, onClo
         alert(result.error);
       } else {
         await refreshAccounts();
-        onClose();
+        if (onAccountUpdated) {
+          onAccountUpdated();
+        } else {
+          onClose();
+        }
       }
     } finally {
       setIsSaving(false);

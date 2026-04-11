@@ -115,7 +115,7 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
   );
 }
 
-export function EditInvestmentModal({ investment, onClose }: { investment: Investment, onClose: () => void }) {
+export function EditInvestmentModal({ investment, onClose, onInvestmentUpdated }: { investment: Investment, onClose: () => void, onInvestmentUpdated?: () => void }) {
   const { refreshInvestments, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -126,7 +126,11 @@ export function EditInvestmentModal({ investment, onClose }: { investment: Inves
         alert(res.error);
       } else {
         await refreshInvestments();
-        onClose();
+        if (onInvestmentUpdated) {
+          onInvestmentUpdated();
+        } else {
+          onClose();
+        }
       }
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "An unknown error occurred");

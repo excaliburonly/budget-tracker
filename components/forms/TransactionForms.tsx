@@ -175,10 +175,11 @@ export function AddTransactionForm({ onTransactionAdded }: { onTransactionAdded?
 }
 
 export function EditTransactionModal({
-    transaction, onClose
+    transaction, onClose, onTransactionUpdated
 }: {
     transaction: Transaction,
-    onClose: () => void
+    onClose: () => void,
+    onTransactionUpdated?: () => void
 }) {
     const { categories, emergencyFunds, investments, accounts, refreshTransactions, setIsSaving } = useDashboard();
     const [type, setType] = useState<"income" | "expense" | "transfer">(transaction.type);
@@ -192,7 +193,11 @@ export function EditTransactionModal({
                     try {
                         await updateTransaction(transaction.id, formData);
                         await refreshTransactions();
-                        onClose();
+                        if (onTransactionUpdated) {
+                            onTransactionUpdated();
+                        } else {
+                            onClose();
+                        }
                     } catch (e: unknown) {
                         alert(e instanceof Error ? e.message : "An unknown error occurred");
                     } finally {
@@ -488,7 +493,7 @@ export function AddCategoryForm({ onCategoryChange }: { onCategoryChange?: () =>
     );
 }
 
-export function EditCategoryModal({ category, onClose }: { category: Category, onClose: () => void }) {
+export function EditCategoryModal({ category, onClose, onCategoryUpdated }: { category: Category, onClose: () => void, onCategoryUpdated?: () => void }) {
     const { refreshCategories, setIsSaving } = useDashboard();
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -499,7 +504,11 @@ export function EditCategoryModal({ category, onClose }: { category: Category, o
                     try {
                         await updateCategory(category.id, formData);
                         await refreshCategories();
-                        onClose();
+                        if (onCategoryUpdated) {
+                            onCategoryUpdated();
+                        } else {
+                            onClose();
+                        }
                     } finally {
                         setIsSaving(false);
                     }

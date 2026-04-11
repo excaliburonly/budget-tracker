@@ -75,16 +75,16 @@ export default function BudgetsPage() {
                 </div>
 
                 <div>
-                    <AddBudgetForm onBudgetAdded={refreshBudgets} />
+                    <AddBudgetForm />
                 </div>
             </div>
 
             {editingBudget && (
                 <EditBudgetModal
                     budget={editingBudget}
-                    onCloseAction={() => {
+                    onClose={() => setEditingBudget(null)}
+                    onBudgetUpdated={() => {
                         setEditingBudget(null);
-                        refreshBudgets();
                     }}
                 />
             )}

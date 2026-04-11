@@ -100,10 +100,12 @@ export function AddBudgetForm({ onBudgetAdded }: BudgetFormProps) {
 
 export function EditBudgetModal({
   budget,
-  onCloseAction
+  onClose,
+  onBudgetUpdated
 }: {
   budget: Budget,
-  onCloseAction: () => void
+  onClose: () => void,
+  onBudgetUpdated?: () => void
 }) {
   const { categories, refreshBudgets, setIsSaving } = useDashboard();
 
@@ -115,7 +117,11 @@ export function EditBudgetModal({
         alert(res.error);
       } else {
         await refreshBudgets();
-        onCloseAction();
+        if (onBudgetUpdated) {
+          onBudgetUpdated();
+        } else {
+          onClose();
+        }
       }
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "An unknown error occurred");
@@ -185,7 +191,7 @@ export function EditBudgetModal({
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onCloseAction}
+              onClick={onClose}
               className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel

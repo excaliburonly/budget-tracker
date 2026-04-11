@@ -52,7 +52,7 @@ export default function AccountsPage() {
                 </div>
 
                 <div>
-                    <AddAccountForm onAccountAdded={refreshAccounts} />
+                    <AddAccountForm />
                 </div>
             </div>
 
@@ -61,7 +61,6 @@ export default function AccountsPage() {
                     account={editingAccount}
                     onClose={() => setEditingAccount(null)}
                     onAccountUpdated={() => {
-                        refreshAccounts();
                         setEditingAccount(null);
                     }}
                 />

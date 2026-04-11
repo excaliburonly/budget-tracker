@@ -89,7 +89,7 @@ export function AddEmergencyFundForm({ onFundAdded }: { onFundAdded?: () => void
   );
 }
 
-export function EditEmergencyFundModal({ fund, onClose }: { fund: EmergencyFund, onClose: () => void }) {
+export function EditEmergencyFundModal({ fund, onClose, onFundUpdated }: { fund: EmergencyFund, onClose: () => void, onFundUpdated?: () => void }) {
   const { refreshEmergencyFunds, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -100,7 +100,11 @@ export function EditEmergencyFundModal({ fund, onClose }: { fund: EmergencyFund,
         alert(result.error);
       } else {
         await refreshEmergencyFunds();
-        onClose();
+        if (onFundUpdated) {
+          onFundUpdated();
+        } else {
+          onClose();
+        }
       }
     } finally {
       setIsSaving(false);
