@@ -1,11 +1,10 @@
 @AGENTS.md
 
-# ESLint & Code Quality Guidelines
-- **Strict Compliance:** Adhere to all ESLint rules in the project's config (e.g., .eslintrc, eslint.config.js, or package.json).
-- **No Linter Disables:** DO NOT use `// eslint-disable-next-line` or `/* eslint-disable */` comments. Fix the code if linting fails, do not suppress the error.
-- **Zero "Any" Types:** If using TypeScript, do not use the `any` type. Use `unknown` or proper interfaces.
-- **Formatting:** Ensure generated code is compatible with `eslint --fix` or Prettier.
-- **No Code Smells:** Avoid high-complexity functions (max 2 params, 50 lines/function, 250 lines/file).
+# Next.js 15+ & React 19 Standards
+- **Serializable Props:** When passing functions as props to Client Components, they MUST be named `action` or end with `Action` (e.g., `onCloseAction`, `onSuccessAction`). This is a strict requirement for Next.js 15+ to distinguish between standard callbacks and Server Actions at the component boundary.
+- **Client Boundaries:** Ensure `"use client"` is placed correctly. Avoid passing non-serializable data from Server Components to Client Components.
 
-# Pre-computation
-- Before delivering code, run local linting (`npm run lint` or `npx eslint`) if possible to verify compliance.
+# Pre-computation & Validation
+- **Mandatory Validation:** After ANY file modification, you MUST run local linting and type-checking (`npm run lint` or `npx tsc --noEmit`) and a build check (`npm run build`) to ensure no regressions or TypeScript/Next.js compiler errors were introduced.
+- **Strict Compliance:** Adhere to all ESLint rules in the project's config.
+- **No Linter Disables:** DO NOT use `// eslint-disable-next-line` or `/* eslint-disable */` comments. Fix the code if linting fails.

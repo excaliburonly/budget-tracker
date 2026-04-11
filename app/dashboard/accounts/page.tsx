@@ -31,36 +31,31 @@ export default function AccountsPage() {
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {accounts.map((account) => (
-                            <AccountCard
-                                key={account.id}
-                                account={account}
-                                currency={currency}
-                                onEdit={() => setEditingAccount(account)}
-                                onRefresh={refreshAccounts}
-                            />
-                        ))}
-                    </div>
-                    {accounts.length === 0 && (
-                        <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-input-border">
-                            <p className="text-text-muted">No accounts added yet.</p>
-                        </div>
-                    )}
-                </div>
+            <AddAccountForm />
 
-                <div>
-                    <AddAccountForm />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {accounts.map((account) => (
+                    <AccountCard
+                        key={account.id}
+                        account={account}
+                        currency={currency}
+                        onEditAction={() => setEditingAccount(account)}
+                        onRefreshAction={refreshAccounts}
+                    />
+                ))}
             </div>
+            
+            {accounts.length === 0 && (
+                <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-input-border">
+                    <p className="text-text-muted">No accounts added yet.</p>
+                </div>
+            )}
 
             {editingAccount && (
                 <EditAccountModal
                     account={editingAccount}
-                    onClose={() => setEditingAccount(null)}
-                    onAccountUpdated={() => {
+                    onCloseAction={() => setEditingAccount(null)}
+                    onAccountUpdatedAction={() => {
                         setEditingAccount(null);
                     }}
                 />

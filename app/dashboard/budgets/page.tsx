@@ -66,8 +66,8 @@ export default function BudgetsPage() {
                                     budget={budget}
                                     spent={spendingByCategory[budget.category_id] || 0}
                                     currency={currency}
-                                    onEdit={setEditingBudget}
-                                    onRefresh={refreshBudgets}
+                                    onEditAction={setEditingBudget}
+                                    onRefreshAction={refreshBudgets}
                                 />
                             ))}
                         </div>
@@ -82,8 +82,8 @@ export default function BudgetsPage() {
             {editingBudget && (
                 <EditBudgetModal
                     budget={editingBudget}
-                    onClose={() => setEditingBudget(null)}
-                    onBudgetUpdated={() => {
+                    onCloseAction={() => setEditingBudget(null)}
+                    onBudgetUpdatedAction={() => {
                         setEditingBudget(null);
                     }}
                 />

@@ -70,14 +70,36 @@ export interface EmergencyFund {
   updated_at: string;
 }
 
+export interface EmergencyFundTransaction {
+  id: string;
+  emergency_fund_id: string;
+  transaction_id: string | null;
+  type: 'contribution' | 'withdrawal';
+  amount: number;
+  date: string;
+  created_at: string;
+}
+
 export interface Investment {
   id: string;
   user_id: string;
   asset_name: string;
+  investment_type: string;
   symbol: string | null;
   quantity: number;
   average_buy_price: number;
   current_value: number;
+  created_at: string;
+}
+
+export interface InvestmentTransaction {
+  id: string;
+  investment_id: string;
+  transaction_id: string | null;
+  type: 'buy' | 'sell';
+  quantity: number;
+  price: number;
+  date: string;
   created_at: string;
 }
 

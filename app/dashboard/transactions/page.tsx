@@ -54,7 +54,7 @@ export default function TransactionsPage() {
                             </tr>) : (transactions.map((transaction) => (<TransactionRow
                                     key={transaction.id}
                                     transaction={transaction}
-                                    onEdit={() => setEditingTransaction(transaction)}
+                                    onEditAction={() => setEditingTransaction(transaction)}
                                 />)))}
                         </tbody>
                     </table>
@@ -63,7 +63,7 @@ export default function TransactionsPage() {
 
             {editingTransaction && (<EditTransactionModal
                     transaction={editingTransaction}
-                    onClose={() => setEditingTransaction(null)}
+                    onCloseAction={() => setEditingTransaction(null)}
                 />)}
         </div>);
 }

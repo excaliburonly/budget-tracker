@@ -8,11 +8,11 @@ import { useDashboard } from "@/providers/dashboard-provider";
 
 interface TransactionRowProps {
   transaction: Transaction;
-  onEdit: (transaction: Transaction) => void;
-  onDelete?: () => void;
+  onEditAction: (transaction: Transaction) => void;
+  onDeleteAction?: () => void;
 }
 
-export function TransactionRow({ transaction, onEdit, onDelete }: TransactionRowProps) {
+export function TransactionRow({ transaction, onEditAction, onDeleteAction }: TransactionRowProps) {
   const { currency, refreshTransactions, setIsSaving } = useDashboard();
   
   const handleDelete = async () => {
@@ -21,7 +21,7 @@ export function TransactionRow({ transaction, onEdit, onDelete }: TransactionRow
       try {
         await deleteTransaction(transaction.id);
         await refreshTransactions();
-        if (onDelete) onDelete();
+        if (onDeleteAction) onDeleteAction();
       } finally {
         setIsSaving(false);
       }
@@ -72,9 +72,9 @@ export function TransactionRow({ transaction, onEdit, onDelete }: TransactionRow
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
           <button
-            onClick={() => onEdit(transaction)}
+            onClick={() => onEditAction(transaction)}
             className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
           >
             < PencilSquareIcon className="w-4 h-4" />

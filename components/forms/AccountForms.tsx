@@ -4,7 +4,7 @@ import { addAccount, updateAccount } from "@/actions/accounts";
 import { Account } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 
-export function AddAccountForm({ onAccountAdded }: { onAccountAdded?: () => void }) {
+export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?: () => void }) {
   const { refreshAccounts, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -15,7 +15,7 @@ export function AddAccountForm({ onAccountAdded }: { onAccountAdded?: () => void
         alert(result.error);
       } else {
         await refreshAccounts();
-        if (onAccountAdded) onAccountAdded();
+        if (onAccountAddedAction) onAccountAddedAction();
         const form = document.getElementById('add-account-form') as HTMLFormElement;
         form?.reset();
       }
@@ -79,7 +79,7 @@ export function AddAccountForm({ onAccountAdded }: { onAccountAdded?: () => void
   );
 }
 
-export function EditAccountModal({ account, onClose, onAccountUpdated }: { account: Account, onClose: () => void, onAccountUpdated?: () => void }) {
+export function EditAccountModal({ account, onCloseAction, onAccountUpdatedAction }: { account: Account, onCloseAction: () => void, onAccountUpdatedAction?: () => void }) {
   const { refreshAccounts, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -90,10 +90,10 @@ export function EditAccountModal({ account, onClose, onAccountUpdated }: { accou
         alert(result.error);
       } else {
         await refreshAccounts();
-        if (onAccountUpdated) {
-          onAccountUpdated();
+        if (onAccountUpdatedAction) {
+          onAccountUpdatedAction();
         } else {
-          onClose();
+          onCloseAction();
         }
       }
     } finally {
@@ -148,7 +148,7 @@ export function EditAccountModal({ account, onClose, onAccountUpdated }: { accou
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel

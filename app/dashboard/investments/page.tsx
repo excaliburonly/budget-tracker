@@ -39,8 +39,8 @@ export default function InvestmentsPage() {
                                 key={investment.id}
                                 investment={investment}
                                 currency={currency}
-                                onEdit={() => setEditingInvestment(investment)}
-                                onRefresh={refreshInvestments}
+                                onEditAction={() => setEditingInvestment(investment)}
+                                onRefreshAction={refreshInvestments}
                             />
                         ))}
                     </div>
@@ -59,8 +59,8 @@ export default function InvestmentsPage() {
             {editingInvestment && (
                 <EditInvestmentModal
                     investment={editingInvestment}
-                    onClose={() => setEditingInvestment(null)}
-                    onInvestmentUpdated={() => {
+                    onCloseAction={() => setEditingInvestment(null)}
+                    onInvestmentUpdatedAction={() => {
                         setEditingInvestment(null);
                     }}
                 />

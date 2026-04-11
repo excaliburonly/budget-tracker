@@ -8,31 +8,31 @@ import { deleteAccount } from "@/actions/accounts";
 interface AccountCardProps {
   account: Account;
   currency: string;
-  onEdit: (account: Account) => void;
-  onRefresh: () => void;
+  onEditAction: (account: Account) => void;
+  onRefreshAction: () => void;
 }
 
-export function AccountCard({ account, currency, onEdit, onRefresh }: AccountCardProps) {
+export function AccountCard({ account, currency, onEditAction, onRefreshAction }: AccountCardProps) {
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this account?')) {
       await deleteAccount(account.id);
-      onRefresh();
+      onRefreshAction();
     }
   };
 
   return (
     <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm transition-all hover:shadow-md relative group">
       <div className="flex justify-between items-start mb-4">
-        <div>
+        <div className="min-w-0 pr-4">
           <span className="text-xs font-semibold text-primary uppercase tracking-wider bg-link-hover-bg px-2 py-0.5 rounded-full">
             {account.type}
           </span>
-          <h4 className="text-xl font-bold text-foreground mt-1">{account.name}</h4>
+          <h4 className="text-xl font-bold text-foreground mt-1 truncate" title={account.name}>{account.name}</h4>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
-            onClick={() => onEdit(account)}
+            onClick={() => onEditAction(account)}
             className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
             title="Edit Account"
           >

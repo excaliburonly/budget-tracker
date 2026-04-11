@@ -33,8 +33,11 @@ export async function createEmergencyFund(formData: FormData): Promise<{ error?:
   const instrument_type = formData.get("instrument_type") as string;
   const institution_name = formData.get("institution_name") as string;
   const target_amount = parseFloat(formData.get("target_amount") as string);
+  const initial_amount = parseFloat(formData.get("initial_amount") as string) || 0;
+  const account_id = formData.get("account_id") as string;
+  const date = new Date().toISOString().split('T')[0];
 
-  const { error } = await supabase
+  const { data: fund, error } = await supabase
     .from("emergency_funds")
     .insert([{
       user_id: user.id,
@@ -42,15 +45,115 @@ export async function createEmergencyFund(formData: FormData): Promise<{ error?:
       instrument_type,
       institution_name: institution_name || null,
       target_amount,
-      current_amount: 0,
-    }]);
+      current_amount: initial_amount,
+    }])
+    .select()
+    .single();
 
   if (error) {
     console.error("Error creating fund:", error);
     return { error: error.message };
   }
 
+  // If initial amount > 0, create a main transaction and a fund transaction
+  if (initial_amount > 0 && account_id) {
+    const { data: mainTx, error: txError } = await supabase
+      .from("transactions")
+      .insert([{
+        user_id: user.id,
+        amount: initial_amount,
+        type: 'expense',
+        account_id,
+        emergency_fund_id: fund.id,
+        date,
+        notes: `Initial contribution to ${name}`,
+      }])
+      .select()
+      .single();
+
+    if (!txError) {
+      await supabase.from("emergency_fund_transactions").insert([{
+        emergency_fund_id: fund.id,
+        transaction_id: mainTx.id,
+        type: 'contribution',
+        amount: initial_amount,
+        date,
+      }]);
+    }
+  }
+
   revalidatePath("/dashboard/emergency-funds");
+  revalidatePath("/dashboard/transactions");
+  revalidatePath("/dashboard/accounts");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
+export async function addEmergencyFundTransaction(fundId: string, formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const type = formData.get("type") as 'contribution' | 'withdrawal';
+  const amount = parseFloat(formData.get("amount") as string);
+  const date = formData.get("date") as string;
+  const account_id = formData.get("account_id") as string;
+
+  const { data: fund, error: fetchError } = await supabase
+    .from("emergency_funds")
+    .select("*")
+    .eq("id", fundId)
+    .single();
+
+  if (fetchError || !fund) return { error: "Fund not found" };
+
+  // 1. Create main transaction
+  let mainTransactionId = null;
+  if (account_id) {
+    const { data: mainTx, error: txError } = await supabase
+      .from("transactions")
+      .insert([{
+        user_id: user.id,
+        amount,
+        type: type === 'contribution' ? 'expense' : 'income',
+        account_id,
+        emergency_fund_id: fund.id,
+        date,
+        notes: `${type === 'contribution' ? 'Contributed to' : 'Withdrew from'} ${fund.name}`,
+      }])
+      .select()
+      .single();
+
+    if (!txError) mainTransactionId = mainTx.id;
+  }
+
+  // 2. Create fund transaction
+  const { error: fundTxError } = await supabase
+    .from("emergency_fund_transactions")
+    .insert([{
+      emergency_fund_id: fund.id,
+      transaction_id: mainTransactionId,
+      type,
+      amount,
+      date,
+    }]);
+
+  if (fundTxError) return { error: fundTxError.message };
+
+  // 3. Update fund balance
+  const newAmount = type === 'contribution' ? fund.current_amount + amount : fund.current_amount - amount;
+  const { error: updateError } = await supabase
+    .from("emergency_funds")
+    .update({ current_amount: newAmount })
+    .eq("id", fundId);
+
+  if (updateError) return { error: updateError.message };
+
+  revalidatePath("/dashboard/emergency-funds");
+  revalidatePath("/dashboard/transactions");
+  revalidatePath("/dashboard/accounts");
   revalidatePath("/dashboard");
   return { success: true };
 }

@@ -39,8 +39,8 @@ export default function EmergencyFundsPage() {
                                 key={fund.id}
                                 fund={fund}
                                 currency={currency}
-                                onEdit={() => setEditingFund(fund)}
-                                onRefresh={refreshEmergencyFunds}
+                                onEditAction={() => setEditingFund(fund)}
+                                onRefreshAction={refreshEmergencyFunds}
                             />
                         ))}
                     </div>
@@ -59,8 +59,8 @@ export default function EmergencyFundsPage() {
             {editingFund && (
                 <EditEmergencyFundModal
                     fund={editingFund}
-                    onClose={() => setEditingFund(null)}
-                    onFundUpdated={() => {
+                    onCloseAction={() => setEditingFund(null)}
+                    onFundUpdatedAction={() => {
                         setEditingFund(null);
                     }}
                 />

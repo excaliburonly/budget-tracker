@@ -5,10 +5,10 @@ import { Budget } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 
 interface BudgetFormProps {
-  onBudgetAdded?: () => void;
+  onBudgetAddedAction?: () => void;
 }
 
-export function AddBudgetForm({ onBudgetAdded }: BudgetFormProps) {
+export function AddBudgetForm({ onBudgetAddedAction }: BudgetFormProps) {
   const { categories, refreshBudgets, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -21,7 +21,7 @@ export function AddBudgetForm({ onBudgetAdded }: BudgetFormProps) {
         const form = document.getElementById("budget-form") as HTMLFormElement;
         form?.reset();
         await refreshBudgets();
-        if (onBudgetAdded) onBudgetAdded();
+        if (onBudgetAddedAction) onBudgetAddedAction();
       }
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "An unknown error occurred");
@@ -100,12 +100,12 @@ export function AddBudgetForm({ onBudgetAdded }: BudgetFormProps) {
 
 export function EditBudgetModal({
   budget,
-  onClose,
-  onBudgetUpdated
+  onCloseAction,
+  onBudgetUpdatedAction
 }: {
   budget: Budget,
-  onClose: () => void,
-  onBudgetUpdated?: () => void
+  onCloseAction: () => void,
+  onBudgetUpdatedAction?: () => void
 }) {
   const { categories, refreshBudgets, setIsSaving } = useDashboard();
 
@@ -117,10 +117,10 @@ export function EditBudgetModal({
         alert(res.error);
       } else {
         await refreshBudgets();
-        if (onBudgetUpdated) {
-          onBudgetUpdated();
+        if (onBudgetUpdatedAction) {
+          onBudgetUpdatedAction();
         } else {
-          onClose();
+          onCloseAction();
         }
       }
     } catch (e: unknown) {
@@ -191,7 +191,7 @@ export function EditBudgetModal({
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel

@@ -1,48 +1,60 @@
 "use client";
 
+import { useState } from "react";
 import { EmergencyFund } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
-import { PencilSquareIcon, TrashIcon, BuildingLibraryIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon, BuildingLibraryIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import { deleteEmergencyFund } from "@/actions/emergency-funds";
+import { AddEmergencyFundTransactionModal } from "../forms/EmergencyFundForms";
 
 interface EmergencyFundCardProps {
   fund: EmergencyFund;
   currency: string;
-  onEdit: (fund: EmergencyFund) => void;
-  onRefresh: () => void;
+  onEditAction: (fund: EmergencyFund) => void;
+  onRefreshAction: () => void;
 }
 
-export function EmergencyFundCard({ fund, currency, onEdit, onRefresh }: EmergencyFundCardProps) {
+export function EmergencyFundCard({ fund, currency, onEditAction, onRefreshAction }: EmergencyFundCardProps) {
+  const [isAddTxModalOpen, setIsAddTxModalOpen] = useState(false);
+
   const percentage = Math.min((fund.current_amount / fund.target_amount) * 100, 100);
   const isCompleted = fund.current_amount >= fund.target_amount;
 
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this fund?')) {
       await deleteEmergencyFund(fund.id);
-      onRefresh();
+      onRefreshAction();
     }
   };
 
   return (
     <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm transition-all hover:shadow-md relative group">
       <div className="flex justify-between items-start mb-4">
-        <div>
-          <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
+        <div className="min-w-0 pr-4">
+          <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
             {fund.instrument_type}
           </span>
-          <h4 className="text-xl font-bold text-foreground mt-1">{fund.name}</h4>
+          <h4 className="text-xl font-bold text-foreground mt-1 leading-none truncate" title={fund.name}>{fund.name}</h4>
           {fund.institution_name && (
-            <div className="flex items-center gap-1 text-text-muted text-xs mt-1">
-              <BuildingLibraryIcon className="w-3 h-3" />
-              {fund.institution_name}
+            <div className="flex items-center gap-1 text-text-muted text-[10px] mt-1.5">
+              <BuildingLibraryIcon className="w-3 h-3 flex-shrink-0" />
+              <span className="truncate">{fund.institution_name}</span>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
-            onClick={() => onEdit(fund)}
-            className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
+            onClick={() => setIsAddTxModalOpen(true)}
+            className="p-1.5 text-emerald-600 hover:bg-emerald-50/10 rounded-lg transition-colors flex items-center gap-1"
+            title="Add Contribution/Withdrawal"
+          >
+            <PlusCircleIcon className="w-5 h-5" />
+            <span className="text-xs font-bold hidden sm:inline">+ Add</span>
+          </button>
+          <button
+            onClick={() => onEditAction(fund)}
+            className="p-1.5 text-text-muted hover:bg-link-hover-bg rounded-lg transition-colors"
             title="Edit Fund"
           >
             <PencilSquareIcon className="w-4 h-4" />
@@ -80,14 +92,25 @@ export function EmergencyFundCard({ fund, currency, onEdit, onRefresh }: Emergen
             </span>
             <span className="text-foreground">{Math.round(percentage)}%</span>
           </div>
-          <div className="w-full bg-background rounded-full h-2 overflow-hidden">
+          <div className="w-full bg-background rounded-full h-2 overflow-hidden border border-surface-border/50">
             <div
-              className={`h-full transition-all duration-700 ease-out ${isCompleted ? 'bg-emerald-500' : 'bg-emerald-600'}`}
+              className={`h-full transition-all duration-700 ease-out ${isCompleted ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-emerald-600'}`}
               style={{ width: `${percentage}%` }}
             />
           </div>
         </div>
       </div>
+
+      {isAddTxModalOpen && (
+        <AddEmergencyFundTransactionModal
+          fund={fund}
+          onCloseAction={() => setIsAddTxModalOpen(false)}
+          onTransactionAddedAction={() => {
+            setIsAddTxModalOpen(false);
+            onRefreshAction();
+          }}
+        />
+      )}
     </div>
   );
 }

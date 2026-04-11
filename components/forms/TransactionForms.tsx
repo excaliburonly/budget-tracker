@@ -6,8 +6,8 @@ import { Category, Transaction } from "@/types/database";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 
-export function AddTransactionForm({ onTransactionAdded }: { onTransactionAdded?: () => void }) {
-    const { categories, emergencyFunds, investments, accounts, refreshTransactions, setIsSaving } = useDashboard();
+export function AddTransactionForm({ onTransactionAddedAction }: { onTransactionAddedAction?: () => void }) {
+    const { categories, accounts, refreshTransactions, setIsSaving } = useDashboard();
     const [type, setType] = useState<"income" | "expense" | "transfer">("expense");
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -19,7 +19,7 @@ export function AddTransactionForm({ onTransactionAdded }: { onTransactionAdded?
         try {
             await addTransaction(formData);
             await refreshTransactions();
-            if (onTransactionAdded) onTransactionAdded();
+            if (onTransactionAddedAction) onTransactionAddedAction();
             const form = document.getElementById('add-transaction-form') as HTMLFormElement;
             form?.reset();
             setType("expense");
@@ -111,36 +111,6 @@ export function AddTransactionForm({ onTransactionAdded }: { onTransactionAdded?
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-foreground/80">Link to Emergency Fund</label>
-                    <select
-                        name="emergency_fund_id"
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                    >
-                        <option value="">Not for emergency fund</option>
-                        {emergencyFunds.map((f) => (
-                            <option key={f.id} value={f.id}>
-                                {f.name} ({f.instrument_type})
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-foreground/80">Link to Investment</label>
-                    <select
-                        name="investment_id"
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                    >
-                        <option value="">Not for investment</option>
-                        {investments.map((i) => (
-                            <option key={i.id} value={i.id}>
-                                {i.asset_name} {i.symbol ? `(${i.symbol})` : ""}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium text-foreground/80">Date</label>
                     <input
                         type="date"
@@ -175,13 +145,13 @@ export function AddTransactionForm({ onTransactionAdded }: { onTransactionAdded?
 }
 
 export function EditTransactionModal({
-    transaction, onClose, onTransactionUpdated
+    transaction, onCloseAction, onTransactionUpdatedAction
 }: {
     transaction: Transaction,
-    onClose: () => void,
-    onTransactionUpdated?: () => void
+    onCloseAction: () => void,
+    onTransactionUpdatedAction?: () => void
 }) {
-    const { categories, emergencyFunds, investments, accounts, refreshTransactions, setIsSaving } = useDashboard();
+    const { categories, accounts, refreshTransactions, setIsSaving } = useDashboard();
     const [type, setType] = useState<"income" | "expense" | "transfer">(transaction.type);
 
     return (
@@ -193,10 +163,10 @@ export function EditTransactionModal({
                     try {
                         await updateTransaction(transaction.id, formData);
                         await refreshTransactions();
-                        if (onTransactionUpdated) {
-                            onTransactionUpdated();
+                        if (onTransactionUpdatedAction) {
+                            onTransactionUpdatedAction();
                         } else {
-                            onClose();
+                            onCloseAction();
                         }
                     } catch (e: unknown) {
                         alert(e instanceof Error ? e.message : "An unknown error occurred");
@@ -284,38 +254,6 @@ export function EditTransactionModal({
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-foreground/80">Link to Emergency Fund</label>
-                        <select
-                            name="emergency_fund_id"
-                            defaultValue={transaction.emergency_fund_id || ""}
-                            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                        >
-                            <option value="">Not for emergency fund</option>
-                            {emergencyFunds.map((f) => (
-                                <option key={f.id} value={f.id}>
-                                    {f.name} ({f.instrument_type})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-foreground/80">Link to Investment</label>
-                        <select
-                            name="investment_id"
-                            defaultValue={transaction.investment_id || ""}
-                            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
-                        >
-                            <option value="">Not for investment</option>
-                            {investments.map((i) => (
-                                <option key={i.id} value={i.id}>
-                                    {i.asset_name} {i.symbol ? `(${i.symbol})` : ""}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-foreground/80">Date</label>
                         <input
                             type="date"
@@ -339,7 +277,7 @@ export function EditTransactionModal({
                     <div className="md:col-span-2 flex justify-end gap-3 pt-4">
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={onCloseAction}
                             className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
                         >
                             Cancel
@@ -357,7 +295,7 @@ export function EditTransactionModal({
     );
 }
 
-export function AddCategoryForm({ onCategoryChange }: { onCategoryChange?: () => void }) {
+export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAction?: () => void }) {
     const { categories, refreshCategories, setIsSaving } = useDashboard();
     const [showForm, setShowForm] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -387,7 +325,7 @@ export function AddCategoryForm({ onCategoryChange }: { onCategoryChange?: () =>
                 try {
                     await addCategory(formData);
                     await refreshCategories();
-                    if (onCategoryChange) onCategoryChange();
+                    if (onCategoryChangeAction) onCategoryChangeAction();
                     (document.getElementById('add-category-form') as HTMLFormElement)?.reset();
                 } finally {
                     setIsSaving(false);
@@ -464,7 +402,7 @@ export function AddCategoryForm({ onCategoryChange }: { onCategoryChange?: () =>
                                         try {
                                             await deleteCategory(category.id);
                                             await refreshCategories();
-                                            if (onCategoryChange) onCategoryChange();
+                                            if (onCategoryChangeAction) onCategoryChangeAction();
                                         } finally {
                                             setIsSaving(false);
                                         }
@@ -483,9 +421,9 @@ export function AddCategoryForm({ onCategoryChange }: { onCategoryChange?: () =>
             {editingCategory && (
                 <EditCategoryModal
                     category={editingCategory}
-                    onClose={() => {
+                    onCloseAction={() => {
                         setEditingCategory(null);
-                        if (onCategoryChange) onCategoryChange();
+                        if (onCategoryChangeAction) onCategoryChangeAction();
                     }}
                 />
             )}
@@ -493,7 +431,7 @@ export function AddCategoryForm({ onCategoryChange }: { onCategoryChange?: () =>
     );
 }
 
-export function EditCategoryModal({ category, onClose, onCategoryUpdated }: { category: Category, onClose: () => void, onCategoryUpdated?: () => void }) {
+export function EditCategoryModal({ category, onCloseAction, onCategoryUpdatedAction }: { category: Category, onCloseAction: () => void, onCategoryUpdatedAction?: () => void }) {
     const { refreshCategories, setIsSaving } = useDashboard();
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -504,10 +442,10 @@ export function EditCategoryModal({ category, onClose, onCategoryUpdated }: { ca
                     try {
                         await updateCategory(category.id, formData);
                         await refreshCategories();
-                        if (onCategoryUpdated) {
-                            onCategoryUpdated();
+                        if (onCategoryUpdatedAction) {
+                            onCategoryUpdatedAction();
                         } else {
-                            onClose();
+                            onCloseAction();
                         }
                     } finally {
                         setIsSaving(false);
@@ -550,7 +488,7 @@ export function EditCategoryModal({ category, onClose, onCategoryUpdated }: { ca
                     <div className="flex justify-end gap-3 pt-4">
                         <button
                             type="button"
-                            onClick={onClose}
+                            onClick={onCloseAction}
                             className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
                         >
                             Cancel

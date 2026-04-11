@@ -24,7 +24,7 @@ const navigation = [
     { name: 'Emergency Funds', href: '/dashboard/emergency-funds', icon: ShieldCheckIcon },
 ];
 
-function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () => void }) {
+function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; onCloseAction?: () => void }) {
     return (
         <>
             <div className="p-8 flex items-center justify-between">
@@ -34,8 +34,8 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
                     </div>
                     <h2 className="text-2xl font-extrabold text-primary tracking-tight">Ledgr</h2>
                 </div>
-                {onClose && (
-                    <button onClick={onClose} className="lg:hidden p-2 text-text-muted hover:bg-link-hover-bg rounded-lg">
+                {onCloseAction && (
+                    <button onClick={onCloseAction} className="lg:hidden p-2 text-text-muted hover:bg-link-hover-bg rounded-lg">
                         <XMarkIcon className="w-6 h-6" />
                     </button>
                 )}
@@ -44,18 +44,19 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
             <nav className="flex-1 px-4 flex flex-col gap-1 overflow-y-auto">
                 {navigation.map((item) => {
                     const isActive = pathname === item.href;
+                    const Icon = item.icon;
                     return (
                         <Link
                             key={item.name}
                             href={item.href}
-                            onClick={onClose}
+                            onClick={onCloseAction}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium text-sm ${
                                 isActive
                                     ? 'bg-primary text-white'
                                     : 'text-foreground/80 hover:bg-link-hover-bg hover:text-link-hover-text'
                             }`}
                         >
-                            <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
+                            <Icon className={`w-5 h-5 ${isActive ? 'text-white' : ''}`} />
                             {item.name}
                         </Link>
                     );
@@ -75,7 +76,7 @@ function SidebarContent({ pathname, onClose }: { pathname: string; onClose?: () 
     );
 }
 
-export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
+export function Sidebar({ isOpen, onCloseAction }: { isOpen?: boolean; onCloseAction?: () => void }) {
     const pathname = usePathname();
 
     return (
@@ -90,7 +91,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
                 className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden transition-opacity duration-300 ${
                     isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
-                onClick={onClose}
+                onClick={onCloseAction}
             />
 
             {/* Mobile Sidebar Drawer */}
@@ -99,7 +100,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
                     isOpen ? 'translate-x-0' : '-translate-x-full'
                 } flex flex-col shadow-2xl`}
             >
-                <SidebarContent pathname={pathname} onClose={onClose} />
+                <SidebarContent pathname={pathname} onCloseAction={onCloseAction} />
             </aside>
         </>
     );

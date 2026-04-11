@@ -4,8 +4,18 @@ import { addInvestment, updateInvestment } from "@/actions/investments";
 import { Investment } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 
-export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: () => void }) {
-  const { refreshInvestments, setIsSaving } = useDashboard();
+const INVESTMENT_TYPES = [
+  "Mutual Fund",
+  "Stock",
+  "Gold",
+  "Silver",
+  "Real Estate",
+  "Crypto",
+  "Other"
+];
+
+export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAddedAction?: () => void }) {
+  const { refreshInvestments, setIsSaving, accounts } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
@@ -17,7 +27,7 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
         await refreshInvestments();
         const form = document.getElementById("investment-form") as HTMLFormElement;
         form?.reset();
-        if (onInvestmentAdded) onInvestmentAdded();
+        if (onInvestmentAddedAction) onInvestmentAddedAction();
       }
     } catch (e: unknown) {
       alert(e instanceof Error ? e.message : "An unknown error occurred");
@@ -46,6 +56,23 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
           </div>
 
           <div>
+            <label htmlFor="investment_type" className="block text-sm font-medium text-foreground/80 mb-1">
+              Investment Type
+            </label>
+            <select
+              name="investment_type"
+              id="investment_type"
+              required
+              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Type</option>
+              {INVESTMENT_TYPES.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
             <label htmlFor="symbol" className="block text-sm font-medium text-foreground/80 mb-1">
               Symbol / Ticker
             </label>
@@ -60,7 +87,7 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
 
           <div>
             <label htmlFor="quantity" className="block text-sm font-medium text-foreground/80 mb-1">
-              Quantity
+              Initial Quantity
             </label>
             <input
               type="number"
@@ -75,7 +102,7 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
 
           <div>
             <label htmlFor="average_buy_price" className="block text-sm font-medium text-foreground/80 mb-1">
-              Avg. Buy Price
+              Initial Buy Price
             </label>
             <input
               type="number"
@@ -102,6 +129,23 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
               className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+
+          <div>
+            <label htmlFor="account_id" className="block text-sm font-medium text-foreground/80 mb-1">
+              Funding Account
+            </label>
+            <select
+              name="account_id"
+              id="account_id"
+              required
+              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select Account</option>
+              {accounts.map(account => (
+                <option key={account.id} value={account.id}>{account.name} (₹{account.balance.toLocaleString()})</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <button
@@ -115,7 +159,7 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
   );
 }
 
-export function EditInvestmentModal({ investment, onClose, onInvestmentUpdated }: { investment: Investment, onClose: () => void, onInvestmentUpdated?: () => void }) {
+export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpdatedAction }: { investment: Investment, onCloseAction: () => void, onInvestmentUpdatedAction?: () => void }) {
   const { refreshInvestments, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -126,10 +170,10 @@ export function EditInvestmentModal({ investment, onClose, onInvestmentUpdated }
         alert(res.error);
       } else {
         await refreshInvestments();
-        if (onInvestmentUpdated) {
-          onInvestmentUpdated();
+        if (onInvestmentUpdatedAction) {
+          onInvestmentUpdatedAction();
         } else {
-          onClose();
+          onCloseAction();
         }
       }
     } catch (e: unknown) {
@@ -142,7 +186,14 @@ export function EditInvestmentModal({ investment, onClose, onInvestmentUpdated }
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
-        <h3 className="text-xl font-bold text-foreground mb-6">Edit Investment</h3>
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-foreground">Edit Investment</h3>
+          <button onClick={onCloseAction} className="text-foreground/50 hover:text-foreground">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
         <form action={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
@@ -154,6 +205,20 @@ export function EditInvestmentModal({ investment, onClose, onInvestmentUpdated }
                 required
                 className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Investment Type</label>
+              <select
+                name="investment_type"
+                defaultValue={investment.investment_type}
+                required
+                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              >
+                {INVESTMENT_TYPES.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -206,7 +271,7 @@ export function EditInvestmentModal({ investment, onClose, onInvestmentUpdated }
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel
@@ -216,6 +281,137 @@ export function EditInvestmentModal({ investment, onClose, onInvestmentUpdated }
               className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
             >
               Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+import { addInvestmentTransaction } from "@/actions/investments";
+
+export function AddInvestmentTransactionModal({ 
+  investment, 
+  onCloseAction, 
+  onTransactionAddedAction 
+}: { 
+  investment: Investment, 
+  onCloseAction: () => void, 
+  onTransactionAddedAction?: () => void 
+}) {
+  const { refreshAll, setIsSaving, accounts } = useDashboard();
+
+  async function handleSubmit(formData: FormData) {
+    setIsSaving(true);
+    try {
+      const res = await addInvestmentTransaction(investment.id, formData);
+      if (res?.error) {
+        alert(res.error);
+      } else {
+        await refreshAll();
+        if (onTransactionAddedAction) {
+          onTransactionAddedAction();
+        } else {
+          onCloseAction();
+        }
+      }
+    } catch (e: unknown) {
+      alert(e instanceof Error ? e.message : "An unknown error occurred");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-foreground">Add Transaction: {investment.asset_name}</h3>
+          <button onClick={onCloseAction} className="text-foreground/50 hover:text-foreground">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <form action={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Type</label>
+              <select
+                name="type"
+                required
+                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="buy">Buy (SIP / Installment)</option>
+                <option value="sell">Sell</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Date</label>
+              <input
+                type="date"
+                name="date"
+                required
+                defaultValue={new Date().toISOString().split('T')[0]}
+                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Quantity</label>
+              <input
+                type="number"
+                step="0.0001"
+                name="quantity"
+                required
+                placeholder="0.00"
+                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Price per unit</label>
+              <input
+                type="number"
+                step="0.01"
+                name="price"
+                required
+                placeholder="0.00"
+                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Account</label>
+              <select
+                name="account_id"
+                required
+                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select Account</option>
+                {accounts.map(account => (
+                  <option key={account.id} value={account.id}>{account.name} (₹{account.balance.toLocaleString()})</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onCloseAction}
+              className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
+            >
+              Add Transaction
             </button>
           </div>
         </form>

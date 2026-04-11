@@ -9,18 +9,18 @@ interface BudgetCardProps {
   budget: Budget;
   spent: number;
   currency: string;
-  onEdit: (budget: Budget) => void;
-  onRefresh: () => void;
+  onEditAction: (budget: Budget) => void;
+  onRefreshAction: () => void;
 }
 
-export function BudgetCard({ budget, spent, currency, onEdit, onRefresh }: BudgetCardProps) {
+export function BudgetCard({ budget, spent, currency, onEditAction, onRefreshAction }: BudgetCardProps) {
   const percentage = Math.min((spent / budget.amount) * 100, 100);
   const isOver = spent > budget.amount;
 
   const handleDelete = async () => {
     if (confirm('Delete this budget limit?')) {
       await deleteBudget(budget.id);
-      onRefresh();
+      onRefreshAction();
     }
   };
 
@@ -32,22 +32,22 @@ export function BudgetCard({ budget, spent, currency, onEdit, onRefresh }: Budge
         </div>
       )}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 pr-4">
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
             style={{ backgroundColor: budget.categories?.color || '#3b82f6' }}
           >
             {budget.categories?.name?.charAt(0) || 'B'}
           </div>
-          <div>
-            <h4 className="font-semibold text-foreground">{budget.categories?.name}</h4>
+          <div className="min-w-0">
+            <h4 className="font-semibold text-foreground truncate" title={budget.categories?.name}>{budget.categories?.name}</h4>
             <span className="text-xs text-text-muted">{budget.month}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
-            onClick={() => onEdit(budget)}
+            onClick={() => onEditAction(budget)}
             className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
             title="Edit Budget"
           >
