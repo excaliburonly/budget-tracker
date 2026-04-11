@@ -169,7 +169,7 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
   if (invTxError) return { error: invTxError.message };
 
   // 4. Update investment totals (weighted average price)
-  let newQuantity = investment.quantity;
+  let newQuantity;
   let newAvgPrice = investment.average_buy_price;
 
   if (type === 'buy') {
