@@ -35,4 +35,4 @@ EXPOSE 3000
 ENV PORT=3000
 
 # Next.js standalone mode generates a server.js file
-CMD ["bun", "run", "server.js"]
+CMD ["bun", "server.js"]
