@@ -1,26 +1,26 @@
 "use client";
 
 import { addAccount, updateAccount } from "@/actions/accounts";
-import { useState } from "react";
 import { Account } from "@/types/database";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 export function AddAccountForm({ onAccountAdded }: { onAccountAdded?: () => void }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { refreshAccounts, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setIsSubmitting(true);
+    setIsSaving(true);
     try {
       const result = await addAccount(formData);
       if (result.error) {
         alert(result.error);
-      } else if (onAccountAdded) {
-        onAccountAdded();
-        // Reset form if needed, or rely on server action revalidation
+      } else {
+        await refreshAccounts();
+        if (onAccountAdded) onAccountAdded();
         const form = document.getElementById('add-account-form') as HTMLFormElement;
         form?.reset();
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   }
 
@@ -69,10 +69,9 @@ export function AddAccountForm({ onAccountAdded }: { onAccountAdded?: () => void
         <div className="md:col-span-3 flex justify-end">
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+            className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
           >
-            {isSubmitting ? "Adding..." : "Add Account"}
+            Add Account
           </button>
         </div>
       </form>
@@ -80,20 +79,21 @@ export function AddAccountForm({ onAccountAdded }: { onAccountAdded?: () => void
   );
 }
 
-export function EditAccountModal({ account, onCloseAction }: { account: Account, onCloseAction: () => void }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function EditAccountModal({ account, onClose }: { account: Account, onClose: () => void }) {
+  const { refreshAccounts, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setIsSubmitting(true);
+    setIsSaving(true);
     try {
       const result = await updateAccount(account.id, formData);
       if (result.error) {
         alert(result.error);
       } else {
-        onCloseAction();
+        await refreshAccounts();
+        onClose();
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   }
 
@@ -144,17 +144,16 @@ export function EditAccountModal({ account, onCloseAction }: { account: Account,
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onCloseAction}
+              onClick={onClose}
               className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              Save Changes
             </button>
           </div>
         </form>

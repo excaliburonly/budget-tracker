@@ -1,64 +1,20 @@
 "use client";
 
-import { getCategories, getTransactions } from "@/actions/transactions";
-import { getAccounts } from "@/actions/accounts";
-import { getEmergencyFunds } from "@/actions/emergency-funds";
-import { getInvestments } from "@/actions/investments";
 import { AddCategoryForm, AddTransactionForm, EditTransactionModal } from "@/components/forms/TransactionForms";
 import { TransactionRow } from "@/components/dashboard/TransactionRow";
-import { Account, Category, EmergencyFund, Investment, Transaction } from "@/types/database";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState, useCallback } from "react";
+import { Transaction } from "@/types/database";
+import { useState } from "react";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 export default function TransactionsPage() {
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [emergencyFunds, setEmergencyFunds] = useState<EmergencyFund[]>([]);
-    const [investments, setInvestments] = useState<Investment[]>([]);
-    const [currency, setCurrency] = useState('INR');
-    const [loading, setLoading] = useState(true);
+    const { 
+        transactions, 
+        loading, 
+        refreshTransactions
+    } = useDashboard();
+    
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-
-    const fetchData = useCallback(async () => {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('currency')
-            .eq('id', user?.id)
-            .single();
-
-        setCurrency(profile?.currency || 'INR');
-
-        const [txs, cats, accs, funds, invs] = await Promise.all([
-            getTransactions(),
-            getCategories(),
-            getAccounts(),
-            getEmergencyFunds(),
-            getInvestments()
-        ]);
-
-        setTransactions(txs);
-        setCategories(cats);
-        setAccounts(accs);
-        setEmergencyFunds(funds);
-        setInvestments(invs);
-        setLoading(false);
-    }, []);
-
-    useEffect(() => {
-        const init = async () => {
-            await fetchData();
-        };
-        init();
-    }, [fetchData]);
-
-    const refreshData = () => {
-        fetchData();
-    };
 
     if (loading) {
         return <div className="p-8 text-center text-text-muted">Loading transactions...</div>;
@@ -74,15 +30,9 @@ export default function TransactionsPage() {
                 </div>
             </header>
 
-            <AddTransactionForm
-                categories={categories}
-                accounts={accounts}
-                emergencyFunds={emergencyFunds}
-                investments={investments}
-                onTransactionAdded={refreshData}
-            />
+            <AddTransactionForm onTransactionAdded={refreshTransactions} />
 
-            <AddCategoryForm categories={categories} onCategoryChange={refreshData} />
+            <AddCategoryForm />
 
             <section className="bg-surface rounded-3xl border border-surface-border shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
@@ -99,8 +49,8 @@ export default function TransactionsPage() {
                         <tbody className="divide-y divide-surface-border">
                             {transactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-text-muted/60">
-                                        No transactions found.
+                                    <td colSpan={5} className="px-6 py-12 text-center text-text-muted">
+                                        No transactions yet. Start by adding one above.
                                     </td>
                                 </tr>
                             ) : (
@@ -108,9 +58,7 @@ export default function TransactionsPage() {
                                     <TransactionRow
                                         key={transaction.id}
                                         transaction={transaction}
-                                        currency={currency}
-                                        onEdit={setEditingTransaction}
-                                        onRefresh={refreshData}
+                                        onEdit={() => setEditingTransaction(transaction)}
                                     />
                                 ))
                             )}
@@ -122,14 +70,7 @@ export default function TransactionsPage() {
             {editingTransaction && (
                 <EditTransactionModal
                     transaction={editingTransaction}
-                    categories={categories}
-                    accounts={accounts}
-                    emergencyFunds={emergencyFunds}
-                    investments={investments}
-                    onCloseAction={() => {
-                        setEditingTransaction(null);
-                        refreshData();
-                    }}
+                    onClose={() => setEditingTransaction(null)}
                 />
             )}
         </div>

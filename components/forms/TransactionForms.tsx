@@ -2,14 +2,12 @@
 
 import { ChangeEvent, useState } from "react";
 import { addCategory, addTransaction, deleteCategory, updateCategory, updateTransaction } from "@/actions/transactions";
-import { Account, Category, EmergencyFund, Investment, Transaction } from "@/types/database";
+import { Category, Transaction } from "@/types/database";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { useDashboard } from "@/providers/dashboard-provider";
 
-export function AddTransactionForm({
-    categories, emergencyFunds = [], investments = [], accounts = [], onTransactionAdded
-}: {
-    categories: Category[], emergencyFunds?: EmergencyFund[], investments?: Investment[], accounts?: Account[], onTransactionAdded?: () => void
-}) {
+export function AddTransactionForm({ onTransactionAdded }: { onTransactionAdded?: () => void }) {
+    const { categories, emergencyFunds, investments, accounts, refreshTransactions, setIsSaving } = useDashboard();
     const [type, setType] = useState<"income" | "expense" | "transfer">("expense");
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -17,11 +15,17 @@ export function AddTransactionForm({
     };
 
     const handleSubmit = async (formData: FormData) => {
-        await addTransaction(formData);
-        if (onTransactionAdded) onTransactionAdded();
-        const form = document.getElementById('add-transaction-form') as HTMLFormElement;
-        form?.reset();
-        setType("expense");
+        setIsSaving(true);
+        try {
+            await addTransaction(formData);
+            await refreshTransactions();
+            if (onTransactionAdded) onTransactionAdded();
+            const form = document.getElementById('add-transaction-form') as HTMLFormElement;
+            form?.reset();
+            setType("expense");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -171,15 +175,12 @@ export function AddTransactionForm({
 }
 
 export function EditTransactionModal({
-    transaction, onCloseAction, categories, emergencyFunds, investments, accounts
+    transaction, onClose
 }: {
     transaction: Transaction,
-    onCloseAction: () => void,
-    categories: Category[],
-    emergencyFunds: EmergencyFund[],
-    investments: Investment[],
-    accounts: Account[]
+    onClose: () => void
 }) {
+    const { categories, emergencyFunds, investments, accounts, refreshTransactions, setIsSaving } = useDashboard();
     const [type, setType] = useState<"income" | "expense" | "transfer">(transaction.type);
 
     return (
@@ -187,11 +188,15 @@ export function EditTransactionModal({
             <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-2xl w-full">
                 <h3 className="text-xl font-bold text-foreground mb-6">Edit Transaction</h3>
                 <form action={async (formData) => {
+                    setIsSaving(true);
                     try {
                         await updateTransaction(transaction.id, formData);
-                        onCloseAction();
+                        await refreshTransactions();
+                        onClose();
                     } catch (e: unknown) {
                         alert(e instanceof Error ? e.message : "An unknown error occurred");
+                    } finally {
+                        setIsSaving(false);
                     }
                 }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
@@ -329,7 +334,7 @@ export function EditTransactionModal({
                     <div className="md:col-span-2 flex justify-end gap-3 pt-4">
                         <button
                             type="button"
-                            onClick={onCloseAction}
+                            onClick={onClose}
                             className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
                         >
                             Cancel
@@ -347,7 +352,8 @@ export function EditTransactionModal({
     );
 }
 
-export function AddCategoryForm({ categories, onCategoryChange }: { categories: Category[], onCategoryChange?: () => void }) {
+export function AddCategoryForm({ onCategoryChange }: { onCategoryChange?: () => void }) {
+    const { categories, refreshCategories, setIsSaving } = useDashboard();
     const [showForm, setShowForm] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
@@ -372,9 +378,15 @@ export function AddCategoryForm({ categories, onCategoryChange }: { categories: 
             </div>
 
             <form action={async (formData) => {
-                await addCategory(formData);
-                if (onCategoryChange) onCategoryChange();
-                (document.getElementById('add-category-form') as HTMLFormElement)?.reset();
+                setIsSaving(true);
+                try {
+                    await addCategory(formData);
+                    await refreshCategories();
+                    if (onCategoryChange) onCategoryChange();
+                    (document.getElementById('add-category-form') as HTMLFormElement)?.reset();
+                } finally {
+                    setIsSaving(false);
+                }
             }} id="add-category-form" className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 pb-8 border-b border-surface-border">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-medium text-text-muted uppercase tracking-wider">New Name</label>
@@ -443,8 +455,14 @@ export function AddCategoryForm({ categories, onCategoryChange }: { categories: 
                             <button
                                 onClick={async () => {
                                     if (confirm(`Delete ${category.name}?`)) {
-                                        await deleteCategory(category.id);
-                                        if (onCategoryChange) onCategoryChange();
+                                        setIsSaving(true);
+                                        try {
+                                            await deleteCategory(category.id);
+                                            await refreshCategories();
+                                            if (onCategoryChange) onCategoryChange();
+                                        } finally {
+                                            setIsSaving(false);
+                                        }
                                     }
                                 }}
                                 className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
@@ -460,7 +478,7 @@ export function AddCategoryForm({ categories, onCategoryChange }: { categories: 
             {editingCategory && (
                 <EditCategoryModal
                     category={editingCategory}
-                    onCloseAction={() => {
+                    onClose={() => {
                         setEditingCategory(null);
                         if (onCategoryChange) onCategoryChange();
                     }}
@@ -470,14 +488,21 @@ export function AddCategoryForm({ categories, onCategoryChange }: { categories: 
     );
 }
 
-export function EditCategoryModal({ category, onCloseAction }: { category: Category, onCloseAction: () => void }) {
+export function EditCategoryModal({ category, onClose }: { category: Category, onClose: () => void }) {
+    const { refreshCategories, setIsSaving } = useDashboard();
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
                 <h3 className="text-xl font-bold text-foreground mb-6">Edit Category</h3>
                 <form action={async (formData) => {
-                    await updateCategory(category.id, formData);
-                    onCloseAction();
+                    setIsSaving(true);
+                    try {
+                        await updateCategory(category.id, formData);
+                        await refreshCategories();
+                        onClose();
+                    } finally {
+                        setIsSaving(false);
+                    }
                 }} className="space-y-4">
                     <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-foreground/80">Name</label>
@@ -516,7 +541,7 @@ export function EditCategoryModal({ category, onCloseAction }: { category: Categ
                     <div className="flex justify-end gap-3 pt-4">
                         <button
                             type="button"
-                            onClick={onCloseAction}
+                            onClick={onClose}
                             className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
                         >
                             Cancel

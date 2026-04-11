@@ -4,19 +4,27 @@ import { Transaction } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
 import { PencilSquareIcon, TrashIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { deleteTransaction } from "@/actions/transactions";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 interface TransactionRowProps {
   transaction: Transaction;
-  currency: string;
   onEdit: (transaction: Transaction) => void;
-  onRefresh: () => void;
+  onDelete?: () => void;
 }
 
-export function TransactionRow({ transaction, currency, onEdit, onRefresh }: TransactionRowProps) {
+export function TransactionRow({ transaction, onEdit, onDelete }: TransactionRowProps) {
+  const { currency, refreshTransactions, setIsSaving } = useDashboard();
+  
   const handleDelete = async () => {
     if (confirm('Delete this transaction?')) {
-      await deleteTransaction(transaction.id);
-      onRefresh();
+      setIsSaving(true);
+      try {
+        await deleteTransaction(transaction.id);
+        await refreshTransactions();
+        if (onDelete) onDelete();
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -69,7 +77,7 @@ export function TransactionRow({ transaction, currency, onEdit, onRefresh }: Tra
             onClick={() => onEdit(transaction)}
             className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
           >
-            <PencilSquareIcon className="w-4 h-4" />
+            < PencilSquareIcon className="w-4 h-4" />
           </button>
           <button
             onClick={handleDelete}

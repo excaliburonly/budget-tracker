@@ -1,29 +1,28 @@
 "use client";
 
-import { useState } from "react";
 import { addInvestment, updateInvestment } from "@/actions/investments";
 import { Investment } from "@/types/database";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { refreshInvestments, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    setError(null);
+    setIsSaving(true);
     try {
       const res = await addInvestment(formData);
       if (res?.error) {
-        setError(res.error);
+        alert(res.error);
       } else {
+        await refreshInvestments();
         const form = document.getElementById("investment-form") as HTMLFormElement;
         form?.reset();
         if (onInvestmentAdded) onInvestmentAdded();
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "An unknown error occurred");
+      alert(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   }
 
@@ -105,38 +104,34 @@ export function AddInvestmentForm({ onInvestmentAdded }: { onInvestmentAdded?: (
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
-
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50"
+          className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-2.5 px-4 rounded-lg transition-colors"
         >
-          {loading ? "Saving..." : "Add Investment"}
+          Add Investment
         </button>
       </form>
     </div>
   );
 }
 
-export function EditInvestmentModal({ investment, onCloseAction }: { investment: Investment, onCloseAction: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function EditInvestmentModal({ investment, onClose }: { investment: Investment, onClose: () => void }) {
+  const { refreshInvestments, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    setError(null);
+    setIsSaving(true);
     try {
       const res = await updateInvestment(investment.id, formData);
       if (res?.error) {
-        setError(res.error);
+        alert(res.error);
       } else {
-        onCloseAction();
+        await refreshInvestments();
+        onClose();
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "An unknown error occurred");
+      alert(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   }
 
@@ -204,22 +199,19 @@ export function EditInvestmentModal({ investment, onCloseAction }: { investment:
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
-
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onCloseAction}
+              onClick={onClose}
               className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              Save Changes
             </button>
           </div>
         </form>

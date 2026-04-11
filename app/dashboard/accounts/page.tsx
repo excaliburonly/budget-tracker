@@ -1,87 +1,68 @@
 "use client";
 
-import { getAccounts } from "@/actions/accounts";
 import { AddAccountForm, EditAccountModal } from "@/components/forms/AccountForms";
 import { AccountCard } from "@/components/dashboard/AccountCard";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState } from "react";
 import { Account } from "@/types/database";
-import { BanknotesIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { CreditCardIcon } from "@heroicons/react/24/outline";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 export default function AccountsPage() {
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [currency, setCurrency] = useState('INR');
+    const { 
+        accounts, 
+        currency, 
+        loading, 
+        refreshAccounts 
+    } = useDashboard();
+    
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
-    async function fetchData() {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('currency')
-            .eq('id', user?.id)
-            .single();
-
-        setCurrency(profile?.currency || 'INR');
-
-        const data = await getAccounts();
-        setAccounts(data);
+    if (loading) {
+        return <div className="p-8 text-center text-text-muted">Loading accounts...</div>;
     }
-
-    useEffect(() => {
-        const init = async () => {
-            await fetchData();
-        };
-        init();
-    }, []);
-
-    const refreshAccounts = async () => {
-        const data = await getAccounts();
-        setAccounts(data);
-    };
 
     return (
         <div className="max-w-6xl mx-auto">
-            <header className="mb-10 flex justify-between items-end">
+            <header className="mb-10 flex items-center gap-3">
+                <CreditCardIcon className="w-8 h-8 text-primary" />
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                        <BanknotesIcon className="w-8 h-8 text-primary" />
-                        Bank Accounts
-                    </h1>
-                    <p className="text-text-muted mt-1">Manage your multiple bank accounts and their balances</p>
+                    <h1 className="text-3xl font-bold text-foreground">My Accounts</h1>
+                    <p className="text-text-muted mt-1">Manage your bank accounts, wallets, and cash</p>
                 </div>
             </header>
 
-            <AddAccountForm onAccountAdded={refreshAccounts} />
-
-            <section>
-                <h3 className="text-lg font-semibold text-foreground mb-4">Your Accounts</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {accounts.length === 0 ? (
-                        <div className="col-span-full py-10 text-center text-sm text-text-muted/60">
-                            No accounts added yet.
-                        </div>
-                    ) : (
-                        accounts.map((account) => (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {accounts.map((account) => (
                             <AccountCard
                                 key={account.id}
                                 account={account}
                                 currency={currency}
-                                onEdit={setEditingAccount}
+                                onEdit={() => setEditingAccount(account)}
                                 onRefresh={refreshAccounts}
                             />
-                        ))
+                        ))}
+                    </div>
+                    {accounts.length === 0 && (
+                        <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-input-border">
+                            <p className="text-text-muted">No accounts added yet.</p>
+                        </div>
                     )}
                 </div>
-            </section>
+
+                <div>
+                    <AddAccountForm onAccountAdded={refreshAccounts} />
+                </div>
+            </div>
 
             {editingAccount && (
                 <EditAccountModal
                     account={editingAccount}
-                    onCloseAction={() => {
-                        setEditingAccount(null);
+                    onClose={() => setEditingAccount(null)}
+                    onAccountUpdated={() => {
                         refreshAccounts();
+                        setEditingAccount(null);
                     }}
                 />
             )}

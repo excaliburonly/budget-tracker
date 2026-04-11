@@ -1,34 +1,32 @@
 "use client";
 
-import { useState } from "react";
 import { createBudget, updateBudget } from "@/actions/budgets";
-import { Category, Budget } from "@/types/database";
+import { Budget } from "@/types/database";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 interface BudgetFormProps {
-  categories: Category[];
   onBudgetAdded?: () => void;
 }
 
-export function AddBudgetForm({ categories, onBudgetAdded }: BudgetFormProps) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function AddBudgetForm({ onBudgetAdded }: BudgetFormProps) {
+  const { categories, refreshBudgets, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    setError(null);
+    setIsSaving(true);
     try {
       const res = await createBudget(formData);
       if (res?.error) {
-        setError(res.error);
+        alert(res.error);
       } else {
         const form = document.getElementById("budget-form") as HTMLFormElement;
         form?.reset();
+        await refreshBudgets();
         if (onBudgetAdded) onBudgetAdded();
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "An unknown error occurred");
+      alert(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   }
 
@@ -89,14 +87,11 @@ export function AddBudgetForm({ categories, onBudgetAdded }: BudgetFormProps) {
           />
         </div>
 
-        {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
-
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-primary hover:bg-primary-hover text-white font-semibold py-2 px-4 rounded-lg transition-colors"
         >
-          {loading ? "Adding..." : "Set Budget"}
+          Set Budget
         </button>
       </form>
     </div>
@@ -105,30 +100,27 @@ export function AddBudgetForm({ categories, onBudgetAdded }: BudgetFormProps) {
 
 export function EditBudgetModal({
   budget,
-  categories,
   onCloseAction
 }: {
   budget: Budget,
-  categories: Category[],
   onCloseAction: () => void
 }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { categories, refreshBudgets, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    setError(null);
+    setIsSaving(true);
     try {
       const res = await updateBudget(budget.id, formData);
       if (res?.error) {
-        setError(res.error);
+        alert(res.error);
       } else {
+        await refreshBudgets();
         onCloseAction();
       }
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "An unknown error occurred");
+      alert(e instanceof Error ? e.message : "An unknown error occurred");
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   }
 
@@ -190,8 +182,6 @@ export function EditBudgetModal({
             />
           </div>
 
-          {error && <p className="text-sm text-red-600 font-medium">{error}</p>}
-
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
@@ -202,10 +192,9 @@ export function EditBudgetModal({
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
             >
-              {loading ? "Saving..." : "Save Changes"}
+              Save Changes
             </button>
           </div>
         </form>

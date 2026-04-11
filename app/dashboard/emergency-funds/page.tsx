@@ -1,94 +1,68 @@
 "use client";
 
-import { getEmergencyFunds } from "@/actions/emergency-funds";
 import { AddEmergencyFundForm, EditEmergencyFundModal } from "@/components/forms/EmergencyFundForms";
 import { EmergencyFundCard } from "@/components/dashboard/EmergencyFundCard";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState, useCallback } from "react";
 import { EmergencyFund } from "@/types/database";
+import { useState } from "react";
 import { ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 export default function EmergencyFundsPage() {
-    const [funds, setFunds] = useState<EmergencyFund[]>([]);
-    const [currency, setCurrency] = useState('INR');
-    const [loading, setLoading] = useState(true);
+    const { 
+        emergencyFunds, 
+        currency, 
+        loading, 
+        refreshEmergencyFunds 
+    } = useDashboard();
+    
     const [editingFund, setEditingFund] = useState<EmergencyFund | null>(null);
 
-    const fetchData = useCallback(async () => {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('currency')
-            .eq('id', user?.id)
-            .single();
-
-        setCurrency(profile?.currency || 'INR');
-
-        const data = await getEmergencyFunds();
-        setFunds(data);
-        setLoading(false);
-    }, []);
-
-    useEffect(() => {
-        const init = async () => {
-            await fetchData();
-        };
-        init();
-    }, [fetchData]);
-
-    const refreshFunds = () => {
-        fetchData();
-    };
-
     if (loading) {
-        return <div className="p-8 text-center text-text-muted">Loading funds...</div>;
+        return <div className="p-8 text-center text-text-muted">Loading emergency funds...</div>;
     }
 
     return (
         <div className="max-w-6xl mx-auto">
             <header className="mb-10 flex items-center gap-3">
-                <ShieldCheckIcon className="w-8 h-8 text-emerald-600" />
+                <ShieldCheckIcon className="w-8 h-8 text-primary" />
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">Emergency Funds & Goals</h1>
-                    <p className="text-text-muted mt-1">Track your progress towards financial security and major life goals</p>
+                    <h1 className="text-3xl font-bold text-foreground">Emergency Funds</h1>
+                    <p className="text-text-muted mt-1">Peace of mind for life&lsquo;s unexpected turns</p>
                 </div>
             </header>
 
-            <AddEmergencyFundForm onFundAdded={refreshFunds} />
-
-            <section>
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-foreground">Your Active Funds</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {funds.length === 0 ? (
-                        <div className="col-span-full bg-surface rounded-2xl border border-dashed border-input-border h-48 flex flex-col items-center justify-center p-6 text-center">
-                            <p className="text-text-muted">No fund goals created yet.</p>
-                            <p className="text-sm text-text-muted/60 mt-1">Start by creating your main emergency fund goal.</p>
-                        </div>
-                    ) : (
-                        funds.map((fund) => (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {emergencyFunds.map((fund) => (
                             <EmergencyFundCard
                                 key={fund.id}
                                 fund={fund}
                                 currency={currency}
-                                onEdit={setEditingFund}
-                                onRefresh={refreshFunds}
+                                onEdit={() => setEditingFund(fund)}
+                                onRefresh={refreshEmergencyFunds}
                             />
-                        ))
+                        ))}
+                    </div>
+                    {emergencyFunds.length === 0 && (
+                        <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-input-border">
+                            <p className="text-text-muted">No emergency funds added yet.</p>
+                        </div>
                     )}
                 </div>
-            </section>
+
+                <div>
+                    <AddEmergencyFundForm onFundAdded={refreshEmergencyFunds} />
+                </div>
+            </div>
 
             {editingFund && (
                 <EditEmergencyFundModal
                     fund={editingFund}
-                    onCloseAction={() => {
+                    onClose={() => setEditingFund(null)}
+                    onFundUpdated={() => {
+                        refreshEmergencyFunds();
                         setEditingFund(null);
-                        refreshFunds();
                     }}
                 />
             )}

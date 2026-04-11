@@ -1,59 +1,24 @@
 "use client";
 
-import { getBudgets } from "@/actions/budgets";
-import { getCategories, getTransactions } from "@/actions/transactions";
 import { AddBudgetForm, EditBudgetModal } from "@/components/forms/BudgetForms";
 import { BudgetCard } from "@/components/dashboard/BudgetCard";
-import { Budget, Category, Transaction } from "@/types/database";
-import { createClient } from "@/utils/supabase/client";
-import { useEffect, useState, useCallback } from "react";
-
+import { Budget, Transaction } from "@/types/database";
+import { useState } from "react";
 import { ChartPieIcon } from "@heroicons/react/24/outline";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 export default function BudgetsPage() {
-    const [budgets, setBudgets] = useState<Budget[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [currency, setCurrency] = useState('INR');
-    const [loading, setLoading] = useState(true);
+    const { 
+        budgets, 
+        transactions, 
+        currency, 
+        loading, 
+        refreshBudgets 
+    } = useDashboard();
+    
     const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
     const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-04"
-
-    const fetchData = useCallback(async () => {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('currency')
-            .eq('id', user?.id)
-            .single();
-
-        setCurrency(profile?.currency || 'INR');
-
-        const [budgetsData, categoriesData, transactionsData] = await Promise.all([
-            getBudgets(currentMonth), 
-            getCategories(), 
-            getTransactions()
-        ]);
-
-        setBudgets(budgetsData);
-        setCategories(categoriesData);
-        setTransactions(transactionsData);
-        setLoading(false);
-    }, [currentMonth]);
-
-    useEffect(() => {
-        const init = async () => {
-            await fetchData();
-        };
-        init();
-    }, [fetchData]);
-
-    const refreshData = () => {
-        fetchData();
-    };
 
     // Filter transactions for current month and expenses
     const currentMonthTransactions = transactions.filter(t => t.date.startsWith(currentMonth) && t.type === 'expense');
@@ -102,7 +67,7 @@ export default function BudgetsPage() {
                                     spent={spendingByCategory[budget.category_id] || 0}
                                     currency={currency}
                                     onEdit={setEditingBudget}
-                                    onRefresh={refreshData}
+                                    onRefresh={refreshBudgets}
                                 />
                             ))}
                         </div>
@@ -110,17 +75,16 @@ export default function BudgetsPage() {
                 </div>
 
                 <div>
-                    <AddBudgetForm categories={categories} onBudgetAdded={refreshData} />
+                    <AddBudgetForm onBudgetAdded={refreshBudgets} />
                 </div>
             </div>
 
             {editingBudget && (
                 <EditBudgetModal
                     budget={editingBudget}
-                    categories={categories}
                     onCloseAction={() => {
                         setEditingBudget(null);
-                        refreshData();
+                        refreshBudgets();
                     }}
                 />
             )}

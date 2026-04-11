@@ -1,25 +1,26 @@
 "use client";
 
 import { createEmergencyFund, updateEmergencyFund } from "@/actions/emergency-funds";
-import { useState } from "react";
 import { EmergencyFund } from "@/types/database";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 export function AddEmergencyFundForm({ onFundAdded }: { onFundAdded?: () => void }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { refreshEmergencyFunds, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setIsSubmitting(true);
+    setIsSaving(true);
     try {
       const result = await createEmergencyFund(formData);
       if (result.error) {
         alert(result.error);
       } else {
+        await refreshEmergencyFunds();
         const form = document.getElementById("add-fund-form") as HTMLFormElement;
         form?.reset();
         if (onFundAdded) onFundAdded();
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   }
 
@@ -78,10 +79,9 @@ export function AddEmergencyFundForm({ onFundAdded }: { onFundAdded?: () => void
         <div className="lg:col-span-4 flex justify-end">
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+            className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors text-sm"
           >
-            {isSubmitting ? "Creating..." : "Create Fund Goal"}
+            Create Fund Goal
           </button>
         </div>
       </form>
@@ -89,20 +89,21 @@ export function AddEmergencyFundForm({ onFundAdded }: { onFundAdded?: () => void
   );
 }
 
-export function EditEmergencyFundModal({ fund, onCloseAction }: { fund: EmergencyFund, onCloseAction: () => void }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function EditEmergencyFundModal({ fund, onClose }: { fund: EmergencyFund, onClose: () => void }) {
+  const { refreshEmergencyFunds, setIsSaving } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
-    setIsSubmitting(true);
+    setIsSaving(true);
     try {
       const result = await updateEmergencyFund(fund.id, formData);
       if (result.error) {
         alert(result.error);
       } else {
-        onCloseAction();
+        await refreshEmergencyFunds();
+        onClose();
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   }
 
@@ -163,17 +164,16 @@ export function EditEmergencyFundModal({ fund, onCloseAction }: { fund: Emergenc
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={onCloseAction}
+              onClick={onClose}
               className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors text-sm disabled:opacity-50"
+              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg transition-colors text-sm"
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              Save Changes
             </button>
           </div>
         </form>
