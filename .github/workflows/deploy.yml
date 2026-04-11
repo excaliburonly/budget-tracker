@@ -1,0 +1,51 @@
+name: Deploy Next.js (Bun) to GCP VM
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.GCP_VM_IP }}
+          username: ${{ secrets.GCP_VM_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            # 1. Setup project directory
+            if [ ! -d "~/my-app" ]; then
+              git clone https://github.com/${{ github.repository }} ~/my-app
+            fi
+            cd ~/my-app
+            git pull origin main
+
+            # 2. Create the .env file dynamically on the VM
+            # This keeps your secrets out of your Docker image and your repo
+            echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" > .env
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}" >> .env
+            # Add more lines here for every secret you have
+
+            # 3. Build the Next.js app
+            # We use --build-arg if you need vars during 'next build' 
+            # (e.g. for NEXT_PUBLIC vars)
+            docker build \
+              --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
+              --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }} \
+              -t nextjs-app .
+
+            # 4. Restart the container
+            docker stop nextjs-app-container || true
+            docker rm nextjs-app-container || true
+            
+            docker run -d \
+              --name nextjs-app-container \
+              --restart always \
+              --memory="512m" \
+              --env-file .env \
+              -p 80:3000 \
+              nextjs-app
