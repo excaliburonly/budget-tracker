@@ -10,6 +10,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # THIS STEP COPIES YOUR FILES TO THE VM
+      - name: Copy files via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.GCP_VM_IP }}
+          username: ${{ secrets.GCP_VM_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          source: "."
+          target: "~/my-app"
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -17,28 +27,19 @@ jobs:
           username: ${{ secrets.GCP_VM_USERNAME }}
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
-            # 1. Setup project directory
-            if [ ! -d "~/my-app" ]; then
-              git clone https://github.com/${{ github.repository }} ~/my-app
-            fi
             cd ~/my-app
-            git pull origin main
-
-            # 2. Create the .env file dynamically on the VM
-            # This keeps your secrets out of your Docker image and your repo
+            
+            # 1. Create .env
             echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" > .env
             echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }}" >> .env
-            # Add more lines here for every secret you have
-
-            # 3. Build the Next.js app
-            # We use --build-arg if you need vars during 'next build' 
-            # (e.g. for NEXT_PUBLIC vars)
+            
+            # 2. Build (Note: building on a 1GB VM might be slow!)
             docker build \
               --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
               --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY }} \
               -t nextjs-app .
-
-            # 4. Restart the container
+            
+            # 3. Clean up and Run
             docker stop nextjs-app-container || true
             docker rm nextjs-app-container || true
             
