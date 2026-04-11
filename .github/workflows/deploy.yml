@@ -1,7 +1,7 @@
 name: Deploy Next.js (Bun) to GCP VM
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   deploy:
