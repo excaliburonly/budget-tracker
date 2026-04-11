@@ -14,7 +14,13 @@ const INVESTMENT_TYPES = [
   "Other"
 ];
 
-export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAddedAction?: () => void }) {
+export function AddInvestmentForm({ 
+  onInvestmentAddedAction,
+  initialType 
+}: { 
+  onInvestmentAddedAction?: () => void,
+  initialType?: string
+}) {
   const { refreshInvestments, setIsSaving, accounts } = useDashboard();
 
   async function handleSubmit(formData: FormData) {
@@ -63,6 +69,7 @@ export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAdd
               name="investment_type"
               id="investment_type"
               required
+              defaultValue={initialType || ""}
               className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Type</option>

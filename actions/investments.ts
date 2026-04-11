@@ -5,14 +5,20 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { Investment } from "@/types/database";
 
-export async function getInvestments(): Promise<Investment[]> {
+export async function getInvestments(type?: string): Promise<Investment[]> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("investments")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (type) {
+    query = query.eq("investment_type", type);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Error fetching investments:", error);
@@ -20,6 +26,24 @@ export async function getInvestments(): Promise<Investment[]> {
   }
 
   return (data as Investment[]) || [];
+}
+
+export async function getInvestmentTypes(): Promise<string[]> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data, error } = await supabase
+    .from("investments")
+    .select("investment_type")
+    .order("investment_type");
+
+  if (error) {
+    console.error("Error fetching investment types:", error);
+    return [];
+  }
+
+  const types = data.map((item: { investment_type: string }) => item.investment_type);
+  return Array.from(new Set(types));
 }
 
 export async function addInvestment(formData: FormData): Promise<{ error?: string; success?: boolean }> {
