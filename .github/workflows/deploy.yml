@@ -7,7 +7,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GAR_LOCATION: us-central1
-  REPOSITORY: budget-tracker
+  REPOSITORY: budget-tracker-repo
   IMAGE: app
   INSTANCE_NAME: digital-ledgr-server
   ZONE: us-central1-c
