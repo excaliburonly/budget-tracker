@@ -84,8 +84,17 @@ export default function BudgetProgressChart({ data, currency }: BudgetProgressCh
             dataKey="spent" 
             radius={[0, 4, 4, 0]}
             barSize={20}
-            shape={(props: any) => {
-              const { spent, amount } = props.payload;
+            shape={(props: {
+              x?: number;
+              y?: number;
+              width?: number;
+              height?: number;
+              payload?: {
+                spent: number;
+                amount: number;
+              };
+            }) => {
+              const { spent = 0, amount = 0 } = props.payload || {};
               const isOver = spent > amount;
               const isClose = spent > amount * 0.9;
               const fill = isOver ? '#ef4444' : isClose ? '#f59e0b' : 'var(--primary)';
