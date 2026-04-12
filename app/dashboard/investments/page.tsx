@@ -20,7 +20,7 @@ export default function InvestmentsPage() {
     const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
 
     const totalPortfolioValue = useMemo(() => {
-        return investments.reduce((sum, inv) => sum + inv.current_value, 0);
+        return investments.reduce((sum, inv) => sum + (inv.current_value * inv.quantity), 0);
     }, [investments]);
 
     const investmentsByType = useMemo(() => {

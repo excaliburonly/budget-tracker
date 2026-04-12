@@ -6,6 +6,7 @@ import { Account } from "@/types/database";
 import { useState } from "react";
 import { CreditCardIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
+import AccountsPieChart from "@/components/charts/AccountsPieChart";
 
 export default function AccountsPage() {
     const { 
@@ -16,6 +17,12 @@ export default function AccountsPage() {
     } = useDashboard();
     
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+
+    // Prepare data for AccountsPieChart
+    const accountChartData = accounts.map(a => ({
+        name: a.name,
+        value: Number(a.balance)
+    }));
 
     if (loading) {
         return <div className="p-8 text-center text-text-muted">Loading accounts...</div>;
@@ -31,7 +38,17 @@ export default function AccountsPage() {
                 </div>
             </header>
 
-            <AddAccountForm />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+                <div className="lg:col-span-1">
+                    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm h-full flex flex-col justify-center">
+                        <h3 className="text-lg font-semibold text-foreground mb-4">Asset Distribution</h3>
+                        <AccountsPieChart data={accountChartData} currency={currency} />
+                    </div>
+                </div>
+                <div className="lg:col-span-2">
+                    <AddAccountForm />
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {accounts.map((account) => (

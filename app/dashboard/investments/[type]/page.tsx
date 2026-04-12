@@ -29,7 +29,7 @@ export default function InvestmentTypePage() {
     }, [investments, type]);
 
     const totalValue = useMemo(() => {
-        return filteredInvestments.reduce((sum, inv) => sum + inv.current_value, 0);
+        return filteredInvestments.reduce((sum, inv) => sum + (inv.current_value * inv.quantity), 0);
     }, [filteredInvestments]);
 
     const typeDisplayName = useMemo(() => {
