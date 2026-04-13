@@ -33,22 +33,22 @@ export default function AccountsPieChart({ data, currency }: AccountsPieChartPro
     .filter(item => item.value > 0)
     .map((item, index) => ({
       ...item,
-      fill: item.color || COLORS[index % COLORS.length],
-      stroke: "transparent"
+      fill: item.color || COLORS[index % COLORS.length]
     }));
 
   return (
-    <div className="h-64 w-full">
+    <div className="h-72 w-full">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={chartData}
             cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={80}
-            paddingAngle={5}
+            cy="45%"
+            innerRadius={0}
+            outerRadius="65%"
             dataKey="value"
+            stroke="var(--surface)"
+            strokeWidth={2}
           />
           <Tooltip
             contentStyle={{
@@ -58,17 +58,22 @@ export default function AccountsPieChart({ data, currency }: AccountsPieChartPro
               fontSize: '12px',
               color: 'var(--foreground)'
             }}
+            itemStyle={{ color: 'var(--foreground)' }}
             formatter={(value: number | string | readonly (number | string)[] | undefined) => {
               const val = Array.isArray(value) ? value[0] : value;
               return [formatCurrency(Number(val || 0), currency), ""];
             }}
           />
-          <Legend 
-            layout="vertical" 
-            verticalAlign="middle" 
-            align="right"
+          <Legend
+            layout="horizontal"
+            verticalAlign="bottom"
+            align="center"
             iconType="circle"
-            wrapperStyle={{ paddingLeft: '20px', fontSize: '12px' }}
+            wrapperStyle={{
+              paddingTop: '10px',
+              fontSize: '11px',
+              color: 'var(--text-muted)'
+            }}
           />
         </PieChart>
       </ResponsiveContainer>
