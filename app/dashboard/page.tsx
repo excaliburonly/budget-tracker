@@ -15,6 +15,8 @@ import {
     ClockIcon,
     CreditCardIcon
 } from "@heroicons/react/24/outline";
+import IncomeExpenseChart from "@/components/charts/IncomeExpenseChart";
+import AccountsPieChart from "@/components/charts/AccountsPieChart";
 
 export default async function DashboardPage() {
     const cookieStore = await cookies();
@@ -34,11 +36,11 @@ export default async function DashboardPage() {
     const [transactions, budgets, accounts] = await Promise.all([getTransactions(), getBudgets(currentMonth), getAccounts()]);
 
     const income = transactions
-        .filter(t => t.type === 'income')
+        .filter(t => t.type === 'income' && t.date.startsWith(currentMonth))
         .reduce((acc, t) => acc + Number(t.amount), 0);
 
     const expenses = transactions
-        .filter(t => t.type === 'expense')
+        .filter(t => t.type === 'expense' && t.date.startsWith(currentMonth))
         .reduce((acc, t) => acc + Number(t.amount), 0);
 
     const totalBalance = accounts.reduce((acc, a) => acc + Number(a.balance), 0);
@@ -52,6 +54,35 @@ export default async function DashboardPage() {
             }
             return acc;
         }, {});
+
+    // Prepare data for IncomeExpenseChart (last 6 months)
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        months.push(d.toISOString().slice(0, 7));
+    }
+
+    const incomeExpenseData = months.map(m => {
+        const monthIncome = transactions
+            .filter(t => t.date.startsWith(m) && t.type === 'income')
+            .reduce((acc, t) => acc + Number(t.amount), 0);
+        const monthExpense = transactions
+            .filter(t => t.date.startsWith(m) && t.type === 'expense')
+            .reduce((acc, t) => acc + Number(t.amount), 0);
+        
+        return {
+            name: new Date(m + "-01").toLocaleDateString(undefined, { month: 'short' }),
+            income: monthIncome,
+            expense: monthExpense
+        };
+    });
+
+    // Prepare data for AccountsPieChart
+    const accountData = accounts.map(a => ({
+        name: a.name,
+        value: Number(a.balance)
+    }));
 
     return (<div className="max-w-6xl mx-auto">
             <header className="mb-8 md:mb-10">
@@ -89,7 +120,7 @@ export default async function DashboardPage() {
                     <div className="text-2xl md:text-3xl font-bold text-emerald-600 mt-2">
                         {formatCurrency(income, currency)}
                     </div>
-                    <span className="text-xs text-text-muted mt-2 inline-block">Total earnings</span>
+                    <span className="text-xs text-text-muted mt-2 inline-block">Total earnings this month</span>
                 </div>
 
                 <div
@@ -103,11 +134,32 @@ export default async function DashboardPage() {
                     <div className="text-2xl md:text-3xl font-bold text-red-600 mt-2">
                         {formatCurrency(expenses, currency)}
                     </div>
-                    <span className="text-xs text-text-muted mt-2 inline-block">Total spending</span>
+                    <span className="text-xs text-text-muted mt-2 inline-block">Total spending this month</span>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Visual Insights */}
+                <section className="lg:col-span-2">
+                    <div className="flex items-center gap-3 mb-6">
+                        <ArrowTrendingUpIcon className="w-6 h-6 text-foreground"/>
+                        <h3 className="text-xl font-bold text-foreground">Income vs Expenses</h3>
+                    </div>
+                    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm">
+                        <IncomeExpenseChart data={incomeExpenseData} currency={currency} />
+                    </div>
+                </section>
+
+                <section>
+                    <div className="flex items-center gap-3 mb-6">
+                        <CreditCardIcon className="w-6 h-6 text-foreground"/>
+                        <h3 className="text-xl font-bold text-foreground">Asset Distribution</h3>
+                    </div>
+                    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm">
+                        <AccountsPieChart data={accountData} currency={currency} />
+                    </div>
+                </section>
+
                 {/* Accounts Overview */}
                 <section className="lg:col-span-3">
                     <div className="flex items-center justify-between mb-6">

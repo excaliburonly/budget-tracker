@@ -6,6 +6,7 @@ import { Budget, Transaction } from "@/types/database";
 import { useState } from "react";
 import { ChartPieIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
+import BudgetProgressChart from "@/components/charts/BudgetProgressChart";
 
 export default function BudgetsPage() {
     const { 
@@ -31,6 +32,13 @@ export default function BudgetsPage() {
         return acc;
     }, {});
 
+    // Prepare data for BudgetProgressChart
+    const budgetChartData = budgets.map(b => ({
+        name: b.categories?.name || 'Unknown',
+        spent: spendingByCategory[b.category_id] || 0,
+        amount: Number(b.amount)
+    }));
+
     if (loading) {
         return <div className="p-8 text-center text-text-muted">Loading budgets...</div>;
     }
@@ -48,30 +56,40 @@ export default function BudgetsPage() {
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-foreground">Active Budgets</h3>
-                    </div>
-
-                    {budgets.length === 0 ? (
-                        <div className="bg-surface rounded-2xl border border-dashed border-input-border h-48 flex flex-col items-center justify-center p-6 text-center">
-                            <p className="text-text-muted">No budgets set for this month yet.</p>
-                            <p className="text-sm text-text-muted/60 mt-1">Add your first budget limit using the form.</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {budgets.map((budget: Budget) => (
-                                <BudgetCard
-                                    key={budget.id}
-                                    budget={budget}
-                                    spent={spendingByCategory[budget.category_id] || 0}
-                                    currency={currency}
-                                    onEditAction={setEditingBudget}
-                                    onRefreshAction={refreshBudgets}
-                                />
-                            ))}
+                <div className="lg:col-span-2 space-y-8">
+                    {/* Overall Budget Progress Chart */}
+                    {budgets.length > 0 && (
+                        <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm">
+                            <h3 className="text-lg font-semibold text-foreground mb-6">Budget vs Reality</h3>
+                            <BudgetProgressChart data={budgetChartData} currency={currency} />
                         </div>
                     )}
+
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-foreground">Active Budgets</h3>
+                        </div>
+
+                        {budgets.length === 0 ? (
+                            <div className="bg-surface rounded-2xl border border-dashed border-input-border h-48 flex flex-col items-center justify-center p-6 text-center">
+                                <p className="text-text-muted">No budgets set for this month yet.</p>
+                                <p className="text-sm text-text-muted/60 mt-1">Add your first budget limit using the form.</p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {budgets.map((budget: Budget) => (
+                                    <BudgetCard
+                                        key={budget.id}
+                                        budget={budget}
+                                        spent={spendingByCategory[budget.category_id] || 0}
+                                        currency={currency}
+                                        onEditAction={setEditingBudget}
+                                        onRefreshAction={refreshBudgets}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div>

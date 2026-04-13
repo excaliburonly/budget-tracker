@@ -16,16 +16,31 @@ import {
     XMarkIcon
 } from "@heroicons/react/24/outline";
 
+import { useState, useMemo } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
+import { useDashboard } from "@/providers/dashboard-provider";
+
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Accounts', href: '/dashboard/accounts', icon: BanknotesIcon },
     { name: 'Transactions', href: '/dashboard/transactions', icon: ArrowsRightLeftIcon },
     { name: 'Budgets', href: '/dashboard/budgets', icon: ChartPieIcon },
-    { name: 'Investments', href: '/dashboard/investments', icon: ChartBarIcon },
+    { name: 'Investments', href: '/dashboard/investments', icon: ChartBarIcon, hasDropdown: true },
     { name: 'Emergency Funds', href: '/dashboard/emergency-funds', icon: ShieldCheckIcon },
 ];
 
 function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; onCloseAction?: () => void }) {
+    const { investments } = useDashboard();
+    const [isInvestmentsOpen, setIsInvestmentsOpen] = useState(pathname?.startsWith('/dashboard/investments'));
+
+    const investmentTypes = useMemo(() => {
+        const types = Array.from(new Set(investments.map(inv => inv.investment_type)));
+        return types.sort().map(type => ({
+            name: type,
+            href: `/dashboard/investments/${type.toLowerCase().replace(/\s+/g, '-')}`
+        }));
+    }, [investments]);
+
     return (
         <>
             <div className="p-8 flex items-center justify-between">
@@ -42,8 +57,62 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
 
             <nav className="flex-1 px-4 flex flex-col gap-1 overflow-y-auto">
                 {navigation.map((item) => {
-                    const isActive = pathname === item.href;
+                    const isActive = pathname === item.href || (item.hasDropdown && pathname?.startsWith(item.href));
+                    const isExactActive = pathname === item.href;
                     const Icon = item.icon;
+                    
+                    if (item.hasDropdown) {
+                        return (
+                            <div key={item.name} className="flex flex-col gap-1">
+                                <div className="flex items-center gap-1">
+                                    <Link
+                                        href={item.href}
+                                        onClick={onCloseAction}
+                                        className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium text-sm ${
+                                            isExactActive
+                                                ? 'bg-primary text-white'
+                                                : isActive 
+                                                    ? 'bg-primary/10 text-primary'
+                                                    : 'text-foreground/80 hover:bg-link-hover-bg hover:text-link-hover-text'
+                                        }`}
+                                    >
+                                        <Icon className={`w-5 h-5 ${isExactActive ? 'text-white' : ''}`} />
+                                        {item.name}
+                                    </Link>
+                                    <button 
+                                        onClick={() => setIsInvestmentsOpen(!isInvestmentsOpen)}
+                                        className={`p-2 rounded-lg transition-colors ${
+                                            isActive ? 'text-primary' : 'text-text-muted hover:bg-link-hover-bg'
+                                        }`}
+                                    >
+                                        {isInvestmentsOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                                {isInvestmentsOpen && investmentTypes.length > 0 && (
+                                    <div className="ml-12 flex flex-col gap-1 mb-2 border-l border-input-border pl-2">
+                                        {investmentTypes.map((subItem) => {
+                                            const isSubActive = pathname === subItem.href;
+                                            return (
+                                                <Link
+                                                    key={subItem.name}
+                                                    href={subItem.href}
+                                                    onClick={onCloseAction}
+                                                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                                                        isSubActive
+                                                            ? 'text-primary bg-primary/10'
+                                                            : 'text-text-muted hover:text-primary hover:bg-link-hover-bg'
+                                                    }`}
+                                                >
+                                                    {subItem.name}
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
                     return (
                         <Link
                             key={item.name}

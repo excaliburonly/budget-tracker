@@ -3,6 +3,86 @@
 import { addInvestment, updateInvestment } from "@/actions/investments";
 import { Investment } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
+import { useState, useEffect, useRef } from "react";
+import { searchMutualFunds, MFSearchResponse } from "@/utils/nav-api";
+
+function MutualFundSearchInput({ 
+  onSelectAction, 
+  initialValue = "" 
+}: { 
+  onSelectAction: (schemeName: string, schemeCode: number) => void,
+  initialValue?: string
+}) {
+  const [query, setQuery] = useState(initialValue);
+  const [results, setResults] = useState<MFSearchResponse[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (query.length >= 3) {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(async () => {
+        const res = await searchMutualFunds(query);
+        setResults(res);
+        setShowResults(true);
+        setIsSearching(false);
+      }, 500);
+    }
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [query]);
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        name="asset_name"
+        required
+        value={query}
+        onChange={(e) => {
+          const val = e.target.value;
+          setQuery(val);
+          if (val.length >= 3) {
+            setIsSearching(true);
+          } else {
+            setResults([]);
+            setShowResults(false);
+            setIsSearching(false);
+          }
+        }}
+        onFocus={() => query.length >= 3 && setShowResults(true)}
+        placeholder="Search Mutual Fund..."
+        className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+      />
+      {isSearching && (
+        <div className="absolute right-3 top-2.5">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+        </div>
+      )}
+      {showResults && results.length > 0 && (
+        <div className="absolute z-20 w-full mt-1 bg-surface border border-surface-border rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          {results.map((result) => (
+            <button
+              key={result.schemeCode}
+              type="button"
+              className="w-full text-left px-4 py-2 hover:bg-background/50 text-sm transition-colors border-b border-surface-border last:border-0"
+              onClick={() => {
+                setQuery(result.schemeName);
+                onSelectAction(result.schemeName, result.schemeCode);
+                setShowResults(false);
+              }}
+            >
+              <div className="font-medium">{result.schemeName}</div>
+              <div className="text-[10px] text-text-muted">Code: {result.schemeCode}</div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const INVESTMENT_TYPES = [
   "Mutual Fund",
@@ -14,8 +94,16 @@ const INVESTMENT_TYPES = [
   "Other"
 ];
 
-export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAddedAction?: () => void }) {
+export function AddInvestmentForm({ 
+  onInvestmentAddedAction,
+  initialType 
+}: { 
+  onInvestmentAddedAction?: () => void,
+  initialType?: string
+}) {
   const { refreshInvestments, setIsSaving, accounts } = useDashboard();
+  const [investmentType, setInvestmentType] = useState(initialType || "");
+  const [schemeCode, setSchemeCode] = useState("");
 
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
@@ -27,6 +115,8 @@ export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAdd
         await refreshInvestments();
         const form = document.getElementById("investment-form") as HTMLFormElement;
         form?.reset();
+        setInvestmentType("");
+        setSchemeCode("");
         if (onInvestmentAddedAction) onInvestmentAddedAction();
       }
     } catch (e: unknown) {
@@ -45,14 +135,22 @@ export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAdd
             <label htmlFor="asset_name" className="block text-sm font-medium text-foreground/80 mb-1">
               Asset Name
             </label>
-            <input
-              type="text"
-              name="asset_name"
-              id="asset_name"
-              required
-              placeholder="e.g. Nifty 50 Index Fund"
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
-            />
+            {investmentType === "Mutual Fund" ? (
+              <MutualFundSearchInput 
+                onSelectAction={(name, code) => {
+                  setSchemeCode(code.toString());
+                }}
+              />
+            ) : (
+              <input
+                type="text"
+                name="asset_name"
+                id="asset_name"
+                required
+                placeholder="e.g. Nifty 50 Index Fund"
+                className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            )}
           </div>
 
           <div>
@@ -63,6 +161,8 @@ export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAdd
               name="investment_type"
               id="investment_type"
               required
+              value={investmentType}
+              onChange={(e) => setInvestmentType(e.target.value)}
               className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Type</option>
@@ -74,15 +174,18 @@ export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAdd
 
           <div>
             <label htmlFor="symbol" className="block text-sm font-medium text-foreground/80 mb-1">
-              Symbol / Ticker
+              Symbol / Scheme Code
             </label>
             <input
               type="text"
               name="symbol"
               id="symbol"
-              placeholder="e.g. NIFTYBEES"
+              value={schemeCode}
+              onChange={(e) => setSchemeCode(e.target.value)}
+              placeholder="e.g. 120503"
               className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500 uppercase"
             />
+            <p className="text-[10px] text-text-muted mt-1 leading-tight">Use MFAPI.in Scheme Code for Mutual Funds</p>
           </div>
 
           <div>
@@ -161,6 +264,8 @@ export function AddInvestmentForm({ onInvestmentAddedAction }: { onInvestmentAdd
 
 export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpdatedAction }: { investment: Investment, onCloseAction: () => void, onInvestmentUpdatedAction?: () => void }) {
   const { refreshInvestments, setIsSaving } = useDashboard();
+  const [investmentType, setInvestmentType] = useState(investment.investment_type);
+  const [schemeCode, setSchemeCode] = useState(investment.symbol || "");
 
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
@@ -198,20 +303,30 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-foreground/80 mb-1">Asset Name</label>
-              <input
-                type="text"
-                name="asset_name"
-                defaultValue={investment.asset_name}
-                required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
-              />
+              {investmentType === "Mutual Fund" ? (
+                <MutualFundSearchInput 
+                  initialValue={investment.asset_name}
+                  onSelectAction={(name, code) => {
+                    setSchemeCode(code.toString());
+                  }}
+                />
+              ) : (
+                <input
+                  type="text"
+                  name="asset_name"
+                  defaultValue={investment.asset_name}
+                  required
+                  className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                />
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-foreground/80 mb-1">Investment Type</label>
               <select
                 name="investment_type"
-                defaultValue={investment.investment_type}
+                value={investmentType}
+                onChange={(e) => setInvestmentType(e.target.value)}
                 required
                 className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               >
@@ -222,13 +337,16 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Symbol</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Symbol / Scheme Code</label>
               <input
                 type="text"
                 name="symbol"
-                defaultValue={investment.symbol || ""}
+                value={schemeCode}
+                onChange={(e) => setSchemeCode(e.target.value)}
+                placeholder="e.g. 120503"
                 className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500 uppercase"
               />
+              <p className="text-[10px] text-text-muted mt-1 leading-tight">Use MFAPI.in Scheme Code for Mutual Funds</p>
             </div>
 
             <div>

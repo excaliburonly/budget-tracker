@@ -4,6 +4,7 @@ import { Budget } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { deleteBudget } from "@/actions/budgets";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 interface BudgetCardProps {
   budget: Budget;
@@ -14,14 +15,20 @@ interface BudgetCardProps {
 }
 
 export function BudgetCard({ budget, spent, currency, onEditAction, onRefreshAction }: BudgetCardProps) {
+  const { showConfirmationAction } = useDashboard();
   const percentage = Math.min((spent / budget.amount) * 100, 100);
   const isOver = spent > budget.amount;
 
-  const handleDelete = async () => {
-    if (confirm('Delete this budget limit?')) {
-      await deleteBudget(budget.id);
-      onRefreshAction();
-    }
+  const handleDelete = () => {
+    showConfirmationAction({
+      title: "Delete Budget",
+      message: `Are you sure you want to delete the budget for "${budget.categories?.name}"?`,
+      confirmText: "Delete",
+      onConfirmAction: async () => {
+        await deleteBudget(budget.id);
+        onRefreshAction();
+      },
+    });
   };
 
   return (

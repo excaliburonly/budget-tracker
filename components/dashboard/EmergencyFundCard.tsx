@@ -6,6 +6,7 @@ import { formatCurrency } from "@/utils/format";
 import { PencilSquareIcon, TrashIcon, BuildingLibraryIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
 import { deleteEmergencyFund } from "@/actions/emergency-funds";
 import { AddEmergencyFundTransactionModal } from "../forms/EmergencyFundForms";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 interface EmergencyFundCardProps {
   fund: EmergencyFund;
@@ -15,16 +16,22 @@ interface EmergencyFundCardProps {
 }
 
 export function EmergencyFundCard({ fund, currency, onEditAction, onRefreshAction }: EmergencyFundCardProps) {
+  const { showConfirmationAction } = useDashboard();
   const [isAddTxModalOpen, setIsAddTxModalOpen] = useState(false);
 
   const percentage = Math.min((fund.current_amount / fund.target_amount) * 100, 100);
   const isCompleted = fund.current_amount >= fund.target_amount;
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this fund?')) {
-      await deleteEmergencyFund(fund.id);
-      onRefreshAction();
-    }
+  const handleDelete = () => {
+    showConfirmationAction({
+      title: "Delete Emergency Fund",
+      message: `Are you sure you want to delete "${fund.name}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      onConfirmAction: async () => {
+        await deleteEmergencyFund(fund.id);
+        onRefreshAction();
+      },
+    });
   };
 
   return (

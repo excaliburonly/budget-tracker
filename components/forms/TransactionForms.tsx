@@ -296,7 +296,7 @@ export function EditTransactionModal({
 }
 
 export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAction?: () => void }) {
-    const { categories, refreshCategories, setIsSaving } = useDashboard();
+    const { categories, refreshCategories, setIsSaving, showConfirmationAction } = useDashboard();
     const [showForm, setShowForm] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
@@ -396,17 +396,22 @@ export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAc
                                 <PencilSquareIcon className="w-3.5 h-3.5" />
                             </button>
                             <button
-                                onClick={async () => {
-                                    if (confirm(`Delete ${category.name}?`)) {
-                                        setIsSaving(true);
-                                        try {
-                                            await deleteCategory(category.id);
-                                            await refreshCategories();
-                                            if (onCategoryChangeAction) onCategoryChangeAction();
-                                        } finally {
-                                            setIsSaving(false);
-                                        }
-                                    }
+                                onClick={() => {
+                                    showConfirmationAction({
+                                        title: "Delete Category",
+                                        message: `Are you sure you want to delete the "${category.name}" category? This will affect existing transactions.`,
+                                        confirmText: "Delete",
+                                        onConfirmAction: async () => {
+                                            setIsSaving(true);
+                                            try {
+                                                await deleteCategory(category.id);
+                                                await refreshCategories();
+                                                if (onCategoryChangeAction) onCategoryChangeAction();
+                                            } finally {
+                                                setIsSaving(false);
+                                            }
+                                        },
+                                    });
                                 }}
                                 className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
                                 title="Delete Category"

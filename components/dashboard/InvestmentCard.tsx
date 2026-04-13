@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Investment } from "@/types/database";
-import { formatCurrency } from "@/utils/format";
-import { PencilSquareIcon, TrashIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
+import { formatCurrency, formatRelativeTime } from "@/utils/format";
+import { PencilSquareIcon, TrashIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, PlusCircleIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { deleteInvestment } from "@/actions/investments";
 import { AddInvestmentTransactionModal } from "../forms/InvestmentForms";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 interface InvestmentCardProps {
   investment: Investment;
@@ -15,6 +16,7 @@ interface InvestmentCardProps {
 }
 
 export function InvestmentCard({ investment, currency, onEditAction, onRefreshAction }: InvestmentCardProps) {
+  const { showConfirmationAction } = useDashboard();
   const [isAddTxModalOpen, setIsAddTxModalOpen] = useState(false);
 
   const totalCost = investment.quantity * investment.average_buy_price;
@@ -22,12 +24,18 @@ export function InvestmentCard({ investment, currency, onEditAction, onRefreshAc
   const pnl = currentTotalValue - totalCost;
   const pnlPercentage = totalCost > 0 ? (pnl / totalCost) * 100 : 0;
   const isPositive = pnl >= 0;
+  const lastSyncedStr = formatRelativeTime(investment.last_synced_at);
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this investment?')) {
-      await deleteInvestment(investment.id);
-      onRefreshAction();
-    }
+  const handleDelete = () => {
+    showConfirmationAction({
+      title: "Delete Investment",
+      message: `Are you sure you want to delete "${investment.asset_name}"? This will remove all records of this investment.`,
+      confirmText: "Delete",
+      onConfirmAction: async () => {
+        await deleteInvestment(investment.id);
+        onRefreshAction();
+      },
+    });
   };
 
   return (
@@ -40,11 +48,19 @@ export function InvestmentCard({ investment, currency, onEditAction, onRefreshAc
               {investment.investment_type}
             </span>
           </div>
-          {investment.symbol && (
-            <span className="text-xs font-mono font-semibold text-text-muted/60 uppercase bg-background px-1.5 py-0.5 rounded">
-              {investment.symbol}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {investment.symbol && (
+              <span className="text-xs font-mono font-semibold text-text-muted/60 uppercase bg-background px-1.5 py-0.5 rounded">
+                {investment.symbol}
+              </span>
+            )}
+            {lastSyncedStr && (
+              <span className="flex items-center gap-1 text-[10px] text-text-muted/40 font-medium">
+                <ClockIcon className="w-3 h-3" />
+                {lastSyncedStr}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1 flex-shrink-0">

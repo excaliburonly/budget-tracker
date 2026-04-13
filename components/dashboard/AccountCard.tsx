@@ -4,6 +4,7 @@ import { Account } from "@/types/database";
 import { formatCurrency } from "@/utils/format";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { deleteAccount } from "@/actions/accounts";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 interface AccountCardProps {
   account: Account;
@@ -13,11 +14,18 @@ interface AccountCardProps {
 }
 
 export function AccountCard({ account, currency, onEditAction, onRefreshAction }: AccountCardProps) {
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this account?')) {
-      await deleteAccount(account.id);
-      onRefreshAction();
-    }
+  const { showConfirmationAction } = useDashboard();
+
+  const handleDelete = () => {
+    showConfirmationAction({
+      title: "Delete Account",
+      message: `Are you sure you want to delete "${account.name}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      onConfirmAction: async () => {
+        await deleteAccount(account.id);
+        onRefreshAction();
+      },
+    });
   };
 
   return (
