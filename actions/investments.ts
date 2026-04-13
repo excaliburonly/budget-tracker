@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { Investment } from "@/types/database";
+import { fetchMutualFundNAV } from "@/utils/nav-api";
 
 export async function getInvestments(type?: string): Promise<Investment[]> {
   const cookieStore = await cookies();
@@ -272,6 +273,54 @@ export async function updateInvestmentValue(id: string, current_value: number): 
 
   revalidatePath("/dashboard/investments");
   return { success: true };
+}
+
+export async function syncMutualFundNAVs(): Promise<{ error?: string; success?: boolean; updatedCount?: number }> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // 1. Fetch all mutual funds with a symbol
+  const { data: investments, error: fetchError } = await supabase
+    .from("investments")
+    .select("*")
+    .eq("investment_type", "Mutual Fund");
+
+  if (fetchError) {
+    console.error("Error fetching investments for sync:", fetchError);
+    return { error: fetchError.message };
+  }
+
+  if (!investments || investments.length === 0) {
+    return { success: true, updatedCount: 0 };
+  }
+
+  let updatedCount = 0;
+  for (const investment of investments) {
+    if (!investment.symbol) continue;
+
+    const latestNAV = await fetchMutualFundNAV(investment.symbol);
+    if (latestNAV !== null) {
+      const newCurrentValue = latestNAV;
+      
+      const { error: updateError } = await supabase
+        .from("investments")
+        .update({
+          current_value: newCurrentValue,
+          last_synced_at: new Date().toISOString()
+        })
+        .eq("id", investment.id);
+
+      if (!updateError) {
+        updatedCount++;
+      } else {
+        console.error(`Error updating NAV for ${investment.asset_name}:`, updateError);
+      }
+    }
+  }
+
+  revalidatePath("/dashboard/investments");
+  revalidatePath("/dashboard");
+  return { success: true, updatedCount };
 }
 
 export async function deleteInvestment(id: string): Promise<{ error?: string; success?: boolean }> {

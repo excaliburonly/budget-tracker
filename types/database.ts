@@ -89,6 +89,7 @@ export interface Investment {
   quantity: number;
   average_buy_price: number;
   current_value: number;
+  last_synced_at: string | null;
   created_at: string;
 }
 

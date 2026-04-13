@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -23,8 +24,19 @@ interface BudgetProgressChartProps {
 }
 
 export default function BudgetProgressChart({ data, currency }: BudgetProgressChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const handle = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    return () => cancelAnimationFrame(handle);
+  }, []);
+
   // Sort data by amount descending
   const sortedData = [...data].sort((a, b) => b.amount - a.amount);
+
+  if (!isMounted) return <div className="h-80 w-full animate-pulse bg-surface/50 rounded-lg" />;
 
   return (
     <div className="h-80 w-full">

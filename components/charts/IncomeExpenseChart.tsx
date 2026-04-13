@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -22,6 +23,17 @@ interface IncomeExpenseChartProps {
 }
 
 export default function IncomeExpenseChart({ data, currency }: IncomeExpenseChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const handle = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    return () => cancelAnimationFrame(handle);
+  }, []);
+
+  if (!isMounted) return <div className="h-64 w-full animate-pulse bg-surface/50 rounded-lg" />;
+
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">

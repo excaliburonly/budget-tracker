@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -28,6 +29,15 @@ const COLORS = [
 ];
 
 export default function AccountsPieChart({ data, currency }: AccountsPieChartProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const handle = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+    return () => cancelAnimationFrame(handle);
+  }, []);
+
   // Filter out accounts with 0 or negative balance for the pie chart and add fill/stroke
   const chartData = data
     .filter(item => item.value > 0)
@@ -35,6 +45,8 @@ export default function AccountsPieChart({ data, currency }: AccountsPieChartPro
       ...item,
       fill: item.color || COLORS[index % COLORS.length]
     }));
+
+  if (!isMounted) return <div className="h-72 w-full animate-pulse bg-surface/50 rounded-lg" />;
 
   return (
     <div className="h-72 w-full">

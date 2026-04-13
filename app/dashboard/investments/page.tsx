@@ -4,10 +4,11 @@ import { AddInvestmentForm, EditInvestmentModal } from "@/components/forms/Inves
 import { InvestmentCard } from "@/components/dashboard/InvestmentCard";
 import { Investment } from "@/types/database";
 import { useState, useMemo } from "react";
-import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
+import { ChartBarSquareIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 import { formatCurrency } from "@/utils/format";
 import Link from "next/link";
+import { syncMutualFundNAVs } from "@/actions/investments";
 
 export default function InvestmentsPage() {
     const { 
@@ -18,6 +19,19 @@ export default function InvestmentsPage() {
     } = useDashboard();
     
     const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const handleSync = async () => {
+        setIsSyncing(true);
+        try {
+            await syncMutualFundNAVs();
+            refreshInvestments();
+        } catch (error) {
+            console.error("Failed to sync NAVs:", error);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     const totalPortfolioValue = useMemo(() => {
         return investments.reduce((sum, inv) => sum + (inv.current_value * inv.quantity), 0);
@@ -47,9 +61,19 @@ export default function InvestmentsPage() {
                         <p className="text-text-muted mt-1">Summary of all your assets</p>
                     </div>
                 </div>
-                <div className="bg-surface p-4 rounded-2xl border border-input-border text-right">
-                    <p className="text-sm text-text-muted mb-1">Total Portfolio Value</p>
-                    <p className="text-2xl font-bold text-primary">{formatCurrency(totalPortfolioValue, currency)}</p>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={handleSync}
+                        disabled={isSyncing}
+                        className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover text-text-muted border border-surface-border rounded-xl transition-colors disabled:opacity-50"
+                    >
+                        <ArrowPathIcon className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
+                        {isSyncing ? 'Syncing...' : 'Sync NAVs'}
+                    </button>
+                    <div className="bg-surface p-4 rounded-2xl border border-input-border text-right">
+                        <p className="text-sm text-text-muted mb-1">Total Portfolio Value</p>
+                        <p className="text-2xl font-bold text-primary">{formatCurrency(totalPortfolioValue, currency)}</p>
+                    </div>
                 </div>
             </header>
 
