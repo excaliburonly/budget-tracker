@@ -13,19 +13,24 @@ interface TransactionRowProps {
 }
 
 export function TransactionRow({ transaction, onEditAction, onDeleteAction }: TransactionRowProps) {
-  const { currency, refreshTransactions, setIsSaving } = useDashboard();
+  const { currency, refreshTransactions, setIsSaving, showConfirmationAction } = useDashboard();
   
-  const handleDelete = async () => {
-    if (confirm('Delete this transaction?')) {
-      setIsSaving(true);
-      try {
-        await deleteTransaction(transaction.id);
-        await refreshTransactions();
-        if (onDeleteAction) onDeleteAction();
-      } finally {
-        setIsSaving(false);
-      }
-    }
+  const handleDelete = () => {
+    showConfirmationAction({
+      title: "Delete Transaction",
+      message: "Are you sure you want to delete this transaction? This action cannot be undone.",
+      confirmText: "Delete",
+      onConfirmAction: async () => {
+        setIsSaving(true);
+        try {
+          await deleteTransaction(transaction.id);
+          await refreshTransactions();
+          if (onDeleteAction) onDeleteAction();
+        } finally {
+          setIsSaving(false);
+        }
+      },
+    });
   };
 
   return (

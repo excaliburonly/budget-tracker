@@ -21,7 +21,6 @@ function MutualFundSearchInput({
 
   useEffect(() => {
     if (query.length >= 3) {
-      setIsSearching(true);
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
       searchTimeoutRef.current = setTimeout(async () => {
         const res = await searchMutualFunds(query);
@@ -29,9 +28,6 @@ function MutualFundSearchInput({
         setShowResults(true);
         setIsSearching(false);
       }, 500);
-    } else {
-      setResults([]);
-      setShowResults(false);
     }
     return () => {
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
@@ -45,7 +41,17 @@ function MutualFundSearchInput({
         name="asset_name"
         required
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          const val = e.target.value;
+          setQuery(val);
+          if (val.length >= 3) {
+            setIsSearching(true);
+          } else {
+            setResults([]);
+            setShowResults(false);
+            setIsSearching(false);
+          }
+        }}
         onFocus={() => query.length >= 3 && setShowResults(true)}
         placeholder="Search Mutual Fund..."
         className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"

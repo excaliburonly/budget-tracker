@@ -23,7 +23,8 @@ export async function searchMutualFunds(query: string): Promise<MFSearchResponse
   try {
     const response = await fetch(`https://api.mfapi.in/mf/search?q=${encodeURIComponent(query)}`);
     if (!response.ok) {
-      throw new Error(`Failed to search for ${query}`);
+      console.error(`Error searching for mutual funds with query ${query}:`);
+      return [];
     }
 
     return (await response.json()) as MFSearchResponse[];
@@ -37,7 +38,8 @@ export async function fetchMutualFundNAV(schemeCode: string): Promise<number | n
   try {
     const response = await fetch(`https://api.mfapi.in/mf/${schemeCode}`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch NAV for ${schemeCode}`);
+      console.error(`Error fetching NAV for scheme code ${schemeCode}:`);
+      return null;
     }
 
     const json = (await response.json()) as MFNAVResponse;

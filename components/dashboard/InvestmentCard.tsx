@@ -6,6 +6,7 @@ import { formatCurrency, formatRelativeTime } from "@/utils/format";
 import { PencilSquareIcon, TrashIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, PlusCircleIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { deleteInvestment } from "@/actions/investments";
 import { AddInvestmentTransactionModal } from "../forms/InvestmentForms";
+import { useDashboard } from "@/providers/dashboard-provider";
 
 interface InvestmentCardProps {
   investment: Investment;
@@ -15,6 +16,7 @@ interface InvestmentCardProps {
 }
 
 export function InvestmentCard({ investment, currency, onEditAction, onRefreshAction }: InvestmentCardProps) {
+  const { showConfirmationAction } = useDashboard();
   const [isAddTxModalOpen, setIsAddTxModalOpen] = useState(false);
 
   const totalCost = investment.quantity * investment.average_buy_price;
@@ -24,11 +26,16 @@ export function InvestmentCard({ investment, currency, onEditAction, onRefreshAc
   const isPositive = pnl >= 0;
   const lastSyncedStr = formatRelativeTime(investment.last_synced_at);
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this investment?')) {
-      await deleteInvestment(investment.id);
-      onRefreshAction();
-    }
+  const handleDelete = () => {
+    showConfirmationAction({
+      title: "Delete Investment",
+      message: `Are you sure you want to delete "${investment.asset_name}"? This will remove all records of this investment.`,
+      confirmText: "Delete",
+      onConfirmAction: async () => {
+        await deleteInvestment(investment.id);
+        onRefreshAction();
+      },
+    });
   };
 
   return (

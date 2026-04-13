@@ -1,10 +1,10 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
-import { revalidatePath } from "next/cache";
-import { Investment } from "@/types/database";
-import { fetchMutualFundNAV } from "@/utils/nav-api";
+import {createClient} from "@/utils/supabase/server";
+import {cookies} from "next/headers";
+import {revalidatePath} from "next/cache";
+import {Investment} from "@/types/database";
+import {fetchMutualFundNAV} from "@/utils/nav-api";
 
 export async function getInvestments(type?: string): Promise<Investment[]> {
   const cookieStore = await cookies();
@@ -300,12 +300,10 @@ export async function syncMutualFundNAVs(): Promise<{ error?: string; success?: 
 
     const latestNAV = await fetchMutualFundNAV(investment.symbol);
     if (latestNAV !== null) {
-      const newCurrentValue = latestNAV;
-      
-      const { error: updateError } = await supabase
+        const { error: updateError } = await supabase
         .from("investments")
         .update({
-          current_value: newCurrentValue,
+          current_value: latestNAV,
           last_synced_at: new Date().toISOString()
         })
         .eq("id", investment.id);

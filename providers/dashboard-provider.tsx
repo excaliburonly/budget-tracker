@@ -11,6 +11,16 @@ import { getInvestments } from "@/actions/investments";
 import { getBudgets } from "@/actions/budgets";
 import { Account, Category, EmergencyFund, Investment, Transaction, Budget } from "@/types/database";
 import { createClient } from "@/utils/supabase/client";
+import { ConfirmationModal } from "@/components/theme/ConfirmationModal";
+
+interface ConfirmationConfig {
+  title: string;
+  message: string;
+  onConfirmAction: () => void;
+  confirmText?: string;
+  cancelText?: string;
+  isDanger?: boolean;
+}
 
 interface DashboardContextType {
   transactions: Transaction[];
@@ -31,6 +41,7 @@ interface DashboardContextType {
   refreshInvestments: () => Promise<void>;
   refreshBudgets: () => Promise<void>;
   refreshCurrency: () => Promise<void>;
+  showConfirmationAction: (config: ConfirmationConfig) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -45,6 +56,15 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [currency, setCurrency] = useState("INR");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [confirmation, setConfirmation] = useState<ConfirmationConfig | null>(null);
+
+  const showConfirmationAction = useCallback((config: ConfirmationConfig) => {
+    setConfirmation(config);
+  }, []);
+
+  const closeConfirmationAction = useCallback(() => {
+    setConfirmation(null);
+  }, []);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -143,9 +163,20 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         refreshInvestments,
         refreshBudgets,
         refreshCurrency,
+        showConfirmationAction,
       }}
     >
       {children}
+      <ConfirmationModal
+        isOpen={!!confirmation}
+        title={confirmation?.title || ""}
+        message={confirmation?.message || ""}
+        onConfirmAction={confirmation?.onConfirmAction || (() => {})}
+        onCloseAction={closeConfirmationAction}
+        confirmText={confirmation?.confirmText}
+        cancelText={confirmation?.cancelText}
+        isDanger={confirmation?.isDanger}
+      />
     </DashboardContext.Provider>
   );
 }
