@@ -11,6 +11,7 @@ import {
     ArrowsRightLeftIcon,
     ChartBarIcon,
     ChartPieIcon,
+    PresentationChartLineIcon,
     ShieldCheckIcon,
     ArrowRightStartOnRectangleIcon,
     XMarkIcon
@@ -24,6 +25,7 @@ const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Accounts', href: '/dashboard/accounts', icon: BanknotesIcon },
     { name: 'Transactions', href: '/dashboard/transactions', icon: ArrowsRightLeftIcon },
+    { name: 'Analytics', href: '/dashboard/analytics', icon: PresentationChartLineIcon },
     { name: 'Budgets', href: '/dashboard/budgets', icon: ChartPieIcon },
     { name: 'Investments', href: '/dashboard/investments', icon: ChartBarIcon, hasDropdown: true },
     { name: 'Emergency Funds', href: '/dashboard/emergency-funds', icon: ShieldCheckIcon },
