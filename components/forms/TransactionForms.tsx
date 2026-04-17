@@ -38,6 +38,7 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                         type="number"
                         step="0.01"
                         name="amount"
+                        autoComplete="off"
                         className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         placeholder="0.00"
                         required
@@ -126,6 +127,7 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     <input
                         type="text"
                         name="notes"
+                        autoComplete="off"
                         className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         placeholder="Lunch, Salary, Rent..."
                     />
@@ -180,6 +182,7 @@ export function EditTransactionModal({
                             type="number"
                             step="0.01"
                             name="amount"
+                            autoComplete="off"
                             defaultValue={transaction.amount}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                             required
@@ -269,6 +272,7 @@ export function EditTransactionModal({
                         <input
                             type="text"
                             name="notes"
+                            autoComplete="off"
                             defaultValue={transaction.notes || ""}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         />
@@ -336,6 +340,7 @@ export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAc
                     <input
                         type="text"
                         name="name"
+                        autoComplete="off"
                         className="px-3 py-1.5 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         placeholder="Groceries..."
                         required
@@ -461,6 +466,7 @@ export function EditCategoryModal({ category, onCloseAction, onCategoryUpdatedAc
                         <input
                             type="text"
                             name="name"
+                            autoComplete="off"
                             defaultValue={category.name}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                             required

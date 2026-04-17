@@ -33,6 +33,7 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
           <input
             type="text"
             name="name"
+            autoComplete="off"
             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
             placeholder="Chase Checking, Savings..."
             required
@@ -60,6 +61,7 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
             type="number"
             step="0.01"
             name="balance"
+            autoComplete="off"
             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
             placeholder="0.00"
             required
@@ -112,6 +114,7 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
               type="text"
               name="name"
               defaultValue={account.name}
+              autoComplete="off"
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
               required
             />
@@ -140,6 +143,7 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
               step="0.01"
               name="balance"
               defaultValue={account.balance}
+              autoComplete="off"
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
               required
             />
