@@ -88,6 +88,7 @@ export interface Investment {
   symbol: string | null;
   quantity: number;
   average_buy_price: number;
+  invested_value: number;
   current_value: number;
   last_synced_at: string | null;
   created_at: string;

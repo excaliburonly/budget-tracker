@@ -204,23 +204,23 @@ export function AddInvestmentForm({
           </div>
 
           <div>
-            <label htmlFor="average_buy_price" className="block text-sm font-medium text-foreground/80 mb-1">
-              Initial Buy Price
+            <label htmlFor="invested_value" className="block text-sm font-medium text-foreground/80 mb-1">
+              Invested Value
             </label>
             <input
-              type="number"
-              step="0.01"
-              name="average_buy_price"
-              id="average_buy_price"
-              required
-              placeholder="0.00"
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                type="number"
+                step="0.01"
+                name="invested_value"
+                id="invested_value"
+                required
+                placeholder="0.00"
+                className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
             <label htmlFor="current_value" className="block text-sm font-medium text-foreground/80 mb-1">
-              Current Market Value
+              Current Price per Unit
             </label>
             <input
               type="number"
@@ -362,19 +362,19 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Avg. Buy Price</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Invested Value</label>
               <input
                 type="number"
                 step="0.01"
-                name="average_buy_price"
-                defaultValue={investment.average_buy_price}
+                name="invested_value"
+                defaultValue={investment.invested_value}
                 required
                 className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Current Market Value</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Current Price per Unit</label>
               <input
                 type="number"
                 step="0.01"
