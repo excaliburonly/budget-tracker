@@ -5,6 +5,6 @@
 - **Client Boundaries:** Ensure `"use client"` is placed correctly. Avoid passing non-serializable data from Server Components to Client Components.
 
 # Pre-computation & Validation
-- **Mandatory Validation:** After ANY file modification, you MUST run local linting and type-checking (`npm run lint` or `npx tsc --noEmit`) and a build check (`npm run build`) to ensure no regressions or TypeScript/Next.js compiler errors were introduced.
+- **Mandatory Validation:** After ANY file modification, you MUST run local linting and type-checking (`npm run lint` or `npx tsc --noEmit`) and a build check (`npm run build`) to ensure no regressions or TypeScript/Next.js compiler errors were introduced. Strictly follow this rule whenever there is a file modification.
 - **Strict Compliance:** Adhere to all ESLint rules in the project's config.
 - **No Linter Disables:** DO NOT use `// eslint-disable-next-line` or `/* eslint-disable */` comments. Fix the code if linting fails.
