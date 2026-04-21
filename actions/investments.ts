@@ -44,7 +44,7 @@ export async function addInvestment(formData: FormData): Promise<{ error?: strin
     const current_value = parseFloat(formData.get("current_value") as string);
     const average_buy_price = invested_value / quantity;
     const account_id = formData.get("account_id") as string;
-    const date = new Date().toISOString().split('T')[0];
+    const date = new Date().toISOString();
 
     // 1. Insert into investments
     const {data: investment, error: invError} = await supabase
@@ -130,7 +130,10 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
     const quantity = parseFloat(formData.get("quantity") as string);
     const price = parseFloat(formData.get("price") as string);
     const date = formData.get("date") as string;
+    const time = formData.get("time") as string;
     const account_id = formData.get("account_id") as string;
+
+    const dateTime = time ? new Date(`${date}T${time}`).toISOString() : new Date(date).toISOString();
 
     // 1. Get current investment data
     const {data: investment, error: fetchError} = await supabase
@@ -155,7 +158,7 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
                 type: type === 'buy' ? 'expense' : 'income',
                 account_id,
                 investment_id: investment.id,
-                date,
+                date: dateTime,
                 notes: `${type === 'buy' ? 'Bought' : 'Sold'} ${quantity} units of ${investment.asset_name}`,
             }])
             .select()
@@ -170,7 +173,7 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
     const {error: invTxError} = await supabase
         .from("investment_transactions")
         .insert([{
-            investment_id: investment.id, transaction_id: mainTransactionId, type, quantity, price, date,
+            investment_id: investment.id, transaction_id: mainTransactionId, type, quantity, price, date: dateTime,
         }]);
 
     if (invTxError) return {error: invTxError.message};

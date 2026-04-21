@@ -35,7 +35,7 @@ export async function createEmergencyFund(formData: FormData): Promise<{ error?:
   const target_amount = parseFloat(formData.get("target_amount") as string);
   const initial_amount = parseFloat(formData.get("initial_amount") as string) || 0;
   const account_id = formData.get("account_id") as string;
-  const date = new Date().toISOString().split('T')[0];
+  const date = new Date().toISOString();
 
   const { data: fund, error } = await supabase
     .from("emergency_funds")
@@ -99,7 +99,10 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
   const type = formData.get("type") as 'contribution' | 'withdrawal';
   const amount = parseFloat(formData.get("amount") as string);
   const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
   const account_id = formData.get("account_id") as string;
+
+  const dateTime = time ? new Date(`${date}T${time}`).toISOString() : new Date(date).toISOString();
 
   const { data: fund, error: fetchError } = await supabase
     .from("emergency_funds")
@@ -120,7 +123,7 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
         type: type === 'contribution' ? 'expense' : 'income',
         account_id,
         emergency_fund_id: fund.id,
-        date,
+        date: dateTime,
         notes: `${type === 'contribution' ? 'Contributed to' : 'Withdrew from'} ${fund.name}`,
       }])
       .select()
@@ -137,7 +140,7 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
       transaction_id: mainTransactionId,
       type,
       amount,
-      date,
+      date: dateTime,
     }]);
 
   if (fundTxError) return { error: fundTxError.message };

@@ -490,6 +490,17 @@ export function AddInvestmentTransactionModal({
             </div>
 
             <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Time</label>
+              <input
+                type="time"
+                name="time"
+                required
+                defaultValue={new Date().toTimeString().slice(0, 5)}
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-foreground/80 mb-1">Quantity</label>
               <input
                 type="number"
