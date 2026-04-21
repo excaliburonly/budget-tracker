@@ -122,6 +122,17 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     />
                 </div>
 
+                <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-medium text-foreground/80">Time</label>
+                    <input
+                        type="time"
+                        name="time"
+                        defaultValue={new Date().toTimeString().slice(0, 5)}
+                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        required
+                    />
+                </div>
+
                 <div className="flex flex-col gap-1.5 lg:col-span-1">
                     <label className="text-sm font-medium text-foreground/80">Notes</label>
                     <input
@@ -261,7 +272,18 @@ export function EditTransactionModal({
                         <input
                             type="date"
                             name="date"
-                            defaultValue={transaction.date}
+                            defaultValue={transaction.date.split("T")[0]}
+                            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                            required
+                        />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium text-foreground/80">Time</label>
+                        <input
+                            type="time"
+                            name="time"
+                            defaultValue={new Date(transaction.date).toTimeString().slice(0, 5)}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                             required
                         />

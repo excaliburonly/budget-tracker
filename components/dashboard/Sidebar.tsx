@@ -27,21 +27,48 @@ const navigation = [
     { name: 'Transactions', href: '/dashboard/transactions', icon: ArrowsRightLeftIcon },
     { name: 'Analytics', href: '/dashboard/analytics', icon: PresentationChartLineIcon },
     { name: 'Budgets', href: '/dashboard/budgets', icon: ChartPieIcon },
-    { name: 'Investments', href: '/dashboard/investments', icon: ChartBarIcon, hasDropdown: true },
-    { name: 'Emergency Funds', href: '/dashboard/emergency-funds', icon: ShieldCheckIcon },
+    { name: 'Investments', href: '/dashboard/investments', icon: ChartBarIcon, hasDropdown: true, dropdownType: 'investments' },
+    { name: 'Emergency Funds', href: '/dashboard/emergency-funds', icon: ShieldCheckIcon, hasDropdown: true, dropdownType: 'emergency-funds' },
 ];
 
 function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; onCloseAction?: () => void }) {
     const { investments } = useDashboard();
-    const [isInvestmentsOpen, setIsInvestmentsOpen] = useState(pathname?.startsWith('/dashboard/investments'));
+    const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
+        'investments': pathname?.startsWith('/dashboard/investments') || false,
+        'emergency-funds': pathname?.startsWith('/dashboard/emergency-funds') || false
+    });
 
-    const investmentTypes = useMemo(() => {
+    const toggleDropdown = (type: string) => {
+        setOpenDropdowns(prev => ({
+            ...prev,
+            [type]: !prev[type]
+        }));
+    };
+
+    const investmentItems = useMemo(() => {
         const types = Array.from(new Set(investments.map(inv => inv.investment_type)));
-        return types.sort().map(type => ({
+        const items = types.sort().map(type => ({
             name: type,
             href: `/dashboard/investments/${type.toLowerCase().replace(/\s+/g, '-')}`
         }));
+        
+        return [
+            { name: 'Transactions', href: '/dashboard/investments/transactions' },
+            ...items
+        ];
     }, [investments]);
+
+    const emergencyFundItems = useMemo(() => {
+        return [
+            { name: 'Transactions', href: '/dashboard/emergency-funds/transactions' }
+        ];
+    }, []);
+
+    const getDropdownItems = (type: string) => {
+        if (type === 'investments') return investmentItems;
+        if (type === 'emergency-funds') return emergencyFundItems;
+        return [];
+    };
 
     return (
         <>
@@ -82,17 +109,17 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                                         {item.name}
                                     </Link>
                                     <button 
-                                        onClick={() => setIsInvestmentsOpen(!isInvestmentsOpen)}
+                                        onClick={() => toggleDropdown(item.dropdownType!)}
                                         className={`p-2 rounded-lg transition-colors ${
                                             isActive ? 'text-primary' : 'text-text-muted hover:bg-link-hover-bg'
                                         }`}
                                     >
-                                        {isInvestmentsOpen ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                                        {openDropdowns[item.dropdownType!] ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
                                     </button>
                                 </div>
-                                {isInvestmentsOpen && investmentTypes.length > 0 && (
+                                {openDropdowns[item.dropdownType!] && (
                                     <div className="ml-12 flex flex-col gap-1 mb-2 border-l border-input-border pl-2">
-                                        {investmentTypes.map((subItem) => {
+                                        {getDropdownItems(item.dropdownType!).map((subItem) => {
                                             const isSubActive = pathname === subItem.href;
                                             return (
                                                 <Link

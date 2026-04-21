@@ -6,6 +6,24 @@ export function formatCurrency(amount: number, currency: string = 'INR') {
   }).format(amount);
 }
 
+export function formatDate(date: string) {
+  return new Date(date).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+export function formatDateTime(date: string) {
+  return new Date(date).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export function formatRelativeTime(date: string | null) {
   if (!date) return null;
   

@@ -3,7 +3,7 @@
 import {createClient} from "@/utils/supabase/server";
 import {cookies} from "next/headers";
 import {revalidatePath} from "next/cache";
-import {Investment} from "@/types/database";
+import {Investment, InvestmentTransaction} from "@/types/database";
 import {fetchMutualFundNAV} from "@/utils/nav-api";
 
 export async function getInvestments(type?: string): Promise<Investment[]> {
@@ -307,4 +307,39 @@ export async function deleteInvestment(id: string): Promise<{ error?: string; su
 
     revalidatePath("/dashboard/investments");
     return {success: true};
+}
+
+export async function getInvestmentTransactions(investmentId?: string): Promise<InvestmentTransaction[]> {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    let query = supabase
+        .from("investment_transactions")
+        .select(`
+            *,
+            investments (
+                asset_name,
+                investment_type
+            ),
+            transactions (
+                notes,
+                accounts (
+                    name
+                )
+            )
+        `)
+        .order("date", {ascending: false});
+
+    if (investmentId) {
+        query = query.eq("investment_id", investmentId);
+    }
+
+    const {data, error} = await query;
+
+    if (error) {
+        console.error("Error fetching investment transactions:", error);
+        return [];
+    }
+
+    return data || [];
 }

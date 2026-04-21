@@ -3,16 +3,72 @@
 import {AddCategoryForm, AddTransactionForm, EditTransactionModal} from "@/components/forms/TransactionForms";
 import {TransactionRow} from "@/components/dashboard/TransactionRow";
 import {Transaction} from "@/types/database";
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {ArrowsRightLeftIcon} from "@heroicons/react/24/outline";
 import {useDashboard} from "@/providers/dashboard-provider";
+import {TransactionFilters} from "@/components/dashboard/TransactionFilters";
 
 export default function TransactionsPage() {
     const {
-        transactions, loading
+        transactions, loading, accounts, categories
     } = useDashboard();
 
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+    // Filter states
+    const [search, setSearch] = useState("");
+    const [selectedAccountId, setSelectedAccountId] = useState("");
+    const [selectedCategoryId, setSelectedCategoryId] = useState("");
+    const [selectedType, setSelectedType] = useState("");
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
+    const filteredTransactions = useMemo(() => {
+        return transactions.filter((t) => {
+            // Search filter
+            if (search && !t.notes?.toLowerCase().includes(search.toLowerCase())) {
+                return false;
+            }
+
+            // Account filter
+            if (selectedAccountId && t.account_id !== selectedAccountId && t.to_account_id !== selectedAccountId) {
+                return false;
+            }
+
+            // Category filter
+            if (selectedCategoryId && t.category_id !== selectedCategoryId) {
+                return false;
+            }
+
+            // Type filter
+            if (selectedType && t.type !== selectedType) {
+                return false;
+            }
+
+            // Date range filter
+            if (startDate && new Date(t.date) < new Date(startDate)) {
+                return false;
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                if (new Date(t.date) > end) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }, [transactions, search, selectedAccountId, selectedCategoryId, selectedType, startDate, endDate]);
+
+    const clearFilters = () => {
+        setSearch("");
+        setSelectedAccountId("");
+        setSelectedCategoryId("");
+        setSelectedType("");
+        setStartDate("");
+        setEndDate("");
+    };
 
     if (loading) {
         return <div className="p-8 text-center text-text-muted">Loading transactions...</div>;
@@ -32,6 +88,24 @@ export default function TransactionsPage() {
 
             <AddCategoryForm/>
 
+            <TransactionFilters
+                accounts={accounts}
+                categories={categories}
+                search={search}
+                onSearchChangeAction={setSearch}
+                selectedAccountId={selectedAccountId}
+                onAccountChangeAction={setSelectedAccountId}
+                selectedCategoryId={selectedCategoryId}
+                onCategoryChangeAction={setSelectedCategoryId}
+                selectedType={selectedType}
+                onTypeChangeAction={setSelectedType}
+                startDate={startDate}
+                onStartDateChangeAction={setStartDate}
+                endDate={endDate}
+                onEndDateChangeAction={setEndDate}
+                onClearAction={clearFilters}
+            />
+
             <section className="bg-surface rounded-3xl border border-surface-border shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-surface-border">
@@ -47,11 +121,13 @@ export default function TransactionsPage() {
                         </tr>
                         </thead>
                         <tbody className="divide-y divide-surface-border">
-                        {transactions.length === 0 ? (<tr>
+                        {filteredTransactions.length === 0 ? (<tr>
                                 <td colSpan={5} className="px-6 py-12 text-center text-text-muted">
-                                    No transactions yet. Start by adding one above.
+                                    {transactions.length === 0 
+                                        ? "No transactions yet. Start by adding one above." 
+                                        : "No transactions match your filters."}
                                 </td>
-                            </tr>) : (transactions.map((transaction) => (<TransactionRow
+                            </tr>) : (filteredTransactions.map((transaction) => (<TransactionRow
                                     key={transaction.id}
                                     transaction={transaction}
                                     onEditAction={() => setEditingTransaction(transaction)}

@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { EmergencyFund } from "@/types/database";
+import { EmergencyFund, EmergencyFundTransaction } from "@/types/database";
 
 export async function getEmergencyFunds(): Promise<EmergencyFund[]> {
   const cookieStore = await cookies();
@@ -202,4 +202,39 @@ export async function deleteEmergencyFund(id: string): Promise<{ error?: string;
 
   revalidatePath("/dashboard/emergency-funds");
   return { success: true };
+}
+
+export async function getEmergencyFundTransactions(fundId?: string): Promise<EmergencyFundTransaction[]> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  let query = supabase
+    .from("emergency_fund_transactions")
+    .select(`
+      *,
+      emergency_funds (
+        name,
+        instrument_type
+      ),
+      transactions (
+        notes,
+        accounts (
+          name
+        )
+      )
+    `)
+    .order("date", { ascending: false });
+
+  if (fundId) {
+    query = query.eq("emergency_fund_id", fundId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error fetching emergency fund transactions:", error);
+    return [];
+  }
+
+  return data || [];
 }

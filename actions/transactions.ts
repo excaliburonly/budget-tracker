@@ -56,7 +56,10 @@ export async function addTransaction(formData: FormData) {
   const account_id = formData.get("account_id") as string;
   const to_account_id = formData.get("to_account_id") as string;
   const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
   const notes = formData.get("notes") as string;
+
+  const dateTime = new Date(`${date}T${time}`);
 
   const { error } = await supabase.from("transactions").insert({
     user_id: user.id,
@@ -67,7 +70,7 @@ export async function addTransaction(formData: FormData) {
     investment_id: investment_id || null,
     account_id: account_id || null,
     to_account_id: to_account_id || null,
-    date,
+    date: dateTime.toISOString(),
     notes,
   });
 
@@ -92,7 +95,10 @@ export async function updateTransaction(id: string, formData: FormData) {
   const account_id = formData.get("account_id") as string;
   const to_account_id = formData.get("to_account_id") as string;
   const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
   const notes = formData.get("notes") as string;
+
+  const dateTime = new Date(`${date}T${time}`);
 
   const { error } = await supabase
     .from("transactions")
@@ -104,7 +110,7 @@ export async function updateTransaction(id: string, formData: FormData) {
       investment_id: investment_id || null,
       account_id: account_id || null,
       to_account_id: to_account_id || null,
-      date,
+      date: dateTime.toISOString(),
       notes,
     })
     .eq("id", id);
