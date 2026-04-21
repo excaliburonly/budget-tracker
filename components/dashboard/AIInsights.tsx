@@ -73,7 +73,7 @@ export default function AIInsights() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-br from-primary/10 via-surface to-surface p-8 rounded-[2.5rem] border border-primary/20 shadow-sm relative overflow-hidden group">
+      <div className="bg-linear-to-br from-primary/10 via-surface to-surface p-8 rounded-[2.5rem] border border-primary/20 shadow-sm relative overflow-hidden group">
         {/* Decorative background elements */}
         <div className="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-500" />
         <div className="absolute -left-8 -bottom-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors duration-500" />
@@ -128,14 +128,14 @@ export default function AIInsights() {
                 </div>
 
                 <div className="p-6 bg-surface/50 rounded-3xl border border-primary/10 backdrop-blur-sm shadow-sm">
-                  <div className="flex items-center gap-2 mb-4 text-[var(--warning)]">
+                  <div className="flex items-center gap-2 mb-4 text-(--warning)">
                     <ExclamationTriangleIcon className="w-5 h-5" />
                     <h4 className="font-black text-[10px] uppercase tracking-[0.2em]">Anomalies</h4>
                   </div>
                   <ul className="space-y-3">
                     {insights.anomalies.length > 0 ? insights.anomalies.map((a, i) => (
                       <li key={i} className="text-sm text-text-muted flex gap-2 font-medium">
-                        <span className="text-[var(--warning)]">•</span> {a}
+                        <span className="text-(--warning)">•</span> {a}
                       </li>
                     )) : (
                       <li className="text-sm text-text-muted italic font-medium">No anomalies detected.</li>
@@ -144,14 +144,14 @@ export default function AIInsights() {
                 </div>
 
                 <div className="p-6 bg-surface/50 rounded-3xl border border-primary/10 backdrop-blur-sm shadow-sm">
-                  <div className="flex items-center gap-2 mb-4 text-[var(--success)]">
+                  <div className="flex items-center gap-2 mb-4 text-(--success)">
                     <LightBulbIcon className="w-5 h-5" />
                     <h4 className="font-black text-[10px] uppercase tracking-[0.2em]">Optimizations</h4>
                   </div>
                   <ul className="space-y-3">
                     {insights.optimizations.length > 0 ? insights.optimizations.map((o, i) => (
                       <li key={i} className="text-sm text-text-muted flex gap-2 font-medium">
-                        <span className="text-[var(--success)]">→</span> {o}
+                        <span className="text-(--success)">→</span> {o}
                       </li>
                     )) : (
                       <li className="text-sm text-text-muted italic font-medium">Add more data for suggestions.</li>
@@ -166,7 +166,7 @@ export default function AIInsights() {
                   disabled={saving || saved}
                   className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all ${
                     saved 
-                      ? 'bg-[var(--success)] text-white cursor-default' 
+                      ? 'bg-(--success) text-white cursor-default' 
                       : 'bg-primary/10 text-primary hover:bg-primary/20 active:scale-95'
                   }`}
                 >
