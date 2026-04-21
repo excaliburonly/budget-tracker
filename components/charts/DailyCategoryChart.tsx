@@ -23,17 +23,17 @@ export default function DailyCategoryChart({ data, categories, currency }: Daily
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const handle = requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       setIsMounted(true);
-    });
-    return () => cancelAnimationFrame(handle);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!isMounted) return <div className="h-80 w-full animate-pulse bg-surface/50 rounded-lg" />;
 
   return (
-    <div className="h-80 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-80 w-full" style={{ minHeight: '320px' }}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={320} minWidth={0}>
         <BarChart
           data={data}
           margin={{

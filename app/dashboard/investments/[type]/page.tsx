@@ -9,7 +9,7 @@ import { useDashboard } from "@/providers/dashboard-provider";
 import { useParams } from "next/navigation";
 import { formatCurrency } from "@/utils/format";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import { syncMutualFundNAVs } from "@/actions/investments";
+import { syncMutualFundNAVs, syncStockPrices } from "@/actions/investments";
 
 export default function InvestmentTypePage() {
     const params = useParams();
@@ -28,10 +28,14 @@ export default function InvestmentTypePage() {
     const handleSync = async () => {
         setIsSyncing(true);
         try {
-            await syncMutualFundNAVs();
+            if (type === 'mutual-fund') {
+                await syncMutualFundNAVs();
+            } else if (type === 'stock') {
+                await syncStockPrices();
+            }
             refreshInvestments();
         } catch (error) {
-            console.error("Failed to sync NAVs:", error);
+            console.error("Failed to sync prices:", error);
         } finally {
             setIsSyncing(false);
         }
@@ -60,7 +64,7 @@ export default function InvestmentTypePage() {
 
     return (
         <div className="max-w-6xl mx-auto">
-            <header className="mb-10 flex items-center justify-between">
+            <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div className="flex items-center gap-3">
                     <ChartBarSquareIcon className="w-8 h-8 text-primary" />
                     <div>
@@ -68,18 +72,18 @@ export default function InvestmentTypePage() {
                         <p className="text-text-muted mt-1">Manage your {typeDisplayName.toLowerCase()} portfolio</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
-                    {type === 'mutual-fund' && (
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                    {(type === 'mutual-fund' || type === 'stock') && (
                         <button
                             onClick={handleSync}
                             disabled={isSyncing}
-                            className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover text-text-muted border border-surface-border rounded-xl transition-colors disabled:opacity-50"
+                            className="flex items-center justify-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover text-text-muted border border-surface-border rounded-xl transition-colors disabled:opacity-50 min-h-[44px]"
                         >
                             <ArrowPathIcon className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
-                            {isSyncing ? 'Syncing...' : 'Sync NAVs'}
+                            {isSyncing ? 'Syncing...' : type === 'stock' ? 'Sync Prices' : 'Sync NAVs'}
                         </button>
                     )}
-                    <div className="bg-surface p-4 rounded-2xl border border-input-border text-right">
+                    <div className="bg-surface p-4 rounded-2xl border border-input-border text-center sm:text-right">
                         <p className="text-sm text-text-muted mb-1">Total {typeDisplayName} Value</p>
                         <p className="text-2xl font-bold text-primary">{formatCurrency(totalValue, currency)}</p>
                     </div>

@@ -297,6 +297,61 @@ export async function syncMutualFundNAVs(): Promise<{ error?: string; success?: 
     return {success: true, updatedCount};
 }
 
+export async function syncStockPrices(): Promise<{ error?: string; success?: boolean; updatedCount?: number }> {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    // 1. Fetch all stock investments with a symbol
+    const {data: investments, error: fetchError} = await supabase
+        .from("investments")
+        .select("*")
+        .eq("investment_type", "Stock");
+
+    if (fetchError) {
+        console.error("Error fetching stock investments for sync:", fetchError);
+        return {error: fetchError.message};
+    }
+
+    if (!investments || investments.length === 0) {
+        return {success: true, updatedCount: 0};
+    }
+
+    let updatedCount = 0;
+    for (const investment of investments) {
+        if (!investment.symbol) continue;
+
+        try {
+            // Yahoo Finance API endpoint
+            const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${investment.symbol}?interval=1m&range=1d`);
+            const json = await response.json();
+            const result = json.chart?.result?.[0];
+            
+            if (result && result.meta?.regularMarketPrice) {
+                const latestPrice = result.meta.regularMarketPrice;
+                const {error: updateError} = await supabase
+                    .from("investments")
+                    .update({
+                        current_value: latestPrice, 
+                        last_synced_at: new Date().toISOString()
+                    })
+                    .eq("id", investment.id);
+
+                if (!updateError) {
+                    updatedCount++;
+                } else {
+                    console.error(`Error updating price for ${investment.asset_name}:`, updateError);
+                }
+            }
+        } catch (e) {
+            console.error(`Failed to sync price for ${investment.asset_name}:`, e);
+        }
+    }
+
+    revalidatePath("/dashboard/investments");
+    revalidatePath("/dashboard");
+    return {success: true, updatedCount};
+}
+
 export async function deleteInvestment(id: string): Promise<{ error?: string; success?: boolean }> {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
@@ -329,7 +384,7 @@ export async function getInvestmentTransactions(investmentId?: string): Promise<
             ),
             transactions (
                 notes,
-                accounts (
+                accounts!transactions_account_id_fkey (
                     name
                 )
             )

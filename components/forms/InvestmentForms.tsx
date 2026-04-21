@@ -4,7 +4,87 @@ import { addInvestment, updateInvestment } from "@/actions/investments";
 import { Investment } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 import { useState, useEffect, useRef } from "react";
-import { searchMutualFunds, MFSearchResponse } from "@/utils/nav-api";
+import { searchMutualFunds, MFSearchResponse, searchStocks, StockSearchResponse } from "@/utils/nav-api";
+
+function StockSearchInput({ 
+  onSelectAction, 
+  initialValue = "" 
+}: { 
+  onSelectAction: (shortname: string, symbol: string) => void,
+  initialValue?: string
+}) {
+  const [query, setQuery] = useState(initialValue);
+  const [results, setResults] = useState<StockSearchResponse[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (query.length >= 2) {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(async () => {
+        const res = await searchStocks(query);
+        setResults(res);
+        setShowResults(true);
+        setIsSearching(false);
+      }, 500);
+    }
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [query]);
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        name="asset_name"
+        required
+        value={query}
+        autoComplete="off"
+        onChange={(e) => {
+          const val = e.target.value;
+          setQuery(val);
+          if (val.length >= 2) {
+            setIsSearching(true);
+          } else {
+            setResults([]);
+            setShowResults(false);
+            setIsSearching(false);
+          }
+        }}
+        onFocus={() => query.length >= 2 && setShowResults(true)}
+        placeholder="Search Stock (e.g. Reliance, AAPL)..."
+        className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+      />
+      {isSearching && (
+        <div className="absolute right-3 top-2.5">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+        </div>
+      )}
+      {showResults && results.length > 0 && (
+        <div className="absolute z-20 w-full mt-1 bg-surface border border-surface-border rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          {results.map((result) => (
+            <button
+              key={result.symbol}
+              type="button"
+              className="w-full text-left px-4 py-2 hover:bg-background/50 text-sm transition-colors border-b border-surface-border last:border-0"
+              onClick={() => {
+                const name = result.shortname || result.longname || result.symbol;
+                setQuery(name);
+                onSelectAction(name, result.symbol);
+                setShowResults(false);
+              }}
+            >
+              <div className="font-medium">{result.shortname || result.longname}</div>
+              <div className="text-[10px] text-text-muted">{result.symbol} • {result.exchange} • {result.typeDisp}</div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function MutualFundSearchInput({ 
   onSelectAction, 
@@ -161,6 +241,12 @@ export function AddInvestmentForm({
                   setSchemeCode(code.toString());
                 }}
               />
+            ) : investmentType === "Stock" ? (
+              <StockSearchInput
+                onSelectAction={(name, symbol) => {
+                  setSchemeCode(symbol);
+                }}
+              />
             ) : (
               <input
                 type="text"
@@ -176,7 +262,7 @@ export function AddInvestmentForm({
 
           <div>
             <label htmlFor="symbol" className="block text-sm font-medium text-foreground/80 mb-1">
-              Symbol / Scheme Code
+              {investmentType === "Mutual Fund" ? "Scheme Code" : investmentType === "Stock" ? "Ticker Symbol" : "Symbol"}
             </label>
             <input
               type="text"
@@ -185,10 +271,16 @@ export function AddInvestmentForm({
               autoComplete="off"
               value={schemeCode}
               onChange={(e) => setSchemeCode(e.target.value)}
-              placeholder="e.g. 120503"
+              placeholder={investmentType === "Mutual Fund" ? "e.g. 120503" : "e.g. AAPL or RELIANCE.NS"}
               className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500 uppercase"
             />
-            <p className="text-[10px] text-text-muted mt-1 leading-tight">Use MFAPI.in Scheme Code for Mutual Funds</p>
+            <p className="text-[10px] text-text-muted mt-1 leading-tight">
+              {investmentType === "Mutual Fund" 
+                ? "Use MFAPI.in Scheme Code for Mutual Funds" 
+                : investmentType === "Stock" 
+                  ? "Use .NS suffix for NSE stocks (e.g. INFY.NS)" 
+                  : "Ticker symbol for tracking"}
+            </p>
           </div>
 
           <div>

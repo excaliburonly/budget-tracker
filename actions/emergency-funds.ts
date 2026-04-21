@@ -224,7 +224,7 @@ export async function getEmergencyFundTransactions(fundId?: string): Promise<Eme
       ),
       transactions (
         notes,
-        accounts (
+        accounts!transactions_account_id_fkey (
           name
         )
       )

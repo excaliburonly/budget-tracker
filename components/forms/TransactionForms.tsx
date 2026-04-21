@@ -3,7 +3,7 @@
 import { ChangeEvent, useState } from "react";
 import { addCategory, addTransaction, deleteCategory, updateCategory, updateTransaction } from "@/actions/transactions";
 import { Category, Transaction } from "@/types/database";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { PencilSquareIcon, TrashIcon, ArrowsRightLeftIcon, ChartPieIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 
 export function AddTransactionForm({ onTransactionAddedAction }: { onTransactionAddedAction?: () => void }) {
@@ -29,29 +29,34 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
     };
 
     return (
-        <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm mb-8">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Add Transaction</h3>
-            <form id="add-transaction-form" action={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-foreground/80">Amount</label>
+        <div className="bg-surface/80 backdrop-blur-sm p-8 rounded-[2.5rem] border border-surface-border/50 shadow-sm h-full">
+            <h3 className="text-xl font-black text-foreground mb-6 tracking-tight flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-xl">
+                    <ArrowsRightLeftIcon className="w-5 h-5 text-primary" />
+                </div>
+                Add Transaction
+            </h3>
+            <form id="add-transaction-form" action={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Amount</label>
                     <input
                         type="number"
                         step="0.01"
                         name="amount"
                         autoComplete="off"
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/40 font-bold"
                         placeholder="0.00"
                         required
                     />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-foreground/80">Type</label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Type</label>
                     <select
                         name="type"
                         value={type}
                         onChange={handleTypeChange}
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                     >
                         <option value="expense">Expense</option>
                         <option value="income">Income</option>
@@ -60,11 +65,11 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                 </div>
 
                 {type !== 'transfer' ? (
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-foreground/80">Category</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Category</label>
                         <select
                             name="category_id"
-                            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                         >
                             <option value="">No category</option>
                             {categories
@@ -77,11 +82,11 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                         </select>
                     </div>
                 ) : (
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-foreground/80">To Account (Destination)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">To Account (Destination)</label>
                         <select
                             name="to_account_id"
-                            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                             required
                         >
                             <option value="">Select destination</option>
@@ -94,13 +99,13 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     </div>
                 )}
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-foreground/80">
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
                         {type === 'transfer' ? 'From Account (Source)' : 'Account'}
                     </label>
                     <select
                         name="account_id"
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                     >
                         <option value="">Select account</option>
                         {accounts.map((a) => (
@@ -111,47 +116,47 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     </select>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-foreground/80">Date</label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Date</label>
                     <input
                         type="date"
                         name="date"
                         defaultValue={new Date().toISOString().split("T")[0]}
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                         required
                     />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-sm font-medium text-foreground/80">Time</label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Time</label>
                     <input
                         type="time"
                         name="time"
                         defaultValue={new Date().toTimeString().slice(0, 5)}
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                         required
                     />
                 </div>
 
-                <div className="flex flex-col gap-1.5 lg:col-span-1">
-                    <label className="text-sm font-medium text-foreground/80">Notes</label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Notes</label>
                     <input
                         type="text"
                         name="notes"
                         autoComplete="off"
-                        className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/40 font-bold"
                         placeholder="Lunch, Salary, Rent..."
                     />
                 </div>
 
                 <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />
 
-                <div className="lg:col-span-3 flex justify-end">
+                <div className="md:col-span-2 lg:col-span-1 flex items-end">
                     <button
                         type="submit"
-                        className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
+                        className="w-full py-4 bg-primary hover:scale-[1.02] active:scale-[0.98] text-white font-black uppercase tracking-widest rounded-2xl transition-all text-xs shadow-lg shadow-primary/20"
                     >
-                        Add Transaction
+                        Save Transaction
                     </button>
                 </div>
             </form>
@@ -344,10 +349,20 @@ export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAc
     }
 
     return (
-        <div className="bg-background/50 p-6 rounded-2xl border border-dashed border-input-border mb-8">
+        <div className="bg-surface/80 backdrop-blur-sm p-8 rounded-[2.5rem] border border-surface-border/50 shadow-sm h-full">
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-md font-semibold text-foreground">Categories</h3>
-                <button onClick={() => setShowForm(false)} className="text-xs text-text-muted hover:text-gray-700 font-medium">Close</button>
+                <h3 className="text-xl font-black text-foreground tracking-tight flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-xl">
+                        <ChartPieIcon className="w-5 h-5 text-primary" />
+                    </div>
+                    Manage Categories
+                </h3>
+                <button 
+                    onClick={() => setShowForm(false)} 
+                    className="px-4 py-2 text-xs font-black uppercase tracking-widest text-text-muted hover:text-red-500 bg-background/50 rounded-xl transition-all"
+                >
+                    Close
+                </button>
             </div>
 
             <form action={async (formData) => {
@@ -360,43 +375,43 @@ export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAc
                 } finally {
                     setIsSaving(false);
                 }
-            }} id="add-category-form" className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 pb-8 border-b border-surface-border">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider">New Name</label>
+            }} id="add-category-form" className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 pb-8 border-b border-surface-border/30">
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">New Name</label>
                     <input
                         type="text"
                         name="name"
                         autoComplete="off"
-                        className="px-3 py-1.5 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/40 font-bold"
                         placeholder="Groceries..."
                         required
                     />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider">Type</label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Type</label>
                     <select
                         name="type"
-                        className="px-3 py-1.5 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                     >
                         <option value="expense">Expense</option>
                         <option value="income">Income</option>
                     </select>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider">Color</label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Color</label>
                     <input
                         type="color"
                         name="color"
                         defaultValue="#2563eb"
-                        className="h-9 w-full rounded-lg border border-input-border bg-input outline-none p-1"
+                        className="h-11 w-full rounded-2xl border border-surface-border/50 bg-background/50 outline-none p-1.5 cursor-pointer transition-transform active:scale-95"
                     />
                 </div>
                 <div className="flex items-end">
                     <button
                         type="submit"
-                        className="w-full px-4 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
+                        className="w-full py-4 bg-primary hover:scale-[1.02] active:scale-[0.98] text-white font-black uppercase tracking-widest rounded-2xl transition-all text-xs shadow-lg shadow-primary/20"
                     >
-                        Add
+                        Add Category
                     </button>
                 </div>
             </form>

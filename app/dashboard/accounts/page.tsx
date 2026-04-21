@@ -29,20 +29,27 @@ export default function AccountsPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <header className="mb-10 flex items-center gap-3">
-                <CreditCardIcon className="w-8 h-8 text-primary" />
+        <div className="max-w-7xl mx-auto space-y-10 animate-fade-in-up">
+            <header className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-2xl w-fit">
+                    <CreditCardIcon className="w-8 h-8 text-primary" />
+                </div>
                 <div>
-                    <h1 className="text-3xl font-bold text-foreground">My Accounts</h1>
-                    <p className="text-text-muted mt-1">Manage your bank accounts, wallets, and cash</p>
+                    <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">My Accounts</h1>
+                    <p className="text-text-muted mt-1 font-medium">Manage your bank accounts, wallets, and cash</p>
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1">
-                    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm h-full flex flex-col justify-center">
-                        <h3 className="text-lg font-semibold text-foreground mb-4">Asset Distribution</h3>
-                        <AccountsPieChart data={accountChartData} currency={currency} />
+                    <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm h-full flex flex-col">
+                        <h3 className="text-lg font-black text-foreground mb-6 tracking-tight flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-primary" />
+                            Asset Distribution
+                        </h3>
+                        <div className="flex-1 min-h-[300px]">
+                            <AccountsPieChart data={accountChartData} currency={currency} />
+                        </div>
                     </div>
                 </div>
                 <div className="lg:col-span-2">
@@ -52,19 +59,24 @@ export default function AccountsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {accounts.map((account) => (
-                    <AccountCard
-                        key={account.id}
-                        account={account}
-                        currency={currency}
-                        onEditAction={() => setEditingAccount(account)}
-                        onRefreshAction={refreshAccounts}
-                    />
+                    <div key={account.id} className="transition-all hover:-translate-y-1 duration-300">
+                        <AccountCard
+                            account={account}
+                            currency={currency}
+                            onEditAction={() => setEditingAccount(account)}
+                            onRefreshAction={refreshAccounts}
+                        />
+                    </div>
                 ))}
             </div>
             
             {accounts.length === 0 && (
-                <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-input-border">
-                    <p className="text-text-muted">No accounts added yet.</p>
+                <div className="text-center py-24 bg-surface/40 rounded-[2.5rem] border-2 border-dashed border-surface-border/50">
+                    <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <CreditCardIcon className="w-8 h-8 text-text-muted" />
+                    </div>
+                    <p className="text-text-muted font-bold">No accounts found</p>
+                    <p className="text-xs text-text-muted mt-1">Add your first account above to get started.</p>
                 </div>
             )}
 

@@ -8,7 +8,7 @@ import { ChartBarSquareIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 import { formatCurrency } from "@/utils/format";
 import Link from "next/link";
-import { syncMutualFundNAVs } from "@/actions/investments";
+import { syncMutualFundNAVs, syncStockPrices } from "@/actions/investments";
 
 export default function InvestmentsPage() {
     const { 
@@ -24,10 +24,13 @@ export default function InvestmentsPage() {
     const handleSync = async () => {
         setIsSyncing(true);
         try {
-            await syncMutualFundNAVs();
+            await Promise.all([
+                syncMutualFundNAVs(),
+                syncStockPrices()
+            ]);
             refreshInvestments();
         } catch (error) {
-            console.error("Failed to sync NAVs:", error);
+            console.error("Failed to sync prices:", error);
         } finally {
             setIsSyncing(false);
         }
@@ -53,7 +56,7 @@ export default function InvestmentsPage() {
 
     return (
         <div className="max-w-6xl mx-auto">
-            <header className="mb-10 flex items-center justify-between">
+            <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div className="flex items-center gap-3">
                     <ChartBarSquareIcon className="w-8 h-8 text-primary" />
                     <div>
@@ -61,16 +64,16 @@ export default function InvestmentsPage() {
                         <p className="text-text-muted mt-1">Summary of all your assets</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                     <button
                         onClick={handleSync}
                         disabled={isSyncing}
-                        className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover text-text-muted border border-surface-border rounded-xl transition-colors disabled:opacity-50"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover text-text-muted border border-surface-border rounded-xl transition-colors disabled:opacity-50 min-h-[44px]"
                     >
                         <ArrowPathIcon className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
-                        {isSyncing ? 'Syncing...' : 'Sync NAVs'}
+                        {isSyncing ? 'Syncing...' : 'Sync All Prices'}
                     </button>
-                    <div className="bg-surface p-4 rounded-2xl border border-input-border text-right">
+                    <div className="bg-surface p-4 rounded-2xl border border-input-border text-center sm:text-right">
                         <p className="text-sm text-text-muted mb-1">Total Portfolio Value</p>
                         <p className="text-2xl font-bold text-primary">{formatCurrency(totalPortfolioValue, currency)}</p>
                     </div>

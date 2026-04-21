@@ -35,10 +35,10 @@ export default function CategoryBreakdownChart({ data, currency, title }: Catego
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const handle = requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       setIsMounted(true);
-    });
-    return () => cancelAnimationFrame(handle);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Filter out items with 0 or negative value and map colors
@@ -60,8 +60,8 @@ export default function CategoryBreakdownChart({ data, currency, title }: Catego
   }
 
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-72 w-full" style={{ minHeight: '288px' }}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={288} minWidth={0}>
         <PieChart>
           <Pie
             data={chartData}

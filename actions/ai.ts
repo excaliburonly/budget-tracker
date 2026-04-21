@@ -4,8 +4,6 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 export async function generateFinancialInsights() {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -13,11 +11,17 @@ export async function generateFinancialInsights() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  if (!process.env.GEMINI_API_KEY) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.error("GEMINI_API_KEY is missing from environment variables");
     return { 
       error: "GEMINI_API_KEY is not configured. Please add it to your environment variables." 
     };
   }
+
+  console.log("GEMINI_API_KEY found, length:", apiKey.length);
+
+  const genAI = new GoogleGenerativeAI(apiKey);
 
   // Get current month date range
   const now = new Date();
@@ -73,12 +77,10 @@ export async function generateFinancialInsights() {
     currentDate: now.toISOString().split('T')[0]
   };
 
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
-    generationConfig: { 
-      responseMimeType: "application/json" 
-    }
-  });
+  const model = genAI.getGenerativeModel(
+    { model: "gemini-flash-latest" },
+    { apiVersion: "v1beta" }
+  );
 
   const prompt = `
     You are a professional financial advisor assistant for "Ledgr", a personal finance app. 
@@ -97,6 +99,7 @@ export async function generateFinancialInsights() {
     }
 
     Rules:
+    - Return ONLY the JSON object.
     - Keep the tone encouraging and professional.
     - If there is very little data, provide a summary of what is there and general financial advice.
     - Focus on categories where spending is high.
@@ -106,12 +109,92 @@ export async function generateFinancialInsights() {
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
-    return JSON.parse(text);
-  } catch (error) {
-    console.error("Error generating AI insights:", error);
+    let text = response.text();
+    
+    // Extract JSON if it's wrapped in markdown or has filler text
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      text = jsonMatch[0];
+    }
+    
+    try {
+      return JSON.parse(text);
+    } catch (parseError) {
+      console.error("Error parsing AI response as JSON:", text);
+      throw new Error("Invalid JSON response from AI");
+    }
+  } catch (error: any) {
+    console.error("Detailed error generating AI insights:", error);
+    
+    // Provide more helpful error messages
+    let errorMessage = "Failed to generate insights. Please try again later.";
+    
+    if (error.message?.includes("API key not valid")) {
+      errorMessage = "Invalid API key. Please check your GEMINI_API_KEY.";
+    } else if (error.message?.includes("blocked")) {
+      errorMessage = "The AI response was blocked by safety filters. Try adding more transaction data.";
+    } else if (error.message?.includes("quota")) {
+      errorMessage = "API quota exceeded. Please try again later.";
+    } else if (error.message) {
+      // Return the actual error message for debugging purposes (can be refined later for production)
+      errorMessage = `AI Error: ${error.message}`;
+    }
+    
     return { 
-      error: "Failed to generate insights. Please try again later." 
+      error: errorMessage 
     };
   }
+}
+
+export async function saveFinancialInsight(month: string, insightData: any) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { data, error } = await supabase
+    .from("ai_insights")
+    .insert([
+      {
+        user_id: user.id,
+        month,
+        insight_data: insightData,
+      }
+    ])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error saving AI insight:", error);
+    return { error: error.message };
+  }
+
+  return { success: true, data };
+}
+
+export async function getSavedInsights(month?: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  let query = supabase
+    .from("ai_insights")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (month) {
+    query = query.eq("month", month);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error fetching AI insights:", error);
+    return [];
+  }
+
+  return data || [];
 }

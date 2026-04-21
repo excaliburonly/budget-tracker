@@ -26,17 +26,18 @@ export default function IncomeExpenseChart({ data, currency }: IncomeExpenseChar
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const handle = requestAnimationFrame(() => {
+    // Add a small delay to ensure container dimensions are calculated
+    const timer = setTimeout(() => {
       setIsMounted(true);
-    });
-    return () => cancelAnimationFrame(handle);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!isMounted) return <div className="h-64 w-full animate-pulse bg-surface/50 rounded-lg" />;
 
   return (
-    <div className="h-64 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-64 w-full" style={{ minHeight: '256px' }}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={256}>
         <BarChart
           data={data}
           margin={{
@@ -80,14 +81,14 @@ export default function IncomeExpenseChart({ data, currency }: IncomeExpenseChar
           <Bar 
             name="Income" 
             dataKey="income" 
-            fill="#10b981" // emerald-500
+            fill="var(--success)" 
             radius={[4, 4, 0, 0]} 
             barSize={32}
           />
           <Bar 
             name="Expense" 
             dataKey="expense" 
-            fill="#ef4444" // red-500
+            fill="var(--error)" 
             radius={[4, 4, 0, 0]} 
             barSize={32}
           />
