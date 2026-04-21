@@ -34,6 +34,32 @@ export async function searchMutualFunds(query: string): Promise<MFSearchResponse
   }
 }
 
+export interface StockSearchResponse {
+  symbol: string;
+  shortname: string;
+  longname?: string;
+  exchange: string;
+  typeDisp: string;
+}
+
+export async function searchStocks(query: string): Promise<StockSearchResponse[]> {
+  if (!query || query.length < 2) return [];
+  try {
+    // Using a public CORS proxy for Yahoo Finance search as it doesn't allow direct browser access easily
+    const response = await fetch(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=10&newsCount=0`);
+    if (!response.ok) {
+      console.error(`Error searching for stocks with query ${query}:`);
+      return [];
+    }
+
+    const json = await response.json();
+    return (json.quotes || []) as StockSearchResponse[];
+  } catch (error) {
+    console.error(`Error searching for stocks with query ${query}:`, error);
+    return [];
+  }
+}
+
 export async function fetchMutualFundNAV(schemeCode: string): Promise<number | null> {
   try {
     const response = await fetch(`https://api.mfapi.in/mf/${schemeCode}`);

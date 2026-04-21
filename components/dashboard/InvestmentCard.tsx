@@ -19,7 +19,7 @@ export function InvestmentCard({ investment, currency, onEditAction, onRefreshAc
   const { showConfirmationAction } = useDashboard();
   const [isAddTxModalOpen, setIsAddTxModalOpen] = useState(false);
 
-  const totalCost = investment.quantity * investment.average_buy_price;
+  const totalCost = investment.invested_value;
   const currentTotalValue = investment.quantity * investment.current_value;
   const pnl = currentTotalValue - totalCost;
   const pnlPercentage = totalCost > 0 ? (pnl / totalCost) * 100 : 0;

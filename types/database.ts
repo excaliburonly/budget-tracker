@@ -12,7 +12,7 @@ export interface Transaction {
   id: string;
   user_id: string;
   amount: number;
-  date: string;
+  date: string; // This will now include time information
   category_id?: string | null;
   emergency_fund_id?: string | null;
   investment_id?: string | null;
@@ -78,6 +78,17 @@ export interface EmergencyFundTransaction {
   amount: number;
   date: string;
   created_at: string;
+  // Relation fields
+  emergency_funds?: {
+    name: string;
+    instrument_type: string;
+  } | null;
+  transactions?: {
+    notes: string | null;
+    accounts: {
+      name: string;
+    } | null;
+  } | null;
 }
 
 export interface Investment {
@@ -88,6 +99,7 @@ export interface Investment {
   symbol: string | null;
   quantity: number;
   average_buy_price: number;
+  invested_value: number;
   current_value: number;
   last_synced_at: string | null;
   created_at: string;
@@ -102,6 +114,17 @@ export interface InvestmentTransaction {
   price: number;
   date: string;
   created_at: string;
+  // Relation fields
+  investments?: {
+    asset_name: string;
+    investment_type: string;
+  } | null;
+  transactions?: {
+    notes: string | null;
+    accounts: {
+      name: string;
+    } | null;
+  } | null;
 }
 
 export interface Account {

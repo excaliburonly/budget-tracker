@@ -33,6 +33,7 @@ export function AddEmergencyFundForm({ onFundAddedAction }: { onFundAddedAction?
           <input
             type="text"
             name="name"
+            autoComplete="off"
             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="Main Emergency Fund..."
             required
@@ -59,6 +60,7 @@ export function AddEmergencyFundForm({ onFundAddedAction }: { onFundAddedAction?
           <input
             type="text"
             name="institution_name"
+            autoComplete="off"
             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="HDFC, Chase, etc."
           />
@@ -70,6 +72,7 @@ export function AddEmergencyFundForm({ onFundAddedAction }: { onFundAddedAction?
             type="number"
             step="0.01"
             name="target_amount"
+            autoComplete="off"
             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="0.00"
             required
@@ -82,6 +85,7 @@ export function AddEmergencyFundForm({ onFundAddedAction }: { onFundAddedAction?
             type="number"
             step="0.01"
             name="initial_amount"
+            autoComplete="off"
             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             placeholder="0.00"
           />
@@ -166,7 +170,7 @@ export function AddEmergencyFundTransactionModal({
               <select
                 name="type"
                 required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="contribution">Contribution</option>
                 <option value="withdrawal">Withdrawal</option>
@@ -180,7 +184,18 @@ export function AddEmergencyFundTransactionModal({
                 name="date"
                 required
                 defaultValue={new Date().toISOString().split('T')[0]}
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Time</label>
+              <input
+                type="time"
+                name="time"
+                required
+                defaultValue={new Date().toTimeString().slice(0, 5)}
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -191,8 +206,9 @@ export function AddEmergencyFundTransactionModal({
                 step="0.01"
                 name="amount"
                 required
+                autoComplete="off"
                 placeholder="0.00"
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -201,7 +217,7 @@ export function AddEmergencyFundTransactionModal({
               <select
                 name="account_id"
                 required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select Account</option>
                 {accounts.map(account => (
@@ -210,6 +226,8 @@ export function AddEmergencyFundTransactionModal({
               </select>
             </div>
           </div>
+
+          <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />
 
           <div className="flex justify-end gap-3 pt-4">
             <button
@@ -265,6 +283,7 @@ export function EditEmergencyFundModal({ fund, onCloseAction, onFundUpdatedActio
               type="text"
               name="name"
               defaultValue={fund.name}
+              autoComplete="off"
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
               required
             />
@@ -292,6 +311,7 @@ export function EditEmergencyFundModal({ fund, onCloseAction, onFundUpdatedActio
               type="text"
               name="institution_name"
               defaultValue={fund.institution_name || ""}
+              autoComplete="off"
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
             />
           </div>
@@ -303,6 +323,7 @@ export function EditEmergencyFundModal({ fund, onCloseAction, onFundUpdatedActio
               step="0.01"
               name="target_amount"
               defaultValue={fund.target_amount}
+              autoComplete="off"
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-emerald-500/20 outline-none"
               required
             />

@@ -34,8 +34,8 @@ export function ConfirmationModal({
       >
         <div className="flex flex-col items-center text-center">
           {isDanger && (
-            <div className="w-16 h-16 bg-red-50/10 rounded-full flex items-center justify-center mb-6">
-              <ExclamationTriangleIcon className="w-8 h-8 text-red-600" />
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
+              <ExclamationTriangleIcon className="w-8 h-8 text-[var(--error)]" />
             </div>
           )}
           
@@ -59,8 +59,8 @@ export function ConfirmationModal({
                 onCloseAction();
               }}
               className={`flex-1 px-6 py-3 ${
-                isDanger ? "bg-red-600 hover:bg-red-700" : "bg-primary hover:bg-primary-hover"
-              } text-white font-semibold rounded-xl transition-colors text-sm order-1 sm:order-2 shadow-lg shadow-red-600/10`}
+                isDanger ? "bg-[var(--error)] hover:opacity-90 shadow-[var(--error)]/20" : "bg-[var(--primary)] hover:opacity-90 shadow-[var(--primary)]/20"
+              } text-white font-semibold rounded-xl transition-colors text-sm order-1 sm:order-2 shadow-lg`}
             >
               {confirmText}
             </button>

@@ -13,46 +13,42 @@ import {
 } from "recharts";
 import { formatCurrency } from "@/utils/format";
 
-interface IncomeExpenseChartProps {
-  data: {
-    name: string;
-    income: number;
-    expense: number;
-  }[];
+interface DailyCategoryChartProps {
+  data: Record<string, string | number>[];
+  categories: { name: string; color: string }[];
   currency: string;
 }
 
-export default function IncomeExpenseChart({ data, currency }: IncomeExpenseChartProps) {
+export default function DailyCategoryChart({ data, categories, currency }: DailyCategoryChartProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // Add a small delay to ensure container dimensions are calculated
     const timer = setTimeout(() => {
       setIsMounted(true);
     }, 100);
     return () => clearTimeout(timer);
   }, []);
 
-  if (!isMounted) return <div className="h-64 w-full animate-pulse bg-surface/50 rounded-lg" />;
+  if (!isMounted) return <div className="h-80 w-full animate-pulse bg-surface/50 rounded-lg" />;
 
   return (
-    <div className="h-64 w-full" style={{ minHeight: '256px' }}>
-      <ResponsiveContainer width="100%" height="100%" minHeight={256}>
+    <div className="h-80 w-full" style={{ minHeight: '320px' }}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={320} minWidth={0}>
         <BarChart
           data={data}
           margin={{
-            top: 5,
+            top: 10,
             right: 10,
             left: 10,
-            bottom: 5,
+            bottom: 20,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--surface-border)" />
           <XAxis 
-            dataKey="name" 
+            dataKey="date" 
             axisLine={false} 
             tickLine={false} 
-            tick={{ fill: 'var(--text-muted)', fontSize: 12 }}
+            tick={{ fill: 'var(--text-muted)', fontSize: 10 }}
             dy={10}
           />
           <YAxis 
@@ -76,22 +72,19 @@ export default function IncomeExpenseChart({ data, currency }: IncomeExpenseChar
             verticalAlign="top" 
             align="right" 
             iconType="circle"
-            wrapperStyle={{ paddingBottom: '20px', fontSize: '12px' }}
+            wrapperStyle={{ paddingBottom: '20px', fontSize: '11px' }}
           />
-          <Bar 
-            name="Income" 
-            dataKey="income" 
-            fill="var(--success)" 
-            radius={[4, 4, 0, 0]} 
-            barSize={32}
-          />
-          <Bar 
-            name="Expense" 
-            dataKey="expense" 
-            fill="var(--error)" 
-            radius={[4, 4, 0, 0]} 
-            barSize={32}
-          />
+          {categories.map((cat) => (
+            <Bar
+              key={cat.name}
+              dataKey={cat.name}
+              name={cat.name}
+              stackId="a"
+              fill={cat.color}
+              radius={[0, 0, 0, 0]}
+              barSize={20}
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
     </div>

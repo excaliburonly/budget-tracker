@@ -42,7 +42,7 @@ export function AddBudgetForm({ onBudgetAddedAction }: BudgetFormProps) {
             name="category_id"
             id="category_id"
             required
-            className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Select a category</option>
             {categories
@@ -67,8 +67,9 @@ export function AddBudgetForm({ onBudgetAddedAction }: BudgetFormProps) {
               name="amount"
               id="amount"
               required
+              autoComplete="off"
               placeholder="0.00"
-              className="w-full pl-8 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-8 pr-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -83,7 +84,7 @@ export function AddBudgetForm({ onBudgetAddedAction }: BudgetFormProps) {
             id="month"
             defaultValue={new Date().toISOString().slice(0, 7)}
             required
-            className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
@@ -144,7 +145,7 @@ export function EditBudgetModal({
               id="category_id_edit"
               required
               defaultValue={budget.category_id}
-              className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             >
               {categories
                 .filter((c) => c.type === "expense")
@@ -168,8 +169,9 @@ export function EditBudgetModal({
                 name="amount"
                 id="amount_edit"
                 required
+                autoComplete="off"
                 defaultValue={budget.amount}
-                className="w-full pl-8 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-8 pr-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -184,7 +186,7 @@ export function EditBudgetModal({
               id="month_edit"
               required
               defaultValue={budget.month}
-              className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 

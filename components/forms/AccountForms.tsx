@@ -3,6 +3,7 @@
 import { addAccount, updateAccount } from "@/actions/accounts";
 import { Account } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
+import { CreditCardIcon } from "@heroicons/react/24/outline";
 
 export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?: () => void }) {
   const { refreshAccounts, setIsSaving } = useDashboard();
@@ -25,25 +26,31 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
   }
 
   return (
-    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm mb-8">
-      <h3 className="text-lg font-semibold text-foreground mb-4">Add Bank Account</h3>
-      <form id="add-account-form" action={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-foreground/80">Account Name</label>
+    <div className="bg-surface/80 backdrop-blur-sm p-8 rounded-[2.5rem] border border-surface-border/50 shadow-sm h-full">
+      <h3 className="text-xl font-black text-foreground mb-6 tracking-tight flex items-center gap-3">
+        <div className="p-2 bg-primary/10 rounded-xl">
+          <CreditCardIcon className="w-5 h-5 text-primary" />
+        </div>
+        Add Bank Account
+      </h3>
+      <form id="add-account-form" action={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-2">
+          <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Account Name</label>
           <input
             type="text"
             name="name"
-            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
-            placeholder="Chase Checking, Savings..."
+            autoComplete="off"
+            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/40 font-bold"
+            placeholder="Chase Checking..."
             required
           />
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-foreground/80">Type</label>
+        <div className="flex flex-col gap-2">
+          <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Type</label>
           <select
             name="type"
-            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
             required
           >
             <option value="Checking">Checking</option>
@@ -54,24 +61,25 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
           </select>
         </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-foreground/80">Initial Balance</label>
+        <div className="flex flex-col gap-2">
+          <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Initial Balance</label>
           <input
             type="number"
             step="0.01"
             name="balance"
-            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+            autoComplete="off"
+            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
             placeholder="0.00"
             required
           />
         </div>
 
-        <div className="md:col-span-3 flex justify-end">
+        <div className="md:col-span-3 flex justify-end pt-2">
           <button
             type="submit"
-            className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
+            className="px-8 py-3 bg-primary hover:scale-105 active:scale-95 text-white font-black uppercase tracking-widest rounded-2xl transition-all text-xs shadow-lg shadow-primary/20"
           >
-            Add Account
+            Create Account
           </button>
         </div>
       </form>
@@ -112,6 +120,7 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
               type="text"
               name="name"
               defaultValue={account.name}
+              autoComplete="off"
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
               required
             />
@@ -140,6 +149,7 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
               step="0.01"
               name="balance"
               defaultValue={account.balance}
+              autoComplete="off"
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
               required
             />

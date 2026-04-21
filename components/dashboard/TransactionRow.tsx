@@ -1,7 +1,7 @@
 "use client";
 
 import { Transaction } from "@/types/database";
-import { formatCurrency } from "@/utils/format";
+import { formatCurrency, formatDateTime } from "@/utils/format";
 import { PencilSquareIcon, TrashIcon, ArrowsRightLeftIcon } from "@heroicons/react/24/outline";
 import { deleteTransaction } from "@/actions/transactions";
 import { useDashboard } from "@/providers/dashboard-provider";
@@ -36,7 +36,7 @@ export function TransactionRow({ transaction, onEditAction, onDeleteAction }: Tr
   return (
     <tr className="hover:bg-background/50 transition-colors group">
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-foreground">{transaction.date}</div>
+        <div className="text-sm font-medium text-foreground">{formatDateTime(transaction.date)}</div>
         <div className="text-xs text-text-muted">{transaction.notes || '-'}</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -69,8 +69,8 @@ export function TransactionRow({ transaction, onEditAction, onDeleteAction }: Tr
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className={`text-sm font-bold ${
-          transaction.type === 'income' ? 'text-green-600' : 
-          transaction.type === 'transfer' ? 'text-indigo-600' : 'text-foreground'
+          transaction.type === 'income' ? 'text-[var(--success)]' : 
+          transaction.type === 'transfer' ? 'text-[var(--primary)]' : 'text-foreground'
         }`}>
           {transaction.type === 'income' ? '+' : transaction.type === 'transfer' ? '' : '-'}
           {formatCurrency(transaction.amount, currency)}

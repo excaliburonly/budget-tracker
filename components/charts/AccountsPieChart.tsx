@@ -32,10 +32,10 @@ export default function AccountsPieChart({ data, currency }: AccountsPieChartPro
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const handle = requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       setIsMounted(true);
-    });
-    return () => cancelAnimationFrame(handle);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Filter out accounts with 0 or negative balance for the pie chart and add fill/stroke
@@ -49,8 +49,8 @@ export default function AccountsPieChart({ data, currency }: AccountsPieChartPro
   if (!isMounted) return <div className="h-72 w-full animate-pulse bg-surface/50 rounded-lg" />;
 
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-72 w-full" style={{ minHeight: '288px' }}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={288} minWidth={0}>
         <PieChart>
           <Pie
             data={chartData}

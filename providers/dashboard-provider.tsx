@@ -6,10 +6,25 @@ import {
   getCategories 
 } from "@/actions/transactions";
 import { getAccounts } from "@/actions/accounts";
-import { getEmergencyFunds } from "@/actions/emergency-funds";
-import { getInvestments } from "@/actions/investments";
+import { 
+  getEmergencyFunds, 
+  getEmergencyFundTransactions 
+} from "@/actions/emergency-funds";
+import { 
+  getInvestments, 
+  getInvestmentTransactions 
+} from "@/actions/investments";
 import { getBudgets } from "@/actions/budgets";
-import { Account, Category, EmergencyFund, Investment, Transaction, Budget } from "@/types/database";
+import { 
+  Account, 
+  Category, 
+  EmergencyFund, 
+  Investment, 
+  Transaction, 
+  Budget,
+  InvestmentTransaction,
+  EmergencyFundTransaction
+} from "@/types/database";
 import { createClient } from "@/utils/supabase/client";
 import { ConfirmationModal } from "@/components/theme/ConfirmationModal";
 
@@ -27,7 +42,9 @@ interface DashboardContextType {
   categories: Category[];
   accounts: Account[];
   emergencyFunds: EmergencyFund[];
+  emergencyFundTransactions: EmergencyFundTransaction[];
   investments: Investment[];
+  investmentTransactions: InvestmentTransaction[];
   budgets: Budget[];
   currency: string;
   loading: boolean;
@@ -38,7 +55,9 @@ interface DashboardContextType {
   refreshCategories: () => Promise<void>;
   refreshAccounts: () => Promise<void>;
   refreshEmergencyFunds: () => Promise<void>;
+  refreshEmergencyFundTransactions: () => Promise<void>;
   refreshInvestments: () => Promise<void>;
+  refreshInvestmentTransactions: () => Promise<void>;
   refreshBudgets: () => Promise<void>;
   refreshCurrency: () => Promise<void>;
   showConfirmationAction: (config: ConfirmationConfig) => void;
@@ -51,7 +70,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [emergencyFunds, setEmergencyFunds] = useState<EmergencyFund[]>([]);
+  const [emergencyFundTransactions, setEmergencyFundTransactions] = useState<EmergencyFundTransaction[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [investmentTransactions, setInvestmentTransactions] = useState<InvestmentTransaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [currency, setCurrency] = useState("INR");
   const [loading, setLoading] = useState(true);
@@ -101,9 +122,19 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     setEmergencyFunds(data);
   }, []);
 
+  const refreshEmergencyFundTransactions = useCallback(async () => {
+    const data = await getEmergencyFundTransactions();
+    setEmergencyFundTransactions(data);
+  }, []);
+
   const refreshInvestments = useCallback(async () => {
     const data = await getInvestments();
     setInvestments(data);
+  }, []);
+
+  const refreshInvestmentTransactions = useCallback(async () => {
+    const data = await getInvestmentTransactions();
+    setInvestmentTransactions(data);
   }, []);
 
   const refreshBudgets = useCallback(async () => {
@@ -120,7 +151,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         refreshCategories(),
         refreshAccounts(),
         refreshEmergencyFunds(),
+        refreshEmergencyFundTransactions(),
         refreshInvestments(),
+        refreshInvestmentTransactions(),
         refreshBudgets(),
       ]);
     } catch (error) {
@@ -134,7 +167,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     refreshCategories,
     refreshAccounts,
     refreshEmergencyFunds,
+    refreshEmergencyFundTransactions,
     refreshInvestments,
+    refreshInvestmentTransactions,
     refreshBudgets,
   ]);
 
@@ -149,7 +184,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         categories,
         accounts,
         emergencyFunds,
+        emergencyFundTransactions,
         investments,
+        investmentTransactions,
         budgets,
         currency,
         loading,
@@ -160,7 +197,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         refreshCategories,
         refreshAccounts,
         refreshEmergencyFunds,
+        refreshEmergencyFundTransactions,
         refreshInvestments,
+        refreshInvestmentTransactions,
         refreshBudgets,
         refreshCurrency,
         showConfirmationAction,

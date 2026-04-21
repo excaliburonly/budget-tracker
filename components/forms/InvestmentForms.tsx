@@ -4,7 +4,87 @@ import { addInvestment, updateInvestment } from "@/actions/investments";
 import { Investment } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 import { useState, useEffect, useRef } from "react";
-import { searchMutualFunds, MFSearchResponse } from "@/utils/nav-api";
+import { searchMutualFunds, MFSearchResponse, searchStocks, StockSearchResponse } from "@/utils/nav-api";
+
+function StockSearchInput({ 
+  onSelectAction, 
+  initialValue = "" 
+}: { 
+  onSelectAction: (shortname: string, symbol: string) => void,
+  initialValue?: string
+}) {
+  const [query, setQuery] = useState(initialValue);
+  const [results, setResults] = useState<StockSearchResponse[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (query.length >= 2) {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(async () => {
+        const res = await searchStocks(query);
+        setResults(res);
+        setShowResults(true);
+        setIsSearching(false);
+      }, 500);
+    }
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [query]);
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        name="asset_name"
+        required
+        value={query}
+        autoComplete="off"
+        onChange={(e) => {
+          const val = e.target.value;
+          setQuery(val);
+          if (val.length >= 2) {
+            setIsSearching(true);
+          } else {
+            setResults([]);
+            setShowResults(false);
+            setIsSearching(false);
+          }
+        }}
+        onFocus={() => query.length >= 2 && setShowResults(true)}
+        placeholder="Search Stock (e.g. Reliance, AAPL)..."
+        className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+      />
+      {isSearching && (
+        <div className="absolute right-3 top-2.5">
+          <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent"></div>
+        </div>
+      )}
+      {showResults && results.length > 0 && (
+        <div className="absolute z-20 w-full mt-1 bg-surface border border-surface-border rounded-lg shadow-xl max-h-60 overflow-y-auto">
+          {results.map((result) => (
+            <button
+              key={result.symbol}
+              type="button"
+              className="w-full text-left px-4 py-2 hover:bg-background/50 text-sm transition-colors border-b border-surface-border last:border-0"
+              onClick={() => {
+                const name = result.shortname || result.longname || result.symbol;
+                setQuery(name);
+                onSelectAction(name, result.symbol);
+                setShowResults(false);
+              }}
+            >
+              <div className="font-medium">{result.shortname || result.longname}</div>
+              <div className="text-[10px] text-text-muted">{result.symbol} • {result.exchange} • {result.typeDisp}</div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function MutualFundSearchInput({ 
   onSelectAction, 
@@ -41,6 +121,7 @@ function MutualFundSearchInput({
         name="asset_name"
         required
         value={query}
+        autoComplete="off"
         onChange={(e) => {
           const val = e.target.value;
           setQuery(val);
@@ -54,7 +135,7 @@ function MutualFundSearchInput({
         }}
         onFocus={() => query.length >= 3 && setShowResults(true)}
         placeholder="Search Mutual Fund..."
-        className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+        className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
       />
       {isSearching && (
         <div className="absolute right-3 top-2.5">
@@ -131,28 +212,6 @@ export function AddInvestmentForm({
       <h3 className="text-lg font-semibold text-foreground mb-4">Add New Investment</h3>
       <form id="investment-form" action={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <label htmlFor="asset_name" className="block text-sm font-medium text-foreground/80 mb-1">
-              Asset Name
-            </label>
-            {investmentType === "Mutual Fund" ? (
-              <MutualFundSearchInput 
-                onSelectAction={(name, code) => {
-                  setSchemeCode(code.toString());
-                }}
-              />
-            ) : (
-              <input
-                type="text"
-                name="asset_name"
-                id="asset_name"
-                required
-                placeholder="e.g. Nifty 50 Index Fund"
-                className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
-              />
-            )}
-          </div>
-
           <div>
             <label htmlFor="investment_type" className="block text-sm font-medium text-foreground/80 mb-1">
               Investment Type
@@ -163,7 +222,7 @@ export function AddInvestmentForm({
               required
               value={investmentType}
               onChange={(e) => setInvestmentType(e.target.value)}
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Type</option>
               {INVESTMENT_TYPES.map(type => (
@@ -173,19 +232,55 @@ export function AddInvestmentForm({
           </div>
 
           <div>
+            <label htmlFor="asset_name" className="block text-sm font-medium text-foreground/80 mb-1">
+              Asset Name
+            </label>
+            {investmentType === "Mutual Fund" ? (
+              <MutualFundSearchInput
+                onSelectAction={(name, code) => {
+                  setSchemeCode(code.toString());
+                }}
+              />
+            ) : investmentType === "Stock" ? (
+              <StockSearchInput
+                onSelectAction={(name, symbol) => {
+                  setSchemeCode(symbol);
+                }}
+              />
+            ) : (
+              <input
+                type="text"
+                name="asset_name"
+                id="asset_name"
+                required
+                autoComplete="off"
+                placeholder="e.g. Nifty 50 Index Fund"
+                className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            )}
+          </div>
+
+          <div>
             <label htmlFor="symbol" className="block text-sm font-medium text-foreground/80 mb-1">
-              Symbol / Scheme Code
+              {investmentType === "Mutual Fund" ? "Scheme Code" : investmentType === "Stock" ? "Ticker Symbol" : "Symbol"}
             </label>
             <input
               type="text"
               name="symbol"
               id="symbol"
+              autoComplete="off"
               value={schemeCode}
               onChange={(e) => setSchemeCode(e.target.value)}
-              placeholder="e.g. 120503"
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500 uppercase"
+              placeholder={investmentType === "Mutual Fund" ? "e.g. 120503" : "e.g. AAPL or RELIANCE.NS"}
+              className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500 uppercase"
             />
-            <p className="text-[10px] text-text-muted mt-1 leading-tight">Use MFAPI.in Scheme Code for Mutual Funds</p>
+            <p className="text-[10px] text-text-muted mt-1 leading-tight">
+              {investmentType === "Mutual Fund" 
+                ? "Use MFAPI.in Scheme Code for Mutual Funds" 
+                : investmentType === "Stock" 
+                  ? "Use .NS suffix for NSE stocks (e.g. INFY.NS)" 
+                  : "Ticker symbol for tracking"}
+            </p>
           </div>
 
           <div>
@@ -198,29 +293,31 @@ export function AddInvestmentForm({
               name="quantity"
               id="quantity"
               required
+              autoComplete="off"
               placeholder="0.00"
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label htmlFor="average_buy_price" className="block text-sm font-medium text-foreground/80 mb-1">
-              Initial Buy Price
+            <label htmlFor="invested_value" className="block text-sm font-medium text-foreground/80 mb-1">
+              Invested Value
             </label>
             <input
-              type="number"
-              step="0.01"
-              name="average_buy_price"
-              id="average_buy_price"
-              required
-              placeholder="0.00"
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                type="number"
+                step="0.01"
+                name="invested_value"
+                id="invested_value"
+                required
+                autoComplete="off"
+                placeholder="0.00"
+                className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
             <label htmlFor="current_value" className="block text-sm font-medium text-foreground/80 mb-1">
-              Current Market Value
+              Current Price per Unit
             </label>
             <input
               type="number"
@@ -228,12 +325,13 @@ export function AddInvestmentForm({
               name="current_value"
               id="current_value"
               required
+              autoComplete="off"
               placeholder="0.00"
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
-          <div>
+          <div className="md:col-span-2">
             <label htmlFor="account_id" className="block text-sm font-medium text-foreground/80 mb-1">
               Funding Account
             </label>
@@ -241,7 +339,7 @@ export function AddInvestmentForm({
               name="account_id"
               id="account_id"
               required
-              className="w-full rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Account</option>
               {accounts.map(account => (
@@ -301,10 +399,25 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
         </div>
         <form action={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Investment Type</label>
+              <select
+                name="investment_type"
+                value={investmentType}
+                onChange={(e) => setInvestmentType(e.target.value)}
+                required
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              >
+                {INVESTMENT_TYPES.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-foreground/80 mb-1">Asset Name</label>
               {investmentType === "Mutual Fund" ? (
-                <MutualFundSearchInput 
+                <MutualFundSearchInput
                   initialValue={investment.asset_name}
                   onSelectAction={(name, code) => {
                     setSchemeCode(code.toString());
@@ -316,24 +429,10 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
                   name="asset_name"
                   defaultValue={investment.asset_name}
                   required
-                  className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                  autoComplete="off"
+                  className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
                 />
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Investment Type</label>
-              <select
-                name="investment_type"
-                value={investmentType}
-                onChange={(e) => setInvestmentType(e.target.value)}
-                required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
-              >
-                {INVESTMENT_TYPES.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
             </div>
 
             <div>
@@ -341,10 +440,11 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
               <input
                 type="text"
                 name="symbol"
+                autoComplete="off"
                 value={schemeCode}
                 onChange={(e) => setSchemeCode(e.target.value)}
                 placeholder="e.g. 120503"
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500 uppercase"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500 uppercase"
               />
               <p className="text-[10px] text-text-muted mt-1 leading-tight">Use MFAPI.in Scheme Code for Mutual Funds</p>
             </div>
@@ -355,33 +455,36 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
                 type="number"
                 step="0.0001"
                 name="quantity"
+                autoComplete="off"
                 defaultValue={investment.quantity}
                 required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Avg. Buy Price</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Invested Value</label>
               <input
                 type="number"
                 step="0.01"
-                name="average_buy_price"
-                defaultValue={investment.average_buy_price}
+                name="invested_value"
+                autoComplete="off"
+                defaultValue={investment.invested_value}
                 required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Current Market Value</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Current Price per Unit</label>
               <input
                 type="number"
                 step="0.01"
                 name="current_value"
+                autoComplete="off"
                 defaultValue={investment.current_value}
                 required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
           </div>
@@ -460,7 +563,7 @@ export function AddInvestmentTransactionModal({
               <select
                 name="type"
                 required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="buy">Buy (SIP / Installment)</option>
                 <option value="sell">Sell</option>
@@ -474,7 +577,18 @@ export function AddInvestmentTransactionModal({
                 name="date"
                 required
                 defaultValue={new Date().toISOString().split('T')[0]}
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Time</label>
+              <input
+                type="time"
+                name="time"
+                required
+                defaultValue={new Date().toTimeString().slice(0, 5)}
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -485,8 +599,9 @@ export function AddInvestmentTransactionModal({
                 step="0.0001"
                 name="quantity"
                 required
+                autoComplete="off"
                 placeholder="0.00"
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -497,8 +612,9 @@ export function AddInvestmentTransactionModal({
                 step="0.01"
                 name="price"
                 required
+                autoComplete="off"
                 placeholder="0.00"
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -507,7 +623,7 @@ export function AddInvestmentTransactionModal({
               <select
                 name="account_id"
                 required
-                className="w-full rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select Account</option>
                 {accounts.map(account => (
@@ -516,6 +632,8 @@ export function AddInvestmentTransactionModal({
               </select>
             </div>
           </div>
+
+          <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />
 
           <div className="flex justify-end gap-3 pt-4">
             <button

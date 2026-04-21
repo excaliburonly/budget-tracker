@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { EmergencyFund } from "@/types/database";
+import { EmergencyFund, EmergencyFundTransaction } from "@/types/database";
 
 export async function getEmergencyFunds(): Promise<EmergencyFund[]> {
   const cookieStore = await cookies();
@@ -35,7 +35,7 @@ export async function createEmergencyFund(formData: FormData): Promise<{ error?:
   const target_amount = parseFloat(formData.get("target_amount") as string);
   const initial_amount = parseFloat(formData.get("initial_amount") as string) || 0;
   const account_id = formData.get("account_id") as string;
-  const date = new Date().toISOString().split('T')[0];
+  const date = new Date().toISOString();
 
   const { data: fund, error } = await supabase
     .from("emergency_funds")
@@ -99,7 +99,13 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
   const type = formData.get("type") as 'contribution' | 'withdrawal';
   const amount = parseFloat(formData.get("amount") as string);
   const date = formData.get("date") as string;
+  const time = formData.get("time") as string;
+  const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
   const account_id = formData.get("account_id") as string;
+
+  const dateTime = new Date(`${date}T${time}Z`);
+  dateTime.setMinutes(dateTime.getMinutes() + timezoneOffset);
+  const dateTimeISO = dateTime.toISOString();
 
   const { data: fund, error: fetchError } = await supabase
     .from("emergency_funds")
@@ -120,7 +126,7 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
         type: type === 'contribution' ? 'expense' : 'income',
         account_id,
         emergency_fund_id: fund.id,
-        date,
+        date: dateTimeISO,
         notes: `${type === 'contribution' ? 'Contributed to' : 'Withdrew from'} ${fund.name}`,
       }])
       .select()
@@ -137,7 +143,7 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
       transaction_id: mainTransactionId,
       type,
       amount,
-      date,
+      date: dateTimeISO,
     }]);
 
   if (fundTxError) return { error: fundTxError.message };
@@ -202,4 +208,39 @@ export async function deleteEmergencyFund(id: string): Promise<{ error?: string;
 
   revalidatePath("/dashboard/emergency-funds");
   return { success: true };
+}
+
+export async function getEmergencyFundTransactions(fundId?: string): Promise<EmergencyFundTransaction[]> {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  let query = supabase
+    .from("emergency_fund_transactions")
+    .select(`
+      *,
+      emergency_funds (
+        name,
+        instrument_type
+      ),
+      transactions (
+        notes,
+        accounts!transactions_account_id_fkey (
+          name
+        )
+      )
+    `)
+    .order("date", { ascending: false });
+
+  if (fundId) {
+    query = query.eq("emergency_fund_id", fundId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Error fetching emergency fund transactions:", error);
+    return [];
+  }
+
+  return data || [];
 }

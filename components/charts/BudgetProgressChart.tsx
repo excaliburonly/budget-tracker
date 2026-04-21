@@ -27,10 +27,10 @@ export default function BudgetProgressChart({ data, currency }: BudgetProgressCh
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const handle = requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       setIsMounted(true);
-    });
-    return () => cancelAnimationFrame(handle);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Sort data by amount descending
@@ -39,8 +39,8 @@ export default function BudgetProgressChart({ data, currency }: BudgetProgressCh
   if (!isMounted) return <div className="h-80 w-full animate-pulse bg-surface/50 rounded-lg" />;
 
   return (
-    <div className="h-80 w-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="h-80 w-full" style={{ minHeight: '320px' }}>
+      <ResponsiveContainer width="100%" height="100%" minHeight={320} minWidth={0}>
         <BarChart
           layout="vertical"
           data={sortedData}
@@ -109,7 +109,7 @@ export default function BudgetProgressChart({ data, currency }: BudgetProgressCh
               const { spent = 0, amount = 0 } = props.payload || {};
               const isOver = spent > amount;
               const isClose = spent > amount * 0.9;
-              const fill = isOver ? '#ef4444' : isClose ? '#f59e0b' : 'var(--primary)';
+              const fill = isOver ? 'var(--error)' : isClose ? 'var(--warning)' : 'var(--primary)';
               return <Rectangle {...props} fill={fill} />;
             }}
           />
