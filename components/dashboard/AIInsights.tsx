@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SparklesIcon, LightBulbIcon, ExclamationTriangleIcon, ChartBarIcon, BookmarkIcon, ClockIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { SparklesIcon, LightBulbIcon, ExclamationTriangleIcon, ChartBarIcon, BookmarkIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { generateFinancialInsights, saveFinancialInsight, getSavedInsights } from "@/actions/ai";
 
 interface Insights {

@@ -108,36 +108,37 @@ export async function generateFinancialInsights() {
 
   try {
     const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = result.response;
     let text = response.text();
     
-    // Extract JSON if it's wrapped in markdown or has filler text
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Extract JSON if it's wrapped in Markdown or has filler text
+    const jsonMatch = text.match(/\{[\s\S]*}/);
     if (jsonMatch) {
       text = jsonMatch[0];
     }
     
     try {
       return JSON.parse(text);
-    } catch (parseError) {
+    } catch {
       console.error("Error parsing AI response as JSON:", text);
       throw new Error("Invalid JSON response from AI");
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error("Detailed error generating AI insights:", error);
     
     // Provide more helpful error messages
     let errorMessage = "Failed to generate insights. Please try again later.";
+    const err = error as Error;
     
-    if (error.message?.includes("API key not valid")) {
+    if (err.message?.includes("API key not valid")) {
       errorMessage = "Invalid API key. Please check your GEMINI_API_KEY.";
-    } else if (error.message?.includes("blocked")) {
+    } else if (err.message?.includes("blocked")) {
       errorMessage = "The AI response was blocked by safety filters. Try adding more transaction data.";
-    } else if (error.message?.includes("quota")) {
+    } else if (err.message?.includes("quota")) {
       errorMessage = "API quota exceeded. Please try again later.";
-    } else if (error.message) {
+    } else if (err.message) {
       // Return the actual error message for debugging purposes (can be refined later for production)
-      errorMessage = `AI Error: ${error.message}`;
+      errorMessage = `AI Error: ${err.message}`;
     }
     
     return { 
@@ -146,7 +147,13 @@ export async function generateFinancialInsights() {
   }
 }
 
-export async function saveFinancialInsight(month: string, insightData: any) {
+interface InsightData {
+  recap: string;
+  anomalies: string[];
+  optimizations: string[];
+}
+
+export async function saveFinancialInsight(month: string, insightData: InsightData) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
