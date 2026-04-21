@@ -57,9 +57,12 @@ export async function addTransaction(formData: FormData) {
   const to_account_id = formData.get("to_account_id") as string;
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
+  const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
   const notes = formData.get("notes") as string;
 
-  const dateTime = new Date(`${date}T${time}`);
+  // Create date in UTC first, then adjust by offset
+  const dateTime = new Date(`${date}T${time}Z`);
+  dateTime.setMinutes(dateTime.getMinutes() + timezoneOffset);
 
   const { error } = await supabase.from("transactions").insert({
     user_id: user.id,
@@ -96,9 +99,11 @@ export async function updateTransaction(id: string, formData: FormData) {
   const to_account_id = formData.get("to_account_id") as string;
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
+  const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
   const notes = formData.get("notes") as string;
 
-  const dateTime = new Date(`${date}T${time}`);
+  const dateTime = new Date(`${date}T${time}Z`);
+  dateTime.setMinutes(dateTime.getMinutes() + timezoneOffset);
 
   const { error } = await supabase
     .from("transactions")

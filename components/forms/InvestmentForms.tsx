@@ -541,6 +541,8 @@ export function AddInvestmentTransactionModal({
             </div>
           </div>
 
+          <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />
+
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"

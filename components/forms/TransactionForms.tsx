@@ -144,6 +144,8 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     />
                 </div>
 
+                <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />
+
                 <div className="lg:col-span-3 flex justify-end">
                     <button
                         type="submit"
@@ -299,6 +301,8 @@ export function EditTransactionModal({
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         />
                     </div>
+
+                    <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />
 
                     <div className="md:col-span-2 flex justify-end gap-3 pt-4">
                         <button

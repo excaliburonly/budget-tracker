@@ -100,9 +100,12 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
   const amount = parseFloat(formData.get("amount") as string);
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
+  const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
   const account_id = formData.get("account_id") as string;
 
-  const dateTime = time ? new Date(`${date}T${time}`).toISOString() : new Date(date).toISOString();
+  const dateTime = new Date(`${date}T${time}Z`);
+  dateTime.setMinutes(dateTime.getMinutes() + timezoneOffset);
+  const dateTimeISO = dateTime.toISOString();
 
   const { data: fund, error: fetchError } = await supabase
     .from("emergency_funds")
@@ -123,7 +126,7 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
         type: type === 'contribution' ? 'expense' : 'income',
         account_id,
         emergency_fund_id: fund.id,
-        date: dateTime,
+        date: dateTimeISO,
         notes: `${type === 'contribution' ? 'Contributed to' : 'Withdrew from'} ${fund.name}`,
       }])
       .select()
@@ -140,7 +143,7 @@ export async function addEmergencyFundTransaction(fundId: string, formData: Form
       transaction_id: mainTransactionId,
       type,
       amount,
-      date: dateTime,
+      date: dateTimeISO,
     }]);
 
   if (fundTxError) return { error: fundTxError.message };

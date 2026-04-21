@@ -131,9 +131,12 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
     const price = parseFloat(formData.get("price") as string);
     const date = formData.get("date") as string;
     const time = formData.get("time") as string;
+    const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
     const account_id = formData.get("account_id") as string;
 
-    const dateTime = time ? new Date(`${date}T${time}`).toISOString() : new Date(date).toISOString();
+    const dateTime = new Date(`${date}T${time}Z`);
+    dateTime.setMinutes(dateTime.getMinutes() + timezoneOffset);
+    const dateTimeISO = dateTime.toISOString();
 
     // 1. Get current investment data
     const {data: investment, error: fetchError} = await supabase
@@ -158,7 +161,7 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
                 type: type === 'buy' ? 'expense' : 'income',
                 account_id,
                 investment_id: investment.id,
-                date: dateTime,
+                date: dateTimeISO,
                 notes: `${type === 'buy' ? 'Bought' : 'Sold'} ${quantity} units of ${investment.asset_name}`,
             }])
             .select()
@@ -173,7 +176,7 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
     const {error: invTxError} = await supabase
         .from("investment_transactions")
         .insert([{
-            investment_id: investment.id, transaction_id: mainTransactionId, type, quantity, price, date: dateTime,
+            investment_id: investment.id, transaction_id: mainTransactionId, type, quantity, price, date: dateTimeISO,
         }]);
 
     if (invTxError) return {error: invTxError.message};
