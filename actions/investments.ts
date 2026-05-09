@@ -76,7 +76,7 @@ export async function addInvestment(formData: FormData): Promise<{ error?: strin
             .insert([{
                 user_id: user.id,
                 amount,
-                type: 'expense',
+                type: 'investment',
                 account_id,
                 investment_id: investment.id,
                 date,
@@ -158,7 +158,7 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
             .insert([{
                 user_id: user.id,
                 amount,
-                type: type === 'buy' ? 'expense' : 'income',
+                type: type === 'buy' ? 'investment' : 'income',
                 account_id,
                 investment_id: investment.id,
                 date: dateTimeISO,

@@ -104,8 +104,8 @@ export async function generateFinancialInsights() {
 
     Provide a concise, helpful, and professional analysis in JSON format with the following structure:
     {
-      "recap": "A 2-3 sentence summary of the overall spending and income performance this month. Mention amounts in ${userCurrency}.",
-      "anomalies": ["A list of 1-3 unusual spending patterns, spikes, or large transactions. Mention amounts in ${userCurrency}. If none, return an empty array."],
+      "recap": "A 2-3 sentence summary of the overall spending, income performance, and investment/savings activity this month. Mention amounts in ${userCurrency}.",
+      "anomalies": ["A list of 1-3 unusual spending patterns, spikes, or large transactions. Mention amounts in ${userCurrency}. NOTE: Do NOT flag large 'investment' type transactions as anomalies as they are intentional savings. If none, return an empty array."],
       "optimizations": ["2-3 actionable suggestions on where to save money or reallocate budget based on spending vs budgets. Mention amounts in ${userCurrency}."]
     }
 
@@ -115,6 +115,7 @@ export async function generateFinancialInsights() {
     - If there is very little data, provide a summary of what is there and general financial advice.
     - Focus on categories where spending is high.
     - Compare spending to budgets where applicable.
+    - Distinguish between 'expense' (money gone) and 'investment' (money saved/invested). Do NOT treat investments as negative spending.
     - ALL currency values and mentions MUST be in ${userCurrency}. Do NOT use USD or $.
   `;
 

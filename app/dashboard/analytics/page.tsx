@@ -41,17 +41,20 @@ export default async function AnalyticsPage() {
   const expenses = thisMonthTransactions
     .filter(t => t.type === 'expense')
     .reduce((acc, t) => acc + Number(t.amount), 0);
-  const savings = income - expenses;
+  const monthInvestments = thisMonthTransactions
+    .filter(t => t.type === 'investment')
+    .reduce((acc, t) => acc + Number(t.amount), 0);
+  const savings = income - expenses; // Net savings includes money potentially invested
   const savingsRate = income > 0 ? (savings / income) * 100 : 0;
 
   // 2. Prepare Data for Daily Category Chart
   const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-  const expenseCategories = categories.filter(c => c.type === 'expense');
+  const expenseCategories = categories.filter(c => c.type === 'expense' || c.type === 'investment');
 
   const dailyData: Record<string, string | number>[] = Array.from({ length: daysInMonth }, (_, i) => {
     const day = String(i + 1).padStart(2, '0');
     const dateStr = `${currentMonth}-${day}`;
-    const dayTransactions = thisMonthTransactions.filter(t => t.date.startsWith(dateStr) && t.type === 'expense');
+    const dayTransactions = thisMonthTransactions.filter(t => t.date.startsWith(dateStr) && (t.type === 'expense' || t.type === 'investment'));
 
     const dayData: Record<string, string | number> = { date: day };
     expenseCategories.forEach(cat => {
@@ -76,7 +79,7 @@ export default async function AnalyticsPage() {
       .filter(t => t.date.startsWith(m) && t.type === 'income')
       .reduce((acc, t) => acc + Number(t.amount), 0);
     const monthExpense = transactions
-      .filter(t => t.date.startsWith(m) && t.type === 'expense')
+      .filter(t => t.date.startsWith(m) && (t.type === 'expense' || t.type === 'investment'))
       .reduce((acc, t) => acc + Number(t.amount), 0);
 
     return {
@@ -87,7 +90,7 @@ export default async function AnalyticsPage() {
   });
 
   // 4. Prepare Category Breakdown Data
-  const processCategoryData = (type: 'income' | 'expense') => {
+  const processCategoryData = (type: 'income' | 'expense' | 'investment') => {
     return Object.values(thisMonthTransactions
       .filter(t => t.type === type)
       .reduce((acc: Record<string, { name: string; value: number; color: string }>, t) => {
@@ -95,7 +98,7 @@ export default async function AnalyticsPage() {
         const catId = t.category_id || 'uncategorized';
         if (!acc[catId]) {
           acc[catId] = {
-            name: catName, value: 0, color: t.categories?.color || (type === 'income' ? 'var(--success)' : 'var(--error)')
+            name: catName, value: 0, color: t.categories?.color || (type === 'income' ? 'var(--success)' : (type === 'investment' ? 'var(--primary)' : 'var(--error)'))
           };
         }
         acc[catId].value += Number(t.amount);
@@ -104,6 +107,7 @@ export default async function AnalyticsPage() {
   };
 
   const expenseByCategoryData = processCategoryData('expense');
+  const investmentByCategoryData = processCategoryData('investment');
   const incomeByCategoryData = processCategoryData('income');
 
   return (
@@ -120,19 +124,19 @@ export default async function AnalyticsPage() {
       </section>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-emerald-500/10 rounded-2xl group-hover:bg-emerald-500/20 transition-colors">
               <ArrowTrendingUpIcon className="w-6 h-6 text-emerald-600" />
             </div>
-            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Monthly Income</span>
+            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Income</span>
           </div>
-          <div className="text-3xl font-black tracking-tight text-emerald-600">
+          <div className="text-2xl font-black tracking-tight text-emerald-600">
             {formatCurrency(income, currency)}
           </div>
           <div className="flex items-center gap-1.5 mt-3 text-[10px] font-bold text-emerald-600/80 uppercase tracking-wider">
-            Total inflow this month
+            Total inflow
           </div>
         </div>
 
@@ -141,28 +145,43 @@ export default async function AnalyticsPage() {
             <div className="p-3 bg-red-500/10 rounded-2xl group-hover:bg-red-500/20 transition-colors">
               <ArrowTrendingDownIcon className="w-6 h-6 text-red-600" />
             </div>
-            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Monthly Expenses</span>
+            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Expenses</span>
           </div>
-          <div className="text-3xl font-black tracking-tight text-red-600">
+          <div className="text-2xl font-black tracking-tight text-red-600">
             {formatCurrency(expenses, currency)}
           </div>
           <div className="flex items-center gap-1.5 mt-3 text-[10px] font-bold text-red-600/80 uppercase tracking-wider">
-            Total outflow this month
+            Total outflow
           </div>
         </div>
 
         <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors">
-              <BanknotesIcon className="w-6 h-6 text-primary" />
+              <PresentationChartLineIcon className="w-6 h-6 text-primary" />
+            </div>
+            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Invested</span>
+          </div>
+          <div className="text-2xl font-black tracking-tight text-primary">
+            {formatCurrency(monthInvestments, currency)}
+          </div>
+          <div className="flex items-center gap-1.5 mt-3 text-[10px] font-bold text-primary/80 uppercase tracking-wider">
+            Wealth built
+          </div>
+        </div>
+
+        <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-indigo-500/10 rounded-2xl group-hover:bg-indigo-500/20 transition-colors">
+              <BanknotesIcon className="w-6 h-6 text-indigo-600" />
             </div>
             <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Net Savings</span>
           </div>
-          <div className={`text-3xl font-black tracking-tight ${savings >= 0 ? 'text-foreground' : 'text-red-600'}`}>
+          <div className={`text-2xl font-black tracking-tight ${savings >= 0 ? 'text-foreground' : 'text-red-600'}`}>
             {formatCurrency(savings, currency)}
           </div>
           <div className="flex items-center gap-1.5 mt-3 text-[10px] font-bold text-text-muted uppercase tracking-wider">
-            Disposable income remaining
+            Leftover funds
           </div>
         </div>
 
@@ -173,11 +192,11 @@ export default async function AnalyticsPage() {
             </div>
             <span className="text-xs font-bold text-text-muted uppercase tracking-widest">Savings Rate</span>
           </div>
-          <div className="text-3xl font-black tracking-tight text-amber-600">
+          <div className="text-2xl font-black tracking-tight text-amber-600">
             {savingsRate.toFixed(1)}%
           </div>
           <div className="flex items-center gap-1.5 mt-3 text-[10px] font-bold text-amber-600/80 uppercase tracking-wider">
-            Efficiency of your income
+            Efficiency
           </div>
         </div>
       </div>
@@ -225,7 +244,7 @@ export default async function AnalyticsPage() {
         </section>
 
         <section className="lg:col-span-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-emerald-500/10 rounded-xl">
@@ -235,6 +254,18 @@ export default async function AnalyticsPage() {
               </div>
               <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm">
                 <CategoryBreakdownChart data={incomeByCategoryData} currency={currency} title="Income" />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <PresentationChartLineIcon className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-black text-foreground tracking-tight">Investment Breakdown</h3>
+              </div>
+              <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm">
+                <CategoryBreakdownChart data={investmentByCategoryData} currency={currency} title="Investments" />
               </div>
             </div>
             
