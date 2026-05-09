@@ -7,9 +7,9 @@ import {
 } from "@/actions/transactions";
 import { getAccounts } from "@/actions/accounts";
 import { 
-  getEmergencyFunds, 
-  getEmergencyFundTransactions 
-} from "@/actions/emergency-funds";
+  getGoals, 
+  getGoalAllocations 
+} from "@/actions/goals";
 import { 
   getInvestments, 
   getInvestmentTransactions 
@@ -18,12 +18,13 @@ import { getBudgets } from "@/actions/budgets";
 import { 
   Account, 
   Category, 
-  EmergencyFund, 
+  Goal,
+  GoalAllocation,
   Investment, 
   Transaction, 
   Budget,
+  Profile,
   InvestmentTransaction,
-  EmergencyFundTransaction
 } from "@/types/database";
 import { createClient } from "@/utils/supabase/client";
 import { ConfirmationModal } from "@/components/theme/ConfirmationModal";
@@ -41,11 +42,12 @@ interface DashboardContextType {
   transactions: Transaction[];
   categories: Category[];
   accounts: Account[];
-  emergencyFunds: EmergencyFund[];
-  emergencyFundTransactions: EmergencyFundTransaction[];
+  goals: Goal[];
+  goalAllocations: GoalAllocation[];
   investments: Investment[];
   investmentTransactions: InvestmentTransaction[];
   budgets: Budget[];
+  profile: Profile | null;
   currency: string;
   loading: boolean;
   isSaving: boolean;
@@ -54,12 +56,12 @@ interface DashboardContextType {
   refreshTransactions: () => Promise<void>;
   refreshCategories: () => Promise<void>;
   refreshAccounts: () => Promise<void>;
-  refreshEmergencyFunds: () => Promise<void>;
-  refreshEmergencyFundTransactions: () => Promise<void>;
+  refreshGoals: () => Promise<void>;
+  refreshGoalAllocations: () => Promise<void>;
   refreshInvestments: () => Promise<void>;
   refreshInvestmentTransactions: () => Promise<void>;
   refreshBudgets: () => Promise<void>;
-  refreshCurrency: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   showConfirmationAction: (config: ConfirmationConfig) => void;
 }
 
@@ -69,11 +71,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [emergencyFunds, setEmergencyFunds] = useState<EmergencyFund[]>([]);
-  const [emergencyFundTransactions, setEmergencyFundTransactions] = useState<EmergencyFundTransaction[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [goalAllocations, setGoalAllocations] = useState<GoalAllocation[]>([]);
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [investmentTransactions, setInvestmentTransactions] = useState<InvestmentTransaction[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [currency, setCurrency] = useState("INR");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -89,16 +92,19 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const currentMonth = new Date().toISOString().slice(0, 7);
 
-  const refreshCurrency = useCallback(async () => {
+  const refreshProfile = useCallback(async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data: profile } = await supabase
+      const { data: profileData } = await supabase
         .from("profiles")
-        .select("currency")
+        .select("*")
         .eq("id", user.id)
         .single();
-      setCurrency(profile?.currency || "INR");
+      if (profileData) {
+        setProfile(profileData);
+        setCurrency(profileData.currency || "INR");
+      }
     }
   }, []);
 
@@ -117,14 +123,14 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     setAccounts(data);
   }, []);
 
-  const refreshEmergencyFunds = useCallback(async () => {
-    const data = await getEmergencyFunds();
-    setEmergencyFunds(data);
+  const refreshGoals = useCallback(async () => {
+    const data = await getGoals();
+    setGoals(data);
   }, []);
 
-  const refreshEmergencyFundTransactions = useCallback(async () => {
-    const data = await getEmergencyFundTransactions();
-    setEmergencyFundTransactions(data);
+  const refreshGoalAllocations = useCallback(async () => {
+    const data = await getGoalAllocations();
+    setGoalAllocations(data);
   }, []);
 
   const refreshInvestments = useCallback(async () => {
@@ -146,12 +152,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       await Promise.all([
-        refreshCurrency(),
+        refreshProfile(),
         refreshTransactions(),
         refreshCategories(),
         refreshAccounts(),
-        refreshEmergencyFunds(),
-        refreshEmergencyFundTransactions(),
+        refreshGoals(),
+        refreshGoalAllocations(),
         refreshInvestments(),
         refreshInvestmentTransactions(),
         refreshBudgets(),
@@ -162,12 +168,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   }, [
-    refreshCurrency,
+    refreshProfile,
     refreshTransactions,
     refreshCategories,
     refreshAccounts,
-    refreshEmergencyFunds,
-    refreshEmergencyFundTransactions,
+    refreshGoals,
+    refreshGoalAllocations,
     refreshInvestments,
     refreshInvestmentTransactions,
     refreshBudgets,
@@ -183,11 +189,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         transactions,
         categories,
         accounts,
-        emergencyFunds,
-        emergencyFundTransactions,
+        goals,
+        goalAllocations,
         investments,
         investmentTransactions,
         budgets,
+        profile,
         currency,
         loading,
         isSaving,
@@ -196,12 +203,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         refreshTransactions,
         refreshCategories,
         refreshAccounts,
-        refreshEmergencyFunds,
-        refreshEmergencyFundTransactions,
+        refreshGoals,
+        refreshGoalAllocations,
         refreshInvestments,
         refreshInvestmentTransactions,
         refreshBudgets,
-        refreshCurrency,
+        refreshProfile,
         showConfirmationAction,
       }}
     >

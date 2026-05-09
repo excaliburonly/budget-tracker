@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { signOut } from "@/actions/auth";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Logo } from "@/components/brand/Logo";
+import { getInitials } from "@/utils/format";
+import Image from "next/image";
 import {
     HomeIcon,
     BanknotesIcon,
@@ -12,10 +14,10 @@ import {
     ChartBarIcon,
     ChartPieIcon,
     PresentationChartLineIcon,
-    ShieldCheckIcon,
     UserCircleIcon,
     ArrowRightStartOnRectangleIcon,
-    XMarkIcon
+    XMarkIcon,
+    WalletIcon
 } from "@heroicons/react/24/outline";
 
 import { useState, useMemo } from "react";
@@ -29,15 +31,14 @@ const navigation = [
     { name: 'Analytics', href: '/dashboard/analytics', icon: PresentationChartLineIcon },
     { name: 'Budgets', href: '/dashboard/budgets', icon: ChartPieIcon },
     { name: 'Investments', href: '/dashboard/investments', icon: ChartBarIcon, hasDropdown: true, dropdownType: 'investments' },
-    { name: 'Emergency Funds', href: '/dashboard/emergency-funds', icon: ShieldCheckIcon, hasDropdown: true, dropdownType: 'emergency-funds' },
+    { name: 'Goals', href: '/dashboard/goals', icon: WalletIcon },
     { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
 ];
 
 function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; onCloseAction?: () => void }) {
-    const { investments } = useDashboard();
+    const { investments, profile } = useDashboard();
     const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
         'investments': pathname?.startsWith('/dashboard/investments') || false,
-        'emergency-funds': pathname?.startsWith('/dashboard/emergency-funds') || false
     });
 
     const toggleDropdown = (type: string) => {
@@ -60,15 +61,8 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
         ];
     }, [investments]);
 
-    const emergencyFundItems = useMemo(() => {
-        return [
-            { name: 'Transactions', href: '/dashboard/emergency-funds/transactions' }
-        ];
-    }, []);
-
     const getDropdownItems = (type: string) => {
         if (type === 'investments') return investmentItems;
-        if (type === 'emergency-funds') return emergencyFundItems;
         return [];
     };
 
@@ -164,16 +158,39 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                 })}
             </nav>
 
-            <div className="p-6 border-t border-sidebar-border/50 flex flex-col gap-3 bg-sidebar/50 backdrop-blur-sm mt-auto">
-                <div className="bg-background/50 p-1.5 rounded-2xl border border-sidebar-border/30">
-                    <ThemeToggle align="top" showLabelOnMobile={true} />
+            <div className="p-6 border-t border-sidebar-border/50 flex flex-col gap-4 bg-sidebar/50 backdrop-blur-sm mt-auto">
+                <div className="flex items-center gap-3 px-2">
+                    <div className="w-10 h-10 rounded-xl overflow-hidden border border-primary/20 bg-primary/10 flex items-center justify-center shrink-0 relative">
+                        {profile?.avatar_url ? (
+                            <Image 
+                                src={profile.avatar_url} 
+                                alt="Profile" 
+                                fill
+                                className="object-cover"
+                            />
+                        ) : (
+                            <span className="text-xs font-black text-primary">
+                                {getInitials(profile?.full_name || 'User')}
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-black text-foreground truncate">{profile?.full_name || 'User'}</span>
+                        <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider truncate">Premium Account</span>
+                    </div>
                 </div>
-                <form action={signOut}>
-                    <button className="flex items-center gap-3 w-full px-4 py-3 text-left text-xs font-black uppercase tracking-widest text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all active:scale-95">
-                        <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
-                        Sign Out
-                    </button>
-                </form>
+
+                <div className="flex flex-col gap-2">
+                    <div className="bg-background/50 p-1.5 rounded-2xl border border-sidebar-border/30">
+                        <ThemeToggle align="top" showLabelOnMobile={true} />
+                    </div>
+                    <form action={signOut}>
+                        <button className="flex items-center gap-3 w-full px-4 py-3 text-left text-xs font-black uppercase tracking-widest text-text-muted hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all active:scale-95">
+                            <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
+                            Sign Out
+                        </button>
+                    </form>
+                </div>
             </div>
         </>
     );
