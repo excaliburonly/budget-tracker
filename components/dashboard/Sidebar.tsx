@@ -13,6 +13,7 @@ import {
     ChartPieIcon,
     PresentationChartLineIcon,
     ShieldCheckIcon,
+    UserCircleIcon,
     ArrowRightStartOnRectangleIcon,
     XMarkIcon
 } from "@heroicons/react/24/outline";
@@ -29,6 +30,7 @@ const navigation = [
     { name: 'Budgets', href: '/dashboard/budgets', icon: ChartPieIcon },
     { name: 'Investments', href: '/dashboard/investments', icon: ChartBarIcon, hasDropdown: true, dropdownType: 'investments' },
     { name: 'Emergency Funds', href: '/dashboard/emergency-funds', icon: ShieldCheckIcon, hasDropdown: true, dropdownType: 'emergency-funds' },
+    { name: 'Profile', href: '/dashboard/profile', icon: UserCircleIcon },
 ];
 
 function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; onCloseAction?: () => void }) {
