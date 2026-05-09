@@ -62,6 +62,15 @@ export async function generateFinancialInsights() {
     console.error("Error fetching budgets for AI:", bError);
   }
 
+  // Fetch user currency from profile
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("currency")
+    .eq("id", user.id)
+    .single();
+
+  const userCurrency = profile?.currency || "INR";
+
   const context = {
     transactions: transactions?.map(t => ({
       amount: t.amount,
@@ -74,7 +83,8 @@ export async function generateFinancialInsights() {
       budgeted: b.amount
     })),
     month: monthString,
-    currentDate: now.toISOString().split('T')[0]
+    currentDate: now.toISOString().split('T')[0],
+    currency: userCurrency
   };
 
   const model = genAI.getGenerativeModel(
@@ -87,15 +97,16 @@ export async function generateFinancialInsights() {
     Analyze the following financial data for the user for the month of ${monthString}.
     
     Current Date: ${context.currentDate}
+    User Currency: ${userCurrency}
 
     Data:
     ${JSON.stringify(context, null, 2)}
 
     Provide a concise, helpful, and professional analysis in JSON format with the following structure:
     {
-      "recap": "A 2-3 sentence summary of the overall spending and income performance this month.",
-      "anomalies": ["A list of 1-3 unusual spending patterns, spikes, or large transactions. If none, return an empty array."],
-      "optimizations": ["2-3 actionable suggestions on where to save money or reallocate budget based on spending vs budgets."]
+      "recap": "A 2-3 sentence summary of the overall spending and income performance this month. Mention amounts in ${userCurrency}.",
+      "anomalies": ["A list of 1-3 unusual spending patterns, spikes, or large transactions. Mention amounts in ${userCurrency}. If none, return an empty array."],
+      "optimizations": ["2-3 actionable suggestions on where to save money or reallocate budget based on spending vs budgets. Mention amounts in ${userCurrency}."]
     }
 
     Rules:
@@ -104,6 +115,7 @@ export async function generateFinancialInsights() {
     - If there is very little data, provide a summary of what is there and general financial advice.
     - Focus on categories where spending is high.
     - Compare spending to budgets where applicable.
+    - ALL currency values and mentions MUST be in ${userCurrency}. Do NOT use USD or $.
   `;
 
   try {
@@ -204,4 +216,25 @@ export async function getSavedInsights(month?: string) {
   }
 
   return data || [];
+}
+
+export async function deleteFinancialInsight(id: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase
+    .from("ai_insights")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Error deleting AI insight:", error);
+    return { error: error.message };
+  }
+
+  return { success: true };
 }

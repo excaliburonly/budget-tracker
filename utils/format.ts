@@ -24,6 +24,16 @@ export function formatDateTime(date: string) {
   });
 }
 
+export function getInitials(name: string | null) {
+  if (!name) return '??';
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+}
+
 export function formatRelativeTime(date: string | null) {
   if (!date) return null;
   

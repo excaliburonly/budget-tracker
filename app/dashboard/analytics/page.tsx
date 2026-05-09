@@ -51,7 +51,7 @@ export default async function AnalyticsPage() {
   const dailyData: Record<string, string | number>[] = Array.from({ length: daysInMonth }, (_, i) => {
     const day = String(i + 1).padStart(2, '0');
     const dateStr = `${currentMonth}-${day}`;
-    const dayTransactions = thisMonthTransactions.filter(t => t.date === dateStr && t.type === 'expense');
+    const dayTransactions = thisMonthTransactions.filter(t => t.date.startsWith(dateStr) && t.type === 'expense');
 
     const dayData: Record<string, string | number> = { date: day };
     expenseCategories.forEach(cat => {
