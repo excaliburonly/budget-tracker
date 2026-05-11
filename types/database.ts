@@ -2,7 +2,7 @@ export interface Category {
   id: string;
   user_id: string;
   name: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'investment';
   icon?: string | null;
   color?: string | null;
   created_at: string;
@@ -18,7 +18,7 @@ export interface Transaction {
   account_id?: string | null;
   to_account_id?: string | null;
   notes?: string | null;
-  type: 'income' | 'expense' | 'transfer';
+  type: 'income' | 'expense' | 'transfer' | 'investment';
   created_at: string;
   // Relation fields
   categories?: {

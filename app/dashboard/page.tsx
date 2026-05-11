@@ -105,7 +105,7 @@ export default async function DashboardPage() {
 
   // Budget calculations
   const spendingByCategory = transactions
-    .filter((t) => t.date.startsWith(currentMonth) && t.type === "expense")
+    .filter((t) => t.date.startsWith(currentMonth) && (t.type === "expense" || t.type === "investment"))
     .reduce((acc: Record<string, number>, t: Transaction) => {
       if (t.category_id) {
         acc[t.category_id] = (acc[t.category_id] || 0) + Number(t.amount);
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
       .filter((t) => t.date.startsWith(m) && t.type === "income")
       .reduce((acc, t) => acc + Number(t.amount), 0);
     const monthExpense = transactions
-      .filter((t) => t.date.startsWith(m) && t.type === "expense")
+      .filter((t) => t.date.startsWith(m) && (t.type === "expense" || t.type === "investment"))
       .reduce((acc, t) => acc + Number(t.amount), 0);
 
     return {
@@ -147,7 +147,7 @@ export default async function DashboardPage() {
   // Prepare data for CategoryBreakdownChart (spending by category)
   const expenseByCategoryData = Object.values(
     transactions
-      .filter((t) => t.date.startsWith(currentMonth) && t.type === "expense")
+      .filter((t) => t.date.startsWith(currentMonth) && (t.type === "expense" || t.type === "investment"))
       .reduce(
         (
           acc: Record<string, { name: string; value: number; color: string }>,
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
             acc[catId] = {
               name: catName,
               value: 0,
-              color: t.categories?.color || "var(--error)",
+              color: t.categories?.color || (t.type === 'investment' ? 'var(--primary)' : "var(--error)"),
             };
           }
           acc[catId].value += Number(t.amount);
@@ -511,7 +511,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                     <span
-                      className={`text-base font-black tracking-tight ${t.type === "income" ? "text-emerald-600" : "text-red-600"}`}
+                      className={`text-base font-black tracking-tight ${t.type === "income" ? "text-emerald-600" : (t.type === "investment" ? "text-primary" : "text-red-600")}`}
                     >
                       {t.type === "income" ? "+" : "-"}
                       {formatCurrency(Number(t.amount), currency)}

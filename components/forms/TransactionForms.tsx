@@ -8,10 +8,10 @@ import { useDashboard } from "@/providers/dashboard-provider";
 
 export function AddTransactionForm({ onTransactionAddedAction }: { onTransactionAddedAction?: () => void }) {
     const { categories, accounts, refreshTransactions, setIsSaving } = useDashboard();
-    const [type, setType] = useState<"income" | "expense" | "transfer">("expense");
+    const [type, setType] = useState<"income" | "expense" | "transfer" | "investment">("expense");
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-        setType(e.target.value as "income" | "expense" | "transfer");
+        setType(e.target.value as "income" | "expense" | "transfer" | "investment");
     };
 
     const handleSubmit = async (formData: FormData) => {
@@ -60,6 +60,7 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     >
                         <option value="expense">Expense</option>
                         <option value="income">Income</option>
+                        <option value="investment">Investment/Savings</option>
                         <option value="transfer">Self-Transfer</option>
                     </select>
                 </div>
@@ -172,7 +173,7 @@ export function EditTransactionModal({
     onTransactionUpdatedAction?: () => void
 }) {
     const { categories, accounts, refreshTransactions, setIsSaving } = useDashboard();
-    const [type, setType] = useState<"income" | "expense" | "transfer">(transaction.type);
+    const [type, setType] = useState<"income" | "expense" | "transfer" | "investment">(transaction.type);
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -212,11 +213,12 @@ export function EditTransactionModal({
                         <select
                             name="type"
                             value={type}
-                            onChange={(e) => setType(e.target.value as "income" | "expense" | "transfer")}
+                            onChange={(e) => setType(e.target.value as "income" | "expense" | "transfer" | "investment")}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         >
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
+                            <option value="investment">Investment/Savings</option>
                             <option value="transfer">Self-Transfer</option>
                         </select>
                     </div>
@@ -395,6 +397,7 @@ export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAc
                     >
                         <option value="expense">Expense</option>
                         <option value="income">Income</option>
+                        <option value="investment">Investment</option>
                     </select>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -524,6 +527,7 @@ export function EditCategoryModal({ category, onCloseAction, onCategoryUpdatedAc
                         >
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
+                            <option value="investment">Investment</option>
                         </select>
                     </div>
 

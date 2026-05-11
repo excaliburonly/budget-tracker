@@ -38,17 +38,10 @@ export default function InvestmentTransactionsPage() {
                         </thead>
                         <tbody className="divide-y divide-surface-border">
                         {investmentTransactions.length === 0 ? (
-                            <tr>
-                                <td colSpan={6} className="px-6 py-12 text-center text-text-muted">
-                                    No investment transactions found.
-                                </td>
-                            </tr>
+                            <tr><td colSpan={6} className="px-6 py-12 text-center text-text-muted">No investment transactions found.</td></tr>
                         ) : (
                             investmentTransactions.map((transaction) => (
-                                <InvestmentTransactionRow
-                                    key={transaction.id}
-                                    transaction={transaction}
-                                />
+                                <InvestmentTransactionRow key={transaction.id} transaction={transaction} />
                             ))
                         )}
                         </tbody>
