@@ -70,9 +70,10 @@ export function TransactionRow({ transaction, onEditAction, onDeleteAction }: Tr
       <td className="px-6 py-4 whitespace-nowrap">
         <div className={`text-sm font-bold ${
           transaction.type === 'income' ? 'text-[var(--success)]' : 
-          transaction.type === 'transfer' ? 'text-[var(--primary)]' : 'text-foreground'
+          transaction.type === 'investment' ? 'text-[var(--primary)]' :
+          transaction.type === 'transfer' ? 'text-indigo-600' : 'text-foreground'
         }`}>
-          {transaction.type === 'income' ? '+' : transaction.type === 'transfer' ? '' : '-'}
+          {transaction.type === 'income' ? '+' : (transaction.type === 'transfer' ? '' : '-')}
           {formatCurrency(transaction.amount, currency)}
         </div>
       </td>

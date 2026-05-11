@@ -46,7 +46,7 @@ export function AddBudgetForm({ onBudgetAddedAction }: BudgetFormProps) {
           >
             <option value="">Select a category</option>
             {categories
-              .filter((c) => c.type === "expense")
+              .filter((c) => c.type === "expense" || c.type === "investment")
               .map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -148,7 +148,7 @@ export function EditBudgetModal({
               className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             >
               {categories
-                .filter((c) => c.type === "expense")
+                .filter((c) => c.type === "expense" || c.type === "investment")
                 .map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}

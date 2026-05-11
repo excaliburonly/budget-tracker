@@ -16,13 +16,10 @@ export function InvestmentTransactionRow({ transaction }: InvestmentTransactionR
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm font-medium text-foreground">{formatDateTime(transaction.date)}</div>
         <div className="text-xs text-text-muted">{transaction.transactions?.notes || '-'}</div>
-      </td>      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-foreground font-medium">
-          {transaction.investments?.asset_name}
-        </div>
-        <div className="text-xs text-text-muted">
-          {transaction.investments?.investment_type}
-        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-foreground font-medium">{transaction.investments?.asset_name}</div>
+        <div className="text-xs text-text-muted">{transaction.investments?.investment_type}</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -32,19 +29,13 @@ export function InvestmentTransactionRow({ transaction }: InvestmentTransactionR
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-foreground">
-          {transaction.quantity} @ {formatCurrency(transaction.price, currency)}
-        </div>
+        <div className="text-sm text-foreground">{transaction.quantity} @ {formatCurrency(transaction.price, currency)}</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-foreground">
-            {transaction.transactions?.accounts?.name || '-'}
-        </div>
+        <div className="text-sm text-foreground">{transaction.transactions?.accounts?.name || '-'}</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right">
-        <div className={`text-sm font-bold ${
-          transaction.type === 'buy' ? 'text-red-600' : 'text-green-600'
-        }`}>
+        <div className={`text-sm font-bold ${transaction.type === 'buy' ? 'text-red-600' : 'text-green-600'}`}>
           {transaction.type === 'buy' ? '-' : '+'}
           {formatCurrency(transaction.quantity * transaction.price, currency)}
         </div>

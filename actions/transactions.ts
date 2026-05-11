@@ -26,7 +26,7 @@ export async function addCategory(formData: FormData) {
   if (!user) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
-  const type = formData.get("type") as "income" | "expense";
+  const type = formData.get("type") as "income" | "expense" | "investment";
   const color = formData.get("color") as string;
 
   const { error } = await supabase.from("categories").insert({
@@ -49,9 +49,8 @@ export async function addTransaction(formData: FormData) {
   if (!user) throw new Error("Unauthorized");
 
   const amount = parseFloat(formData.get("amount") as string);
-  const type = formData.get("type") as "income" | "expense" | "transfer";
+  const type = formData.get("type") as "income" | "expense" | "transfer" | "investment";
   const category_id = formData.get("category_id") as string;
-  const emergency_fund_id = formData.get("emergency_fund_id") as string;
   const investment_id = formData.get("investment_id") as string;
   const account_id = formData.get("account_id") as string;
   const to_account_id = formData.get("to_account_id") as string;
@@ -69,7 +68,6 @@ export async function addTransaction(formData: FormData) {
     amount,
     type,
     category_id: type === 'transfer' ? null : (category_id || null),
-    emergency_fund_id: emergency_fund_id || null,
     investment_id: investment_id || null,
     account_id: account_id || null,
     to_account_id: to_account_id || null,
@@ -81,7 +79,7 @@ export async function addTransaction(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/transactions");
-  revalidatePath("/dashboard/emergency-funds");
+  revalidatePath("/dashboard/goals");
   revalidatePath("/dashboard/investments");
   revalidatePath("/dashboard/accounts");
 }
@@ -91,9 +89,8 @@ export async function updateTransaction(id: string, formData: FormData) {
   const supabase = createClient(cookieStore);
 
   const amount = parseFloat(formData.get("amount") as string);
-  const type = formData.get("type") as "income" | "expense" | "transfer";
+  const type = formData.get("type") as "income" | "expense" | "transfer" | "investment";
   const category_id = formData.get("category_id") as string;
-  const emergency_fund_id = formData.get("emergency_fund_id") as string;
   const investment_id = formData.get("investment_id") as string;
   const account_id = formData.get("account_id") as string;
   const to_account_id = formData.get("to_account_id") as string;
@@ -111,7 +108,6 @@ export async function updateTransaction(id: string, formData: FormData) {
       amount,
       type,
       category_id: type === 'transfer' ? null : (category_id || null),
-      emergency_fund_id: emergency_fund_id || null,
       investment_id: investment_id || null,
       account_id: account_id || null,
       to_account_id: to_account_id || null,
@@ -124,7 +120,7 @@ export async function updateTransaction(id: string, formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/transactions");
-  revalidatePath("/dashboard/emergency-funds");
+  revalidatePath("/dashboard/goals");
   revalidatePath("/dashboard/investments");
   revalidatePath("/dashboard/accounts");
 }
@@ -139,7 +135,7 @@ export async function deleteTransaction(id: string) {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/transactions");
-  revalidatePath("/dashboard/emergency-funds");
+  revalidatePath("/dashboard/goals");
   revalidatePath("/dashboard/investments");
   revalidatePath("/dashboard/accounts");
 }
@@ -149,7 +145,7 @@ export async function updateCategory(id: string, formData: FormData) {
   const supabase = createClient(cookieStore);
 
   const name = formData.get("name") as string;
-  const type = formData.get("type") as "income" | "expense";
+  const type = formData.get("type") as "income" | "expense" | "investment";
   const color = formData.get("color") as string;
 
   const { error } = await supabase

@@ -2,7 +2,7 @@ export interface Category {
   id: string;
   user_id: string;
   name: string;
-  type: 'income' | 'expense';
+  type: 'income' | 'expense' | 'investment';
   icon?: string | null;
   color?: string | null;
   created_at: string;
@@ -14,12 +14,11 @@ export interface Transaction {
   amount: number;
   date: string; // This will now include time information
   category_id?: string | null;
-  emergency_fund_id?: string | null;
   investment_id?: string | null;
   account_id?: string | null;
   to_account_id?: string | null;
   notes?: string | null;
-  type: 'income' | 'expense' | 'transfer';
+  type: 'income' | 'expense' | 'transfer' | 'investment';
   created_at: string;
   // Relation fields
   categories?: {
@@ -58,37 +57,24 @@ export interface Profile {
   updated_at: string;
 }
 
-export interface EmergencyFund {
+export interface Goal {
   id: string;
   user_id: string;
   name: string;
-  instrument_type: string;
-  institution_name: string | null;
   target_amount: number;
-  current_amount: number;
+  deadline: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export interface EmergencyFundTransaction {
+export interface GoalAllocation {
   id: string;
-  emergency_fund_id: string;
-  transaction_id: string | null;
-  type: 'contribution' | 'withdrawal';
-  amount: number;
-  date: string;
+  goal_id: string;
+  asset_type: 'account' | 'investment';
+  asset_id: string;
+  percentage: number;
   created_at: string;
-  // Relation fields
-  emergency_funds?: {
-    name: string;
-    instrument_type: string;
-  } | null;
-  transactions?: {
-    notes: string | null;
-    accounts: {
-      name: string;
-    } | null;
-  } | null;
+  updated_at: string;
 }
 
 export interface Investment {
