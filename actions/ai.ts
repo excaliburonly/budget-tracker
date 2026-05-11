@@ -166,6 +166,108 @@ interface InsightData {
   optimizations: string[];
 }
 
+interface WhatIfParams {
+  monthlyIncomeChange: number;
+  monthlyExpenseChange: number;
+  monthlyInvestmentChange: number;
+  years: number;
+}
+
+export async function runWhatIfSimulation(params: WhatIfParams) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  // Check subscription tier
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("subscription_tier, currency")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.subscription_tier !== 'premium') {
+    return { error: "PREMIUM_REQUIRED", message: "The What-If Simulator is a premium feature. Please upgrade to access." };
+  }
+
+  const userCurrency = profile?.currency || "INR";
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  // Fetch current financial snapshot
+  const [accounts, investments, goals] = await Promise.all([
+    supabase.from("accounts").select("balance").eq("user_id", user.id),
+    supabase.from("investments").select("current_value, quantity, investment_type").eq("user_id", user.id),
+    supabase.from("goals").select("*").eq("user_id", user.id)
+  ]);
+
+  const currentLiquidCash = accounts.data?.reduce((acc, a) => acc + Number(a.balance), 0) || 0;
+  const currentInvestedValue = investments.data?.reduce((acc, inv) => acc + (Number(inv.current_value) * Number(inv.quantity)), 0) || 0;
+
+  const context = {
+    currentLiquidCash,
+    currentInvestedValue,
+    totalNetWorth: currentLiquidCash + currentInvestedValue,
+    goals: goals.data,
+    modifications: params,
+    currency: userCurrency
+  };
+
+  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+
+  const prompt = `
+    You are a high-level financial strategist for the "Ledgr" app. 
+    Perform a "What-If" financial simulation based on the following data:
+    
+    User Data:
+    ${JSON.stringify(context, null, 2)}
+
+    Parameters for Simulation:
+    - Increase/Decrease in Monthly Income: ${params.monthlyIncomeChange}
+    - Increase/Decrease in Monthly Expenses: ${params.monthlyExpenseChange}
+    - Increase/Decrease in Monthly Investment Contribution: ${params.monthlyInvestmentChange}
+    - Simulation Horizon: ${params.years} years
+
+    Assumptions:
+    - Use a conservative 10-12% annual return for Mutual Funds/Stocks.
+    - Use a 5-6% annual return for liquid cash (savings/FDs).
+    - Account for a 5% annual inflation rate in your commentary.
+
+    Provide a structured JSON response:
+    {
+      "projection": [
+        {"year": 0, "netWorth": number, "liquid": number, "invested": number},
+        ... (one entry per year for the horizon)
+      ],
+      "goalAnalysis": [
+        {"goalName": string, "projectedAchievementDate": string, "isReached": boolean}
+      ],
+      "insight": "A professional analysis of how these changes impact the user's long-term wealth (3-4 sentences).",
+      "recommendation": "One key strategic move the user should make based on this simulation."
+    }
+
+    Rules:
+    - Return ONLY the JSON object.
+    - All monetary values must be in ${userCurrency}.
+    - Be realistic but encouraging.
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    let text = result.response.text();
+    const jsonMatch = text.match(/\{[\s\S]*}/);
+    if (jsonMatch) text = jsonMatch[0];
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Simulation Error:", error);
+    return { error: "Failed to run simulation" };
+  }
+}
+
+
 export async function saveFinancialInsight(month: string, insightData: InsightData) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);

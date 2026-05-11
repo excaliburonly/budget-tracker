@@ -1,3 +1,56 @@
+export async function fetchHistoricalNAVs(schemeCode: string): Promise<Record<string, number>> {
+  try {
+    const response = await fetch(`https://api.mfapi.in/mf/${schemeCode}`);
+    if (!response.ok) return {};
+
+    const json = (await response.json()) as MFNAVResponse;
+    const history: Record<string, number> = {};
+    
+    if (json.status === "SUCCESS") {
+      json.data.forEach(item => {
+        // Convert DD-MM-YYYY to YYYY-MM-DD for easier matching
+        const [day, month, year] = item.date.split('-');
+        const formattedDate = `${year}-${month}-${day}`;
+        history[formattedDate] = parseFloat(item.nav);
+      });
+    }
+    return history;
+  } catch (error) {
+    console.error(`Error fetching historical NAVs for ${schemeCode}:`, error);
+    return {};
+  }
+}
+
+export async function fetchHistoricalStockPrices(symbol: string, startDate: string, endDate: string): Promise<Record<string, number>> {
+  try {
+    const period1 = Math.floor(new Date(startDate).getTime() / 1000);
+    const period2 = Math.floor(new Date(endDate).getTime() / 1000);
+    
+    const response = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?period1=${period1}&period2=${period2}&interval=1d`);
+    if (!response.ok) return {};
+
+    const json = await response.json();
+    const result = json.chart?.result?.[0];
+    const history: Record<string, number> = {};
+
+    if (result && result.timestamp && result.indicators?.quote?.[0]?.close) {
+      const timestamps = result.timestamp as number[];
+      const closes = result.indicators.quote[0].close as number[];
+
+      timestamps.forEach((ts, i) => {
+        const date = new Date(ts * 1000).toISOString().split('T')[0];
+        if (closes[i] !== null) {
+          history[date] = closes[i];
+        }
+      });
+    }
+    return history;
+  } catch (error) {
+    console.error(`Error fetching historical stock prices for ${symbol}:`, error);
+    return {};
+  }
+}
+
 export interface MFNAVResponse {
   meta: {
     fund_house: string;
