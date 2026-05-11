@@ -84,7 +84,9 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">To Account (Destination)</label>
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
+                            To Account (Destination)
+                        </label>
                         <select
                             name="to_account_id"
                             className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
@@ -93,7 +95,7 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                             <option value="">Select destination</option>
                             {accounts.map((a) => (
                                 <option key={a.id} value={a.id}>
-                                    {a.name}
+                                    {a.name} {a.type === 'Credit Card' ? '(Credit Card)' : ''}
                                 </option>
                             ))}
                         </select>
@@ -111,7 +113,7 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                         <option value="">Select account</option>
                         {accounts.map((a) => (
                             <option key={a.id} value={a.id}>
-                                {a.name}
+                                {a.name} {a.type === 'Credit Card' ? '(Credit Card)' : ''}
                             </option>
                         ))}
                     </select>

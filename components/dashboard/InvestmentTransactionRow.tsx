@@ -29,7 +29,7 @@ export function InvestmentTransactionRow({ transaction }: InvestmentTransactionR
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-foreground">{transaction.quantity} @ {formatCurrency(transaction.price, currency)}</div>
+        <div className="text-sm text-foreground">{transaction.quantity} Units</div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-foreground">{transaction.transactions?.accounts?.name || '-'}</div>

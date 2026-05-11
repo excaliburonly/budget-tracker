@@ -82,12 +82,16 @@ export default function InvestmentPerformanceChart({ data, currency }: Investmen
               dataKey="date" 
               axisLine={false} 
               tickLine={false} 
-              tick={{fontSize: 10, fontWeight: 700}} 
+              tick={{ fill: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }} 
               minTickGap={30}
               tickFormatter={(str: string) => new Date(str).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
             />
             <YAxis 
-              hide 
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+              tickFormatter={(value) => formatCurrency(value, currency)}
+              width={80}
               domain={['auto', 'auto']} 
             />
             <Tooltip 

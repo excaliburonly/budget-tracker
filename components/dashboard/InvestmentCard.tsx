@@ -107,7 +107,7 @@ export function InvestmentCard({ investment, currency, onEditAction, onRefreshAc
 
       <div className="pt-4 border-t border-surface-border flex justify-between items-center">
         <div className="text-xs text-text-muted">
-          Qty: <span className="font-semibold text-foreground">{investment.quantity}</span> @ {formatCurrency(investment.average_buy_price, currency)}
+          Units: <span className="font-semibold text-foreground">{investment.quantity}</span> • Invested: <span className="font-semibold text-foreground">{formatCurrency(investment.invested_value, currency)}</span>
         </div>
         <div className={`text-xs font-bold px-2 py-0.5 rounded-full ${isPositive ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'}`}>
           {isPositive ? '+' : ''}{pnlPercentage.toFixed(2)}%

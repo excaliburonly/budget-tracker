@@ -146,7 +146,8 @@ export async function addInvestment(formData: FormData): Promise<{ error?: strin
     const symbol = formData.get("symbol") as string;
     const quantity = parseFloat(formData.get("quantity") as string);
     const invested_value = parseFloat(formData.get("invested_value") as string);
-    const current_value = parseFloat(formData.get("current_value") as string);
+    const current_value_raw = formData.get("current_value");
+    const current_value = current_value_raw ? parseFloat(current_value_raw as string) : (invested_value / quantity);
     const average_buy_price = invested_value / quantity;
     const account_id = formData.get("account_id") as string;
     const date = new Date().toISOString();
@@ -184,7 +185,8 @@ export async function addInvestmentTransaction(investmentId: string, formData: F
 
     const type = formData.get("type") as 'buy' | 'sell';
     const quantity = parseFloat(formData.get("quantity") as string);
-    const price = parseFloat(formData.get("price") as string);
+    const invested_value = parseFloat(formData.get("invested_value") as string);
+    const price = invested_value / quantity;
     const date = formData.get("date") as string;
     const time = formData.get("time") as string;
     const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
@@ -324,12 +326,17 @@ export async function updateInvestment(id: string, formData: FormData): Promise<
     const symbol = formData.get("symbol") as string;
     const quantity = parseFloat(formData.get("quantity") as string);
     const invested_value = parseFloat(formData.get("invested_value") as string);
-    const current_value = parseFloat(formData.get("current_value") as string);
     const average_buy_price = invested_value / quantity;
+    const current_value_raw = formData.get("current_value");
 
-    const {error} = await supabase.from("investments").update({
-        asset_name, investment_type, symbol: symbol || null, quantity, average_buy_price, current_value, invested_value,
-    }).eq("id", id);
+    const updateData: Partial<Investment> = {
+        asset_name, investment_type, symbol: symbol || null, quantity, average_buy_price, invested_value,
+    };
+    if (current_value_raw) {
+        updateData.current_value = parseFloat(current_value_raw as string);
+    }
+
+    const {error} = await supabase.from("investments").update(updateData).eq("id", id);
     if (error) return {error: error.message};
     revalidatePath("/dashboard/investments");
     revalidatePath("/dashboard");
