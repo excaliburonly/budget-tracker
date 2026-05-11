@@ -42,8 +42,8 @@ export default function IncomeExpenseChart({ data, currency }: IncomeExpenseChar
           data={data}
           margin={{
             top: 5,
-            right: 10,
-            left: 10,
+            right: 0,
+            left: 0,
             bottom: 5,
           }}
         >
@@ -56,7 +56,11 @@ export default function IncomeExpenseChart({ data, currency }: IncomeExpenseChar
             dy={10}
           />
           <YAxis 
-            hide 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+            tickFormatter={(value) => formatCurrency(value, currency)}
+            width={80}
           />
           <Tooltip
             cursor={{ fill: 'var(--background)', opacity: 0.4 }}

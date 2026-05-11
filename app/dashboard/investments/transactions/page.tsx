@@ -31,7 +31,7 @@ export default function InvestmentTransactionsPage() {
                             <th className="px-6 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-widest">Date / Notes</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-widest">Asset</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-widest">Type</th>
-                            <th className="px-6 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-widest">Detail</th>
+                            <th className="px-6 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-widest">Units</th>
                             <th className="px-6 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-widest">Account</th>
                             <th className="px-6 py-4 text-right text-xs font-bold text-text-muted uppercase tracking-widest">Value</th>
                         </tr>

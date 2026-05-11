@@ -38,8 +38,8 @@ export default function DailyCategoryChart({ data, categories, currency }: Daily
           data={data}
           margin={{
             top: 10,
-            right: 10,
-            left: 10,
+            right: 0,
+            left: 0,
             bottom: 20,
           }}
         >
@@ -52,7 +52,11 @@ export default function DailyCategoryChart({ data, categories, currency }: Daily
             dy={10}
           />
           <YAxis 
-            hide 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+            tickFormatter={(value) => formatCurrency(value, currency)}
+            width={80}
           />
           <Tooltip
             cursor={{ fill: 'var(--background)', opacity: 0.4 }}

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { CreditCardIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 import AccountsPieChart from "@/components/charts/AccountsPieChart";
+import { formatCurrency } from "@/utils/format";
 
 export default function AccountsPage() {
     const { 
@@ -21,8 +22,16 @@ export default function AccountsPage() {
     // Prepare data for AccountsPieChart
     const accountChartData = accounts.map(a => ({
         name: a.name,
-        value: Number(a.balance)
+        value: Math.abs(Number(a.balance))
     }));
+
+    const totalAssets = accounts
+        .filter(a => a.type !== 'Credit Card' || a.balance > 0)
+        .reduce((sum, a) => sum + Number(a.balance), 0);
+    
+    const totalDebt = accounts
+        .filter(a => a.type === 'Credit Card' && a.balance < 0)
+        .reduce((sum, a) => sum + Math.abs(Number(a.balance)), 0);
 
     if (loading) {
         return <div className="p-8 text-center text-text-muted">Loading accounts...</div>;
@@ -30,13 +39,28 @@ export default function AccountsPage() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-10 animate-fade-in-up">
-            <header className="flex flex-col md:flex-row md:items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-2xl w-fit">
-                    <CreditCardIcon className="w-8 h-8 text-primary" />
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-2xl w-fit">
+                        <CreditCardIcon className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">My Accounts</h1>
+                        <p className="text-text-muted mt-1 font-medium">Manage your bank accounts, wallets, and cash</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">My Accounts</h1>
-                    <p className="text-text-muted mt-1 font-medium">Manage your bank accounts, wallets, and cash</p>
+
+                <div className="flex gap-4">
+                    <div className="bg-surface p-4 rounded-2xl border border-surface-border text-right min-w-[150px]">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-1">Total Assets</p>
+                        <p className="text-xl font-bold text-emerald-600">{formatCurrency(totalAssets, currency)}</p>
+                    </div>
+                    {totalDebt > 0 && (
+                        <div className="bg-red-50/50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/20 text-right min-w-[150px]">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 mb-1">Total Debt</p>
+                            <p className="text-xl font-bold text-red-600 dark:text-red-400">{formatCurrency(totalDebt, currency)}</p>
+                        </div>
+                    )}
                 </div>
             </header>
 

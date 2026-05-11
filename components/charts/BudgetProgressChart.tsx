@@ -46,13 +46,19 @@ export default function BudgetProgressChart({ data, currency }: BudgetProgressCh
           data={sortedData}
           margin={{
             top: 5,
-            right: 30,
-            left: 40,
+            right: 0,
+            left: 0,
             bottom: 5,
           }}
         >
-          <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="var(--surface-border)" />
-          <XAxis type="number" hide />
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={true} stroke="var(--surface-border)" />
+          <XAxis 
+            type="number" 
+            axisLine={false} 
+            tickLine={false} 
+            tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
+            tickFormatter={(value) => formatCurrency(value, currency)}
+          />
           <YAxis 
             dataKey="name" 
             type="category" 

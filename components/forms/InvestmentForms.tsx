@@ -285,7 +285,7 @@ export function AddInvestmentForm({
 
           <div>
             <label htmlFor="quantity" className="block text-sm font-medium text-foreground/80 mb-1">
-              Initial Quantity
+              Units
             </label>
             <input
               type="number"
@@ -312,22 +312,6 @@ export function AddInvestmentForm({
                 autoComplete="off"
                 placeholder="0.00"
                 className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="current_value" className="block text-sm font-medium text-foreground/80 mb-1">
-              Current Price per Unit
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              name="current_value"
-              id="current_value"
-              required
-              autoComplete="off"
-              placeholder="0.00"
-              className="w-full px-4 py-2 rounded-lg border border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
@@ -450,7 +434,7 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Quantity</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Units</label>
               <input
                 type="number"
                 step="0.0001"
@@ -470,19 +454,6 @@ export function EditInvestmentModal({ investment, onCloseAction, onInvestmentUpd
                 name="invested_value"
                 autoComplete="off"
                 defaultValue={investment.invested_value}
-                required
-                className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Current Price per Unit</label>
-              <input
-                type="number"
-                step="0.01"
-                name="current_value"
-                autoComplete="off"
-                defaultValue={investment.current_value}
                 required
                 className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
@@ -593,7 +564,7 @@ export function AddInvestmentTransactionModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Quantity</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Units</label>
               <input
                 type="number"
                 step="0.0001"
@@ -606,11 +577,11 @@ export function AddInvestmentTransactionModal({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground/80 mb-1">Price per unit</label>
+              <label className="block text-sm font-medium text-foreground/80 mb-1">Invested Value</label>
               <input
                 type="number"
                 step="0.01"
-                name="price"
+                name="invested_value"
                 required
                 autoComplete="off"
                 placeholder="0.00"
