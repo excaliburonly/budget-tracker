@@ -44,7 +44,7 @@ const CustomTooltip = ({
     const profitPercent = invested > 0 ? (profit / invested) * 100 : 0;
 
     return (
-      <div className="bg-surface/90 backdrop-blur-md border border-surface-border p-4 rounded-2xl shadow-2xl min-w-[200px] animate-in fade-in zoom-in duration-200">
+      <div className="bg-surface/90 backdrop-blur-md border border-surface-border p-4 rounded-2xl shadow-2xl min-w-50 animate-in fade-in zoom-in duration-200">
         <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 pb-2 border-b border-surface-border/50">
           {label
             ? new Date(label).toLocaleDateString(undefined, {
@@ -112,7 +112,7 @@ export default function InvestmentPerformanceChart({
     return (
       <div
         style={{ height }}
-        className="w-full bg-surface/50 animate-pulse rounded-[1.5rem]"
+        className="w-full bg-surface/50 animate-pulse rounded-3xl"
       />
     );
   }
