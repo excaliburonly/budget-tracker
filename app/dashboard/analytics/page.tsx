@@ -190,8 +190,8 @@ export default async function AnalyticsPage(props: { searchParams: Promise<{ tab
                       <p className="text-[10px] text-text-muted font-black uppercase tracking-widest">{inv.investment_type} • {inv.symbol || 'No Symbol'}</p>
                     </div>
                   </div>
-                  <div className="h-64">
-                    <InvestmentPerformanceChart data={individualPerformances[inv.id]} currency={currency} />
+                  <div>
+                    <InvestmentPerformanceChart data={individualPerformances[inv.id]} currency={currency} height={200} />
                   </div>
                 </div>
               ))}

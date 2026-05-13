@@ -92,15 +92,36 @@ export default async function DashboardPage() {
     };
   });
 
-  // Calculate money left per day
+  // Calculate money left per day based on last working day of the month
   const today = new Date();
-  const lastDayOfMonth = new Date(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    0,
-  ).getDate();
-  const currentDay = today.getDate();
-  const daysLeft = Math.max(1, lastDayOfMonth - currentDay);
+  today.setHours(0, 0, 0, 0);
+
+  const getLastWorkingDay = (date: Date) => {
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    while (lastDay.getDay() === 0 || lastDay.getDay() === 6) {
+      lastDay.setDate(lastDay.getDate() - 1);
+    }
+    lastDay.setHours(0, 0, 0, 0);
+    return lastDay;
+  };
+
+  let targetDate = getLastWorkingDay(today);
+  let startDate: Date;
+
+  if (today >= targetDate) {
+    // If we've reached or passed the last working day, the next period ends at next month's last working day
+    startDate = targetDate;
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    targetDate = getLastWorkingDay(nextMonth);
+  } else {
+    // Current period started at last month's last working day
+    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    startDate = getLastWorkingDay(lastMonth);
+  }
+
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const daysLeft = Math.max(1, Math.round((targetDate.getTime() - today.getTime()) / msPerDay));
+  const totalDaysInPeriod = Math.max(1, Math.round((targetDate.getTime() - startDate.getTime()) / msPerDay));
   const moneyPerDay = totalBalance / daysLeft;
 
   // Budget calculations
@@ -294,7 +315,7 @@ export default async function DashboardPage() {
               <div
                 className="h-full bg-amber-500 transition-all duration-1000"
                 style={{
-                  width: `${Math.max(10, (daysLeft / lastDayOfMonth) * 100)}%`,
+                  width: `${Math.max(10, (daysLeft / totalDaysInPeriod) * 100)}%`,
                 }}
               />
             </div>
