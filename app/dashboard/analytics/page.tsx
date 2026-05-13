@@ -13,6 +13,7 @@ import {
 import IncomeExpenseChart from "@/components/charts/IncomeExpenseChart";
 import CategoryBreakdownChart from "@/components/charts/CategoryBreakdownChart";
 import DailyCategoryChart from "@/components/charts/DailyCategoryChart";
+import NetWorthChart from "@/components/charts/NetWorthChart";
 import AIInsights from "@/components/dashboard/AIInsights";
 import WhatIfSimulator from "@/components/dashboard/WhatIfSimulator";
 import FinancialHealthReport from "@/components/dashboard/FinancialHealthReport";
@@ -20,6 +21,7 @@ import AnalyticsTabs from "@/components/dashboard/AnalyticsTabs";
 import InvestmentPerformanceChart from "@/components/charts/InvestmentPerformanceChart";
 import { Suspense } from "react";
 import { getInvestmentPerformance, getInvestments, getIndividualInvestmentPerformance, PerformancePoint } from "@/actions/investments";
+import { getNetWorthHistory, updateNetWorthSnapshot } from "@/actions/profiles";
 
 export default async function AnalyticsPage(props: { searchParams: Promise<{ tab?: string }> }) {
   const searchParams = await props.searchParams;
@@ -44,6 +46,12 @@ export default async function AnalyticsPage(props: { searchParams: Promise<{ tab
     getCategories(),
     getInvestments()
   ]);
+
+  let netWorthHistory = [];
+  if (activeTab === "general") {
+    await updateNetWorthSnapshot();
+    netWorthHistory = await getNetWorthHistory();
+  }
 
   // Data processing for general analytics
   const thisMonthTransactions = transactions.filter(t => t.date.startsWith(currentMonth));
@@ -248,6 +256,10 @@ export default async function AnalyticsPage(props: { searchParams: Promise<{ tab
               <div className="flex items-center gap-1.5 mt-3 text-[10px] font-bold text-amber-600/80 uppercase tracking-wider">Efficiency</div>
             </div>
           </div>
+
+          <section>
+            <NetWorthChart data={netWorthHistory} currency={currency} />
+          </section>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10">
             <section className="lg:col-span-3 space-y-6">

@@ -82,3 +82,71 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/dashboard");
   return { success: true };
 }
+
+export async function getNetWorthHistory() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("net_worth_history")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("month", { ascending: true })
+    .limit(12);
+
+  if (error) {
+    console.error("Error fetching net worth history:", error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function updateNetWorthSnapshot() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  // Fetch current liquid cash from accounts
+  const { data: accounts } = await supabase
+    .from("accounts")
+    .select("balance")
+    .eq("user_id", user.id);
+  
+  const liquidCash = accounts?.reduce((acc, a) => acc + Number(a.balance), 0) || 0;
+
+  // Fetch current invested value from investments
+  const { data: investments } = await supabase
+    .from("investments")
+    .select("current_value, quantity")
+    .eq("user_id", user.id);
+  
+  const investedValue = investments?.reduce((acc, inv) => acc + (Number(inv.current_value) * Number(inv.quantity)), 0) || 0;
+
+  const totalNetWorth = liquidCash + investedValue;
+  const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+  const { error } = await supabase
+    .from("net_worth_history")
+    .upsert({
+      user_id: user.id,
+      month,
+      liquid_cash: liquidCash,
+      invested_value: investedValue,
+      total_net_worth: totalNetWorth,
+    }, {
+      onConflict: 'user_id, month'
+    });
+
+  if (error) {
+    console.error("Error updating net worth snapshot:", error);
+    return { error: error.message };
+  }
+
+  return { success: true };
+}
