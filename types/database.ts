@@ -54,6 +54,7 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   currency: string;
+  subscription_tier?: 'free' | 'premium';
   updated_at: string;
 }
 

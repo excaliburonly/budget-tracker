@@ -9,13 +9,16 @@ export async function getCategories(): Promise<Category[]> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("categories")
     .select("*")
+    .or(`user_id.is.null,user_id.eq.${user?.id}`)
     .order("name", { ascending: true });
 
   if (error) throw new Error(error.message);
-  return (data as Category[]) || [];
+  return data || [];
 }
 
 export async function addCategory(formData: FormData) {

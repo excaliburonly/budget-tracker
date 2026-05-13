@@ -2,16 +2,49 @@
 
 import { ChangeEvent, useState } from "react";
 import { addCategory, addTransaction, deleteCategory, updateCategory, updateTransaction } from "@/actions/transactions";
+import { suggestTransactionCategory } from "@/actions/ai";
 import { Category, Transaction } from "@/types/database";
-import { PencilSquareIcon, TrashIcon, ArrowsRightLeftIcon, ChartPieIcon } from "@heroicons/react/24/outline";
+import { 
+    PencilSquareIcon, 
+    TrashIcon, 
+    ArrowsRightLeftIcon, 
+    ChartPieIcon,
+    SparklesIcon 
+} from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 
 export function AddTransactionForm({ onTransactionAddedAction }: { onTransactionAddedAction?: () => void }) {
-    const { categories, accounts, refreshTransactions, setIsSaving } = useDashboard();
+    const { categories, accounts, refreshTransactions, setIsSaving, profile } = useDashboard();
     const [type, setType] = useState<"income" | "expense" | "transfer" | "investment">("expense");
+    const [notes, setNotes] = useState("");
+    const [categoryId, setCategoryId] = useState("");
+    const [isSuggesting, setIsSuggesting] = useState(false);
+
+    const isPremium = profile?.subscription_tier === 'premium';
 
     const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         setType(e.target.value as "income" | "expense" | "transfer" | "investment");
+        setCategoryId(""); // Reset category when type changes
+    };
+
+    const handleSuggestCategory = async () => {
+        if (!notes || notes.length < 2 || type === 'transfer' || !isPremium) return;
+        
+        setIsSuggesting(true);
+        try {
+            const result = await suggestTransactionCategory(notes, type);
+            if (result && typeof result === 'object' && 'error' in result) {
+                alert(result.message);
+                return;
+            }
+            if (typeof result === 'string') {
+                setCategoryId(result);
+            }
+        } catch (error) {
+            console.error("Suggestion failed:", error);
+        } finally {
+            setIsSuggesting(false);
+        }
     };
 
     const handleSubmit = async (formData: FormData) => {
@@ -23,6 +56,8 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
             const form = document.getElementById('add-transaction-form') as HTMLFormElement;
             form?.reset();
             setType("expense");
+            setNotes("");
+            setCategoryId("");
         } finally {
             setIsSaving(false);
         }
@@ -70,6 +105,8 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                         <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Category</label>
                         <select
                             name="category_id"
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
                             className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                         >
                             <option value="">No category</option>
@@ -139,15 +176,36 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     />
                 </div>
 
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 relative">
                     <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Notes</label>
-                    <input
-                        type="text"
-                        name="notes"
-                        autoComplete="off"
-                        className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/40 font-bold"
-                        placeholder="Lunch, Salary, Rent..."
-                    />
+                    <div className="relative group">
+                        <input
+                            type="text"
+                            name="notes"
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            autoComplete="off"
+                            className="w-full px-5 py-3 pr-12 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/40 font-bold"
+                            placeholder="Lunch, Salary, Rent..."
+                        />
+                        {type !== 'transfer' && (
+                            <button
+                                type="button"
+                                onClick={handleSuggestCategory}
+                                disabled={isSuggesting || notes.length < 2 || !isPremium}
+                                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${
+                                    isSuggesting 
+                                        ? 'bg-primary/10 text-primary animate-pulse' 
+                                        : !isPremium
+                                            ? 'bg-background text-text-muted/30 cursor-not-allowed'
+                                            : 'bg-background hover:bg-primary/10 text-text-muted hover:text-primary disabled:opacity-0'
+                                }`}
+                                title={isPremium ? "AI Suggest Category" : "AI Auto-categorization (Premium Only)"}
+                            >
+                                <SparklesIcon className={`w-4 h-4 ${isSuggesting ? 'animate-spin' : ''}`} />
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />
@@ -566,7 +624,7 @@ export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAc
                 {categories.map((category) => (
                     <div
                         key={category.id}
-                        className="flex flex-col items-center p-3 rounded-xl bg-surface border border-surface-border shadow-sm"
+                        className={`flex flex-col items-center p-3 rounded-xl bg-surface border shadow-sm transition-all ${category.user_id ? 'border-primary/30 ring-1 ring-primary/10' : 'border-surface-border'}`}
                     >
                         <div
                             className="w-3 h-3 rounded-full mb-2"
@@ -575,42 +633,44 @@ export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAc
                         <span className="text-xs font-bold text-foreground truncate w-full text-center">
                             {category.name}
                         </span>
-                        <span className="text-[10px] text-text-muted uppercase font-medium mt-0.5">
-                            {category.type}
+                        <span className="text-[10px] text-text-muted uppercase font-black tracking-tighter mt-0.5">
+                            {category.user_id ? 'Personal' : 'Standard'} • {category.type}
                         </span>
 
-                        <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-surface-border w-full">
-                            <button
-                                onClick={() => setEditingCategory(category)}
-                                className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
-                                title="Edit Category"
-                            >
-                                <PencilSquareIcon className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    showConfirmationAction({
-                                        title: "Delete Category",
-                                        message: `Are you sure you want to delete the "${category.name}" category? This will affect existing transactions.`,
-                                        confirmText: "Delete",
-                                        onConfirmAction: async () => {
-                                            setIsSaving(true);
-                                            try {
-                                                await deleteCategory(category.id);
-                                                await refreshCategories();
-                                                if (onCategoryChangeAction) onCategoryChangeAction();
-                                            } finally {
-                                                setIsSaving(false);
-                                            }
-                                        },
-                                    });
-                                }}
-                                className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
-                                title="Delete Category"
-                            >
-                                <TrashIcon className="w-3.5 h-3.5" />
-                            </button>
-                        </div>
+                        {category.user_id && (
+                            <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-surface-border w-full">
+                                <button
+                                    onClick={() => setEditingCategory(category)}
+                                    className="p-1.5 text-primary hover:bg-link-hover-bg rounded-lg transition-colors"
+                                    title="Edit Category"
+                                >
+                                    <PencilSquareIcon className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        showConfirmationAction({
+                                            title: "Delete Category",
+                                            message: `Are you sure you want to delete the "${category.name}" category? This will affect existing transactions.`,
+                                            confirmText: "Delete",
+                                            onConfirmAction: async () => {
+                                                setIsSaving(true);
+                                                try {
+                                                    await deleteCategory(category.id);
+                                                    await refreshCategories();
+                                                    if (onCategoryChangeAction) onCategoryChangeAction();
+                                                } finally {
+                                                    setIsSaving(false);
+                                                }
+                                            },
+                                        });
+                                    }}
+                                    className="p-1.5 text-red-600 hover:bg-red-50/10 rounded-lg transition-colors"
+                                    title="Delete Category"
+                                >
+                                    <TrashIcon className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

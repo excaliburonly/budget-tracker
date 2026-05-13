@@ -176,7 +176,13 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                     </div>
                     <div className="flex flex-col min-w-0">
                         <span className="text-sm font-black text-foreground truncate">{profile?.full_name || 'User'}</span>
-                        <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider truncate">Premium Account</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider truncate ${
+                            profile?.subscription_tier === 'premium' 
+                                ? 'text-primary' 
+                                : 'text-text-muted'
+                        }`}>
+                            {profile?.subscription_tier === 'premium' ? 'Premium Plan' : 'Free Plan'}
+                        </span>
                     </div>
                 </div>
 

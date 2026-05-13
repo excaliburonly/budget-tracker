@@ -289,6 +289,69 @@ export async function deleteFinancialInsight(id: string) {
   return { success: true };
 }
 
+export async function suggestTransactionCategory(note: string, type: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  // Check subscription tier
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("subscription_tier")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.subscription_tier !== 'premium') {
+    return { error: "PREMIUM_REQUIRED", message: "AI Auto-categorization is a premium feature. Please upgrade to access." };
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  // Fetch all available categories for this user
+  const { data: categories } = await supabase
+    .from("categories")
+    .select("id, name, type")
+    .or(`user_id.is.null,user_id.eq.${user.id}`)
+    .eq("type", type);
+
+  if (!categories || categories.length === 0) return null;
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const prompt = `
+    You are a financial assistant for the "Ledgr" app. 
+    Based on the transaction note provided, pick the most appropriate category from the list below.
+    
+    Transaction Note: "${note}"
+    Transaction Type: ${type}
+
+    Available Categories:
+    ${categories.map(c => `- ${c.name} (ID: ${c.id})`).join("\n")}
+
+    Rules:
+    - Return ONLY the ID of the best matching category.
+    - If no category matches well, return "null".
+    - Be smart: "Uber" should be Transport, "Starbucks" should be Dining & Food, etc.
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    
+    // Validate that the returned text is one of the category IDs
+    const matchedCategory = categories.find(c => text.includes(c.id));
+    return matchedCategory ? matchedCategory.id : null;
+  } catch (error) {
+    console.error("Auto-categorization error:", error);
+    return null;
+  }
+}
+
 export async function generateFinancialHealthReport() {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
