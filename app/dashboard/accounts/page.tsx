@@ -1,10 +1,10 @@
 "use client";
 
-import { AddAccountForm, EditAccountModal } from "@/components/forms/AccountForms";
+import { AddAccountForm, EditAccountModal, LogDebtPaymentModal } from "@/components/forms/AccountForms";
 import { AccountCard } from "@/components/dashboard/AccountCard";
 import { Account } from "@/types/database";
 import { useState } from "react";
-import { CreditCardIcon } from "@heroicons/react/24/outline";
+import { CreditCardIcon, BanknotesIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 import AccountsPieChart from "@/components/charts/AccountsPieChart";
 
@@ -15,8 +15,12 @@ export default function AccountsPage() {
         loading, 
         refreshAccounts 
     } = useDashboard();
-    
+
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
+    const [payingAccount, setPayingAccount] = useState<Account | null>(null);
+
+    const normalAccounts = accounts.filter(a => a.account_category === 'normal');
+    const debtAccounts = accounts.filter(a => a.account_category === 'debt');
 
     // Prepare data for AccountsPieChart
     const accountChartData = accounts.map(a => ({
@@ -57,17 +61,55 @@ export default function AccountsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {accounts.map((account) => (
-                    <div key={account.id} className="transition-all hover:-translate-y-1 duration-300">
-                        <AccountCard
-                            account={account}
-                            currency={currency}
-                            onEditAction={() => setEditingAccount(account)}
-                            onRefreshAction={refreshAccounts}
-                        />
-                    </div>
-                ))}
+            <div className="space-y-12">
+                {normalAccounts.length > 0 && (
+                    <section className="space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-500/10 rounded-xl">
+                                <BanknotesIcon className="w-5 h-5 text-green-600" />
+                            </div>
+                            <h2 className="text-xl font-black text-foreground tracking-tight">Normal Accounts</h2>
+                            <div className="flex-1 h-px bg-surface-border/50" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {normalAccounts.map((account) => (
+                                <div key={account.id} className="transition-all hover:-translate-y-1 duration-300">
+                                    <AccountCard
+                                        account={account}
+                                        currency={currency}
+                                        onEditAction={() => setEditingAccount(account)}
+                                        onRefreshAction={refreshAccounts}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {debtAccounts.length > 0 && (
+                    <section className="space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-red-500/10 rounded-xl">
+                                <ShieldCheckIcon className="w-5 h-5 text-red-600" />
+                            </div>
+                            <h2 className="text-xl font-black text-foreground tracking-tight">Debt Accounts</h2>
+                            <div className="flex-1 h-px bg-surface-border/50" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {debtAccounts.map((account) => (
+                                <div key={account.id} className="transition-all hover:-translate-y-1 duration-300">
+                                    <AccountCard
+                                        account={account}
+                                        currency={currency}
+                                        onEditAction={() => setEditingAccount(account)}
+                                        onRefreshAction={refreshAccounts}
+                                        onPayAction={() => setPayingAccount(account)}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </div>
             
             {accounts.length === 0 && (
@@ -86,6 +128,17 @@ export default function AccountsPage() {
                     onCloseAction={() => setEditingAccount(null)}
                     onAccountUpdatedAction={() => {
                         setEditingAccount(null);
+                    }}
+                />
+            )}
+
+            {payingAccount && (
+                <LogDebtPaymentModal
+                    debtAccount={payingAccount}
+                    accounts={accounts}
+                    onCloseAction={() => setPayingAccount(null)}
+                    onPaymentLoggedAction={() => {
+                        setPayingAccount(null);
                     }}
                 />
             )}

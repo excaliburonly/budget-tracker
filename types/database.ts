@@ -118,6 +118,7 @@ export interface Account {
   user_id: string;
   name: string;
   type: string;
+  account_category: 'normal' | 'debt';
   balance: number;
   created_at: string;
   updated_at: string;

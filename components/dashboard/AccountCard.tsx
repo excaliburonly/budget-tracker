@@ -11,9 +11,10 @@ interface AccountCardProps {
   currency: string;
   onEditAction: (account: Account) => void;
   onRefreshAction: () => void;
+  onPayAction?: (account: Account) => void;
 }
 
-export function AccountCard({ account, currency, onEditAction, onRefreshAction }: AccountCardProps) {
+export function AccountCard({ account, currency, onEditAction, onRefreshAction, onPayAction }: AccountCardProps) {
   const { showConfirmationAction } = useDashboard();
 
   const handleDelete = () => {
@@ -59,7 +60,17 @@ export function AccountCard({ account, currency, onEditAction, onRefreshAction }
       <div className="text-2xl font-extrabold text-foreground">
         {formatCurrency(account.balance, currency)}
       </div>
-      <p className="text-xs text-text-muted/60 mt-1">Current Balance</p>
+      <div className="flex justify-between items-end mt-1">
+        <p className="text-xs text-text-muted/60">Current Balance</p>
+        {account.account_category === 'debt' && onPayAction && (
+          <button
+            onClick={() => onPayAction(account)}
+            className="text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary-hover bg-primary/5 hover:bg-primary/10 px-3 py-1.5 rounded-xl transition-all"
+          >
+            Log Payment
+          </button>
+        )}
+      </div>
     </div>
   );
 }

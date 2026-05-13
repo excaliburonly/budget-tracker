@@ -1,12 +1,23 @@
 "use client";
 
-import { addAccount, updateAccount } from "@/actions/accounts";
+import { addAccount, updateAccount, logDebtPayment } from "@/actions/accounts";
 import { Account } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 import { CreditCardIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
 
 export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?: () => void }) {
   const { refreshAccounts, setIsSaving } = useDashboard();
+  const [category, setCategory] = useState<'normal' | 'debt'>('normal');
+
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const type = e.target.value;
+    if (type === 'Credit Card') {
+      setCategory('debt');
+    } else {
+      setCategory('normal');
+    }
+  };
 
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
@@ -19,6 +30,7 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
         if (onAccountAddedAction) onAccountAddedAction();
         const form = document.getElementById('add-account-form') as HTMLFormElement;
         form?.reset();
+        setCategory('normal');
       }
     } finally {
       setIsSaving(false);
@@ -50,6 +62,7 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
           <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Type</label>
           <select
             name="type"
+            onChange={handleTypeChange}
             className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
             required
           >
@@ -58,6 +71,20 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
             <option value="Credit Card">Credit Card</option>
             <option value="Investment">Investment</option>
             <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Category</label>
+          <select
+            name="account_category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as 'normal' | 'debt')}
+            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+            required
+          >
+            <option value="normal">Normal (Assets)</option>
+            <option value="debt">Debt (Liabilities)</option>
           </select>
         </div>
 
@@ -143,6 +170,19 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
           </div>
 
           <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80">Category</label>
+            <select
+              name="account_category"
+              defaultValue={account.account_category}
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              required
+            >
+              <option value="normal">Normal (Assets)</option>
+              <option value="debt">Debt (Liabilities)</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-foreground/80">Balance</label>
             <input
               type="number"
@@ -168,6 +208,114 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
               className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
             >
               Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+export function LogDebtPaymentModal({ debtAccount, accounts, onCloseAction, onPaymentLoggedAction }: { 
+  debtAccount: Account, 
+  accounts: Account[], 
+  onCloseAction: () => void, 
+  onPaymentLoggedAction?: () => void 
+}) {
+  const { refreshAccounts, setIsSaving } = useDashboard();
+  const normalAccounts = accounts.filter(a => a.account_category === 'normal');
+
+  async function handleSubmit(formData: FormData) {
+    setIsSaving(true);
+    try {
+      const result = await logDebtPayment(formData);
+      if (result.error) {
+        alert(result.error);
+      } else {
+        await refreshAccounts();
+        if (onPaymentLoggedAction) {
+          onPaymentLoggedAction();
+        } else {
+          onCloseAction();
+        }
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
+        <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
+          <CreditCardIcon className="w-6 h-6 text-primary" />
+          Log Payment for {debtAccount.name}
+        </h3>
+        <form action={handleSubmit} className="space-y-4">
+          <input type="hidden" name="to_account_id" value={debtAccount.id} />
+          
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80">Pay From</label>
+            <select
+              name="from_account_id"
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              required
+            >
+              <option value="">Select Account</option>
+              {normalAccounts.map(a => (
+                <option key={a.id} value={a.id}>{a.name} ({a.balance})</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80">Amount</label>
+            <input
+              type="number"
+              step="0.01"
+              name="amount"
+              autoComplete="off"
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              placeholder="0.00"
+              required
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80">Date</label>
+            <input
+              type="date"
+              name="date"
+              defaultValue={new Date().toISOString().split('T')[0]}
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              required
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-foreground/80">Notes</label>
+            <input
+              type="text"
+              name="notes"
+              autoComplete="off"
+              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              placeholder="e.g. Monthly bill payment"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onCloseAction}
+              className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
+            >
+              Log Payment
             </button>
           </div>
         </form>
