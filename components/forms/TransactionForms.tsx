@@ -332,6 +332,149 @@ export function EditTransactionModal({
     );
 }
 
+export function BulkEditModal({
+    selectedIds, onCloseAction, onCompleteAction
+}: {
+    selectedIds: string[],
+    onCloseAction: () => void,
+    onCompleteAction: () => void
+}) {
+    const { categories, accounts, refreshTransactions, setIsSaving, showConfirmationAction } = useDashboard();
+    const [date, setDate] = useState("");
+    const [categoryId, setCategoryId] = useState("");
+    const [accountId, setAccountId] = useState("");
+
+    const handleBulkUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!categoryId && !accountId && !date) {
+            alert("Please select at least one field to update");
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            const updates: { category_id?: string; account_id?: string; date?: string } = {};
+            if (categoryId) updates.category_id = categoryId === "null" ? undefined : categoryId;
+            if (accountId) updates.account_id = accountId;
+            if (date) {
+                // We'll just update the date part, keeping time as 12:00 PM for simplicity in bulk
+                updates.date = new Date(`${date}T12:00:00Z`).toISOString();
+            }
+
+            const { bulkUpdateTransactions } = await import("@/actions/transactions");
+            await bulkUpdateTransactions(selectedIds, updates);
+            await refreshTransactions();
+            onCompleteAction();
+        } catch (e: unknown) {
+            alert(e instanceof Error ? e.message : "An unknown error occurred");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleBulkDelete = () => {
+        showConfirmationAction({
+            title: "Bulk Delete Transactions",
+            message: `Are you sure you want to delete ${selectedIds.length} transactions? This action cannot be undone.`,
+            confirmText: "Delete All",
+            onConfirmAction: async () => {
+                setIsSaving(true);
+                try {
+                    const { bulkDeleteTransactions } = await import("@/actions/transactions");
+                    await bulkDeleteTransactions(selectedIds);
+                    await refreshTransactions();
+                    onCompleteAction();
+                } catch (e: unknown) {
+                    alert(e instanceof Error ? e.message : "An unknown error occurred");
+                } finally {
+                    setIsSaving(false);
+                }
+            },
+        });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-foreground">Bulk Edit ({selectedIds.length} items)</h3>
+                    <button 
+                        onClick={handleBulkDelete}
+                        className="text-xs font-bold text-red-500 hover:text-red-600 flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                        <TrashIcon className="w-4 h-4" />
+                        Delete All
+                    </button>
+                </div>
+                
+                <p className="text-xs text-text-muted mb-6">Only fields you select below will be updated for all selected transactions.</p>
+                
+                <form onSubmit={handleBulkUpdate} className="space-y-6">
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">New Category</label>
+                        <select
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                        >
+                            <option value="">Don&apos;t change</option>
+                            <option value="null">Remove Category</option>
+                            {/* Grouping categories by type could be better, but let's show all for bulk edit */}
+                            {categories.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    [{c.type.toUpperCase()}] {c.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">New Account</label>
+                        <select
+                            value={accountId}
+                            onChange={(e) => setAccountId(e.target.value)}
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                        >
+                            <option value="">Don&apos;t change</option>
+                            {accounts.map((a) => (
+                                <option key={a.id} value={a.id}>
+                                    {a.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">New Date</label>
+                        <input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                        />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <button
+                            type="button"
+                            onClick={onCloseAction}
+                            className="px-6 py-3 text-sm font-bold text-text-muted hover:text-foreground transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-8 py-3 bg-primary hover:scale-[1.02] active:scale-[0.98] text-white font-black uppercase tracking-widest rounded-2xl transition-all text-xs shadow-lg shadow-primary/20"
+                        >
+                            Update All
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
 export function AddCategoryForm({ onCategoryChangeAction }: { onCategoryChangeAction?: () => void }) {
     const { categories, refreshCategories, setIsSaving, showConfirmationAction } = useDashboard();
     const [showForm, setShowForm] = useState(false);

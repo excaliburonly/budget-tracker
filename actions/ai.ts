@@ -19,8 +19,6 @@ export async function generateFinancialInsights() {
     };
   }
 
-  console.log("GEMINI_API_KEY found, length:", apiKey.length);
-
   const genAI = new GoogleGenerativeAI(apiKey);
 
   // Get current month date range
@@ -76,10 +74,10 @@ export async function generateFinancialInsights() {
       amount: t.amount,
       type: t.type,
       date: t.date,
-      category: (t.categories as unknown as { name: string })?.name || "Uncategorized"
+      category: Array.isArray(t.categories) ? (t.categories as { name: string }[])[0]?.name : (t.categories as { name: string } | null)?.name || "Uncategorized"
     })),
     budgets: budgets?.map(b => ({
-      category: (b.categories as unknown as { name: string })?.name,
+      category: Array.isArray(b.categories) ? (b.categories as { name: string }[])[0]?.name : (b.categories as { name: string } | null)?.name,
       budgeted: b.amount
     })),
     month: monthString,
@@ -124,7 +122,6 @@ export async function generateFinancialInsights() {
     const response = result.response;
     let text = response.text();
     
-    // Extract JSON if it's wrapped in Markdown or has filler text
     const jsonMatch = text.match(/\{[\s\S]*}/);
     if (jsonMatch) {
       text = jsonMatch[0];
@@ -138,25 +135,14 @@ export async function generateFinancialInsights() {
     }
   } catch (error) {
     console.error("Detailed error generating AI insights:", error);
-    
-    // Provide more helpful error messages
     let errorMessage = "Failed to generate insights. Please try again later.";
     const err = error as Error;
-    
     if (err.message?.includes("API key not valid")) {
       errorMessage = "Invalid API key. Please check your GEMINI_API_KEY.";
-    } else if (err.message?.includes("blocked")) {
-      errorMessage = "The AI response was blocked by safety filters. Try adding more transaction data.";
-    } else if (err.message?.includes("quota")) {
-      errorMessage = "API quota exceeded. Please try again later.";
     } else if (err.message) {
-      // Return the actual error message for debugging purposes (can be refined later for production)
       errorMessage = `AI Error: ${err.message}`;
     }
-    
-    return { 
-      error: errorMessage 
-    };
+    return { error: errorMessage };
   }
 }
 
@@ -180,7 +166,6 @@ export async function runWhatIfSimulation(params: WhatIfParams) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  // Check subscription tier
   const { data: profile } = await supabase
     .from("profiles")
     .select("subscription_tier, currency")
@@ -197,7 +182,6 @@ export async function runWhatIfSimulation(params: WhatIfParams) {
 
   const genAI = new GoogleGenerativeAI(apiKey);
 
-  // Fetch current financial snapshot
   const [accounts, investments, goals] = await Promise.all([
     supabase.from("accounts").select("balance").eq("user_id", user.id),
     supabase.from("investments").select("current_value, quantity, investment_type").eq("user_id", user.id),
@@ -231,28 +215,22 @@ export async function runWhatIfSimulation(params: WhatIfParams) {
     - Increase/Decrease in Monthly Investment Contribution: ${params.monthlyInvestmentChange}
     - Simulation Horizon: ${params.years} years
 
-    Assumptions:
-    - Use a conservative 10-12% annual return for Mutual Funds/Stocks.
-    - Use a 5-6% annual return for liquid cash (savings/FDs).
-    - Account for a 5% annual inflation rate in your commentary.
-
     Provide a structured JSON response:
     {
       "projection": [
         {"year": 0, "netWorth": number, "liquid": number, "invested": number},
-        ... (one entry per year for the horizon)
+        ...
       ],
       "goalAnalysis": [
         {"goalName": string, "projectedAchievementDate": string, "isReached": boolean}
       ],
-      "insight": "A professional analysis of how these changes impact the user's long-term wealth (3-4 sentences).",
-      "recommendation": "One key strategic move the user should make based on this simulation."
+      "insight": "Analysis of how these changes impact wealth.",
+      "recommendation": "One strategic move."
     }
 
     Rules:
     - Return ONLY the JSON object.
     - All monetary values must be in ${userCurrency}.
-    - Be realistic but encouraging.
   `;
 
   try {
@@ -267,7 +245,6 @@ export async function runWhatIfSimulation(params: WhatIfParams) {
   }
 }
 
-
 export async function saveFinancialInsight(month: string, insightData: InsightData) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -277,21 +254,11 @@ export async function saveFinancialInsight(month: string, insightData: InsightDa
 
   const { data, error } = await supabase
     .from("ai_insights")
-    .insert([
-      {
-        user_id: user.id,
-        month,
-        insight_data: insightData,
-      }
-    ])
+    .insert([{ user_id: user.id, month, insight_data: insightData }])
     .select()
     .single();
 
-  if (error) {
-    console.error("Error saving AI insight:", error);
-    return { error: error.message };
-  }
-
+  if (error) return { error: error.message };
   return { success: true, data };
 }
 
@@ -302,22 +269,11 @@ export async function getSavedInsights(month?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  let query = supabase
-    .from("ai_insights")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (month) {
-    query = query.eq("month", month);
-  }
+  let query = supabase.from("ai_insights").select("*").order("created_at", { ascending: false });
+  if (month) query = query.eq("month", month);
 
   const { data, error } = await query;
-
-  if (error) {
-    console.error("Error fetching AI insights:", error);
-    return [];
-  }
-
+  if (error) return [];
   return data || [];
 }
 
@@ -328,16 +284,115 @@ export async function deleteFinancialInsight(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { error } = await supabase
-    .from("ai_insights")
-    .delete()
-    .eq("id", id)
-    .eq("user_id", user.id);
-
-  if (error) {
-    console.error("Error deleting AI insight:", error);
-    return { error: error.message };
-  }
-
+  const { error } = await supabase.from("ai_insights").delete().eq("id", id).eq("user_id", user.id);
+  if (error) return { error: error.message };
   return { success: true };
+}
+
+export async function generateFinancialHealthReport() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+
+  const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
+  const prevMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevMonth = prevMonthDate.toISOString().slice(0, 7);
+
+  const [currTransactions, currBudgets, accounts, investments] = await Promise.all([
+    supabase.from("transactions").select("amount, type, date, categories(name)").gte("date", currentMonth + "-01").eq("user_id", user.id),
+    supabase.from("budgets").select("amount, categories(name)").eq("month", currentMonth).eq("user_id", user.id),
+    supabase.from("accounts").select("balance, type").eq("user_id", user.id),
+    supabase.from("investments").select("current_value, quantity").eq("user_id", user.id)
+  ]);
+
+  const [prevTransactions, prevBudgets] = await Promise.all([
+    supabase.from("transactions").select("amount, type, date, categories(name)").gte("date", prevMonth + "-01").lt("date", currentMonth + "-01").eq("user_id", user.id),
+    supabase.from("budgets").select("amount, categories(name)").eq("month", prevMonth).eq("user_id", user.id)
+  ]);
+
+  const profile = await supabase.from("profiles").select("currency").eq("id", user.id).single();
+  const currency = profile.data?.currency || "INR";
+
+  const calculateStats = (txs: { amount: number | string; type: string }[]) => {
+    const income = txs.filter(t => t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0);
+    const expenses = txs.filter(t => t.type === 'expense').reduce((acc, t) => acc + Number(t.amount), 0);
+    const investments = txs.filter(t => t.type === 'investment').reduce((acc, t) => acc + Number(t.amount), 0);
+    return { income, expenses, investments, totalOut: expenses + investments };
+  };
+
+  const currStats = calculateStats(currTransactions.data || []);
+  const prevStats = calculateStats(prevTransactions.data || []);
+
+  const liquidCash = accounts.data?.reduce((acc, a) => acc + Number(a.balance), 0) || 0;
+  const investmentValue = investments.data?.reduce((acc, inv) => acc + (Number(inv.current_value) * Number(inv.quantity)), 0) || 0;
+  const netWorth = liquidCash + investmentValue;
+
+  const context = {
+    currentMonth: {
+      stats: currStats,
+      transactions: currTransactions.data?.map(t => ({ 
+        amount: t.amount, 
+        type: t.type, 
+        category: Array.isArray(t.categories) ? (t.categories as { name: string }[])[0]?.name : (t.categories as { name: string } | null)?.name 
+      })),
+      budgets: currBudgets.data
+    },
+    previousMonth: {
+      stats: prevStats,
+      transactions: prevTransactions.data?.map(t => ({ 
+        amount: t.amount, 
+        type: t.type, 
+        category: Array.isArray(t.categories) ? (t.categories as { name: string }[])[0]?.name : (t.categories as { name: string } | null)?.name 
+      })),
+      budgets: prevBudgets.data
+    },
+    netWorth,
+    currency
+  };
+
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+  const prompt = `
+    You are an expert financial analyst. Generate a "State of the Union" financial health report for a user based on their data for ${currentMonth} compared to ${prevMonth}.
+    
+    Data:
+    ${JSON.stringify(context, null, 2)}
+
+    Format your response as a JSON object:
+    {
+      "title": "Professional title",
+      "summary": "Overview of financial health.",
+      "wins": ["List of achievements"],
+      "concerns": ["Areas for focus"],
+      "metrics": [
+        {"label": "Savings Rate", "value": "percentage", "trend": "up/down/stable", "description": "brief"},
+        {"label": "Expense Delta", "value": "currency", "trend": "up/down/stable", "description": "comparison"},
+        {"label": "Net Worth Growth", "value": "currency", "trend": "up/down/stable", "description": "change"}
+      ],
+      "strategicAdvice": "One bold advice."
+    }
+
+    Rules:
+    - ALL currency must be in ${currency}.
+    - Return ONLY the JSON object.
+  `;
+
+  try {
+    const result = await model.generateContent(prompt);
+    let text = result.response.text();
+    const jsonMatch = text.match(/\{[\s\S]*}/);
+    if (jsonMatch) text = jsonMatch[0];
+    return JSON.parse(text);
+  } catch (error) {
+    console.error("Health Report Error:", error);
+    return { error: "Failed to generate health report" };
+  }
 }

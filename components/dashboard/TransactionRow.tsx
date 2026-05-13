@@ -10,9 +10,17 @@ interface TransactionRowProps {
   transaction: Transaction;
   onEditAction: (transaction: Transaction) => void;
   onDeleteAction?: () => void;
+  isSelected?: boolean;
+  onToggleSelectionAction?: (id: string) => void;
 }
 
-export function TransactionRow({ transaction, onEditAction, onDeleteAction }: TransactionRowProps) {
+export function TransactionRow({ 
+  transaction, 
+  onEditAction, 
+  onDeleteAction, 
+  isSelected, 
+  onToggleSelectionAction 
+}: TransactionRowProps) {
   const { currency, refreshTransactions, setIsSaving, showConfirmationAction } = useDashboard();
   
   const handleDelete = () => {
@@ -34,10 +42,22 @@ export function TransactionRow({ transaction, onEditAction, onDeleteAction }: Tr
   };
 
   return (
-    <tr className="hover:bg-background/50 transition-colors group">
+    <tr className={`hover:bg-background/50 transition-colors group ${isSelected ? 'bg-primary/5' : ''}`}>
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-foreground">{formatDateTime(transaction.date)}</div>
-        <div className="text-xs text-text-muted">{transaction.notes || '-'}</div>
+        <div className="flex items-center gap-4">
+          {onToggleSelectionAction && (
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={() => onToggleSelectionAction(transaction.id)}
+              className="w-4 h-4 rounded border-surface-border/50 text-primary focus:ring-primary/20 bg-background/50 cursor-pointer"
+            />
+          )}
+          <div>
+            <div className="text-sm font-medium text-foreground">{formatDateTime(transaction.date)}</div>
+            <div className="text-xs text-text-muted">{transaction.notes || '-'}</div>
+          </div>
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         {transaction.type === 'transfer' ? (

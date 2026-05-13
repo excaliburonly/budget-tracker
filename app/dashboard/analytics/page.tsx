@@ -15,6 +15,7 @@ import CategoryBreakdownChart from "@/components/charts/CategoryBreakdownChart";
 import DailyCategoryChart from "@/components/charts/DailyCategoryChart";
 import AIInsights from "@/components/dashboard/AIInsights";
 import WhatIfSimulator from "@/components/dashboard/WhatIfSimulator";
+import FinancialHealthReport from "@/components/dashboard/FinancialHealthReport";
 import AnalyticsTabs from "@/components/dashboard/AnalyticsTabs";
 import InvestmentPerformanceChart from "@/components/charts/InvestmentPerformanceChart";
 import { Suspense } from "react";
@@ -126,11 +127,16 @@ export default async function AnalyticsPage(props: { searchParams: Promise<{ tab
       </Suspense>
 
       {activeTab === "ai" ? (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <section>
+            <FinancialHealthReport />
+          </section>
+          
           <section className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
             <AIInsights />
           </section>
+          
           <section>
             <WhatIfSimulator subscriptionTier={subscriptionTier} currency={currency} />
           </section>

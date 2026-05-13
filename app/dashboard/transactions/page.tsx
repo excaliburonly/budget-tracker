@@ -1,10 +1,10 @@
 "use client";
 
-import {AddCategoryForm, AddTransactionForm, EditTransactionModal} from "@/components/forms/TransactionForms";
+import {AddCategoryForm, AddTransactionForm, EditTransactionModal, BulkEditModal} from "@/components/forms/TransactionForms";
 import {TransactionRow} from "@/components/dashboard/TransactionRow";
 import {Transaction} from "@/types/database";
 import {useState, useMemo} from "react";
-import {ArrowsRightLeftIcon} from "@heroicons/react/24/outline";
+import {ArrowsRightLeftIcon, PencilIcon} from "@heroicons/react/24/outline";
 import {useDashboard} from "@/providers/dashboard-provider";
 import {TransactionFilters} from "@/components/dashboard/TransactionFilters";
 
@@ -14,6 +14,8 @@ export default function TransactionsPage() {
     } = useDashboard();
 
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [isBulkEditing, setIsBulkEditing] = useState(false);
 
     // Filter states
     const [search, setSearch] = useState("");
@@ -61,6 +63,20 @@ export default function TransactionsPage() {
         });
     }, [transactions, search, selectedAccountId, selectedCategoryId, selectedType, startDate, endDate]);
 
+    const toggleSelection = (id: string) => {
+        setSelectedIds(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.length === filteredTransactions.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(filteredTransactions.map(t => t.id));
+        }
+    };
+
     const clearFilters = () => {
         setSearch("");
         setSelectedAccountId("");
@@ -68,6 +84,7 @@ export default function TransactionsPage() {
         setSelectedType("");
         setStartDate("");
         setEndDate("");
+        setSelectedIds([]);
     };
 
     if (loading) {
@@ -110,12 +127,22 @@ export default function TransactionsPage() {
                 />
             </div>
 
-            <section className="bg-surface/80 backdrop-blur-sm rounded-[2rem] border border-surface-border/50 shadow-xl overflow-hidden">
+            <section className="bg-surface/80 backdrop-blur-sm rounded-[2rem] border border-surface-border/50 shadow-xl overflow-hidden relative">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-surface-border/30">
                         <thead className="bg-background/50">
                         <tr>
-                            <th className="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Date / Notes</th>
+                            <th className="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">
+                                <div className="flex items-center gap-4">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.length > 0 && selectedIds.length === filteredTransactions.length}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 rounded border-surface-border/50 text-primary focus:ring-primary/20 bg-background/50 cursor-pointer"
+                                    />
+                                    Date / Notes
+                                </div>
+                            </th>
                             <th className="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Category</th>
                             <th className="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Account</th>
                             <th className="px-6 py-5 text-left text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Amount</th>
@@ -140,15 +167,52 @@ export default function TransactionsPage() {
                                     key={transaction.id}
                                     transaction={transaction}
                                     onEditAction={() => setEditingTransaction(transaction)}
+                                    isSelected={selectedIds.includes(transaction.id)}
+                                    onToggleSelectionAction={toggleSelection}
                                 />)))}
                         </tbody>
                     </table>
                 </div>
+
+                {/* Bulk Actions Floating Bar */}
+                {selectedIds.length > 0 && (
+                    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 bg-foreground text-background px-6 py-4 rounded-3xl shadow-2xl flex items-center gap-6 animate-fade-in-up border border-white/10">
+                        <span className="text-sm font-black uppercase tracking-widest border-r border-white/10 pr-6">
+                            {selectedIds.length} Selected
+                        </span>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setIsBulkEditing(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-xs font-black uppercase tracking-widest"
+                            >
+                                <PencilIcon className="w-4 h-4" />
+                                Bulk Edit
+                            </button>
+                            <button
+                                onClick={() => setSelectedIds([])}
+                                className="px-4 py-2 text-xs font-black uppercase tracking-widest opacity-50 hover:opacity-100"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
             </section>
 
             {editingTransaction && (<EditTransactionModal
                     transaction={editingTransaction}
                     onCloseAction={() => setEditingTransaction(null)}
                 />)}
+
+            {isBulkEditing && (
+                <BulkEditModal
+                    selectedIds={selectedIds}
+                    onCloseAction={() => setIsBulkEditing(false)}
+                    onCompleteAction={() => {
+                        setIsBulkEditing(false);
+                        setSelectedIds([]);
+                    }}
+                />
+            )}
         </div>);
 }

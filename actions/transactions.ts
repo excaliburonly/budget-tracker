@@ -140,6 +140,43 @@ export async function deleteTransaction(id: string) {
   revalidatePath("/dashboard/accounts");
 }
 
+export async function bulkDeleteTransactions(ids: string[]) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase.from("transactions").delete().in("id", ids);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/transactions");
+  revalidatePath("/dashboard/goals");
+  revalidatePath("/dashboard/investments");
+  revalidatePath("/dashboard/accounts");
+}
+
+export async function bulkUpdateTransactions(ids: string[], updates: {
+  category_id?: string | null;
+  account_id?: string | null;
+  date?: string;
+}) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { error } = await supabase
+    .from("transactions")
+    .update(updates)
+    .in("id", ids);
+
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/transactions");
+  revalidatePath("/dashboard/goals");
+  revalidatePath("/dashboard/investments");
+  revalidatePath("/dashboard/accounts");
+}
+
 export async function updateCategory(id: string, formData: FormData) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
