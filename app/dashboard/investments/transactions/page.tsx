@@ -3,6 +3,7 @@
 import { InvestmentTransactionRow } from "@/components/dashboard/InvestmentTransactionRow";
 import { ChartBarSquareIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
+import { LoadingSpinner } from "@/components/theme/Loading";
 
 export default function InvestmentTransactionsPage() {
     const {
@@ -10,7 +11,7 @@ export default function InvestmentTransactionsPage() {
     } = useDashboard();
 
     if (loading) {
-        return <div className="p-8 text-center text-text-muted">Loading transactions...</div>;
+        return <div className="p-20"><LoadingSpinner label="Loading investment transactions..." /></div>;
     }
 
     return (

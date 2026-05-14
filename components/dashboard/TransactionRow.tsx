@@ -94,8 +94,16 @@ export function TransactionRow({
           transaction.type === 'transfer' ? 'text-indigo-600' : 'text-foreground'
         }`}>
           {transaction.type === 'income' ? '+' : (transaction.type === 'transfer' ? '' : '-')}
-          {formatCurrency(transaction.amount, currency)}
+          {transaction.accounts?.type === 'International Stock Wallet' && transaction.secondary_amount && transaction.accounts.secondary_currency
+            ? formatCurrency(transaction.secondary_amount, transaction.accounts.secondary_currency)
+            : formatCurrency(transaction.amount, currency)
+          }
         </div>
+        {transaction.accounts?.type === 'International Stock Wallet' && transaction.secondary_amount && (
+          <div className="text-[10px] text-text-muted mt-0.5">
+            ≈ {formatCurrency(transaction.amount, currency)}
+          </div>
+        )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex justify-end gap-2 md:opacity-0 md:group-hover:opacity-100 transition-opacity">

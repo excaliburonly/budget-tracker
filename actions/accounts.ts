@@ -33,6 +33,8 @@ export async function addAccount(formData: FormData): Promise<{ error?: string; 
   const type = formData.get("type") as string;
   const account_category = formData.get("account_category") as 'normal' | 'debt' || 'normal';
   const balance = parseFloat(formData.get("balance") as string);
+  const secondary_balance = parseFloat(formData.get("secondary_balance") as string || "0");
+  const secondary_currency = formData.get("secondary_currency") as string;
 
   const { error } = await supabase
     .from("accounts")
@@ -42,6 +44,8 @@ export async function addAccount(formData: FormData): Promise<{ error?: string; 
       type,
       account_category,
       balance,
+      secondary_balance,
+      secondary_currency: secondary_currency || null,
     }]);
 
   if (error) {
@@ -63,10 +67,19 @@ export async function updateAccount(id: string, formData: FormData): Promise<{ e
   const type = formData.get("type") as string;
   const account_category = formData.get("account_category") as 'normal' | 'debt';
   const balance = parseFloat(formData.get("balance") as string);
+  const secondary_balance = parseFloat(formData.get("secondary_balance") as string || "0");
+  const secondary_currency = formData.get("secondary_currency") as string;
 
   const { error } = await supabase
     .from("accounts")
-    .update({ name, type, account_category, balance })
+    .update({ 
+      name, 
+      type, 
+      account_category, 
+      balance,
+      secondary_balance,
+      secondary_currency: secondary_currency || null,
+    })
     .eq("id", id);
 
   if (error) {

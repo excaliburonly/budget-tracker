@@ -5,14 +5,17 @@ import { Account } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 import { CreditCardIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import { SUPPORTED_CURRENCIES } from "@/utils/exchange-rates";
 
 export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?: () => void }) {
   const { refreshAccounts, setIsSaving } = useDashboard();
   const [category, setCategory] = useState<'normal' | 'debt'>('normal');
+  const [type, setType] = useState<string>('Checking');
 
   const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const type = e.target.value;
-    if (type === 'Credit Card') {
+    const newType = e.target.value;
+    setType(newType);
+    if (newType === 'Credit Card') {
       setCategory('debt');
     } else {
       setCategory('normal');
@@ -31,11 +34,14 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
         const form = document.getElementById('add-account-form') as HTMLFormElement;
         form?.reset();
         setCategory('normal');
+        setType('Checking');
       }
     } finally {
       setIsSaving(false);
     }
   }
+
+  const isInternational = type === 'International Stock Wallet';
 
   return (
     <div className="bg-surface/80 backdrop-blur-sm p-8 rounded-[2.5rem] border border-surface-border/50 shadow-sm h-full">
@@ -62,6 +68,7 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
           <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Type</label>
           <select
             name="type"
+            value={type}
             onChange={handleTypeChange}
             className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
             required
@@ -70,6 +77,8 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
             <option value="Savings">Savings</option>
             <option value="Credit Card">Credit Card</option>
             <option value="Investment">Investment</option>
+            <option value="Indian Stock Wallet">Indian Stock Wallet</option>
+            <option value="International Stock Wallet">International Stock Wallet</option>
             <option value="Other">Other</option>
           </select>
         </div>
@@ -101,6 +110,38 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
           />
         </div>
 
+        {isInternational && (
+          <>
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Market / Currency</label>
+              <select
+                name="secondary_currency"
+                className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                required={isInternational}
+              >
+                <option value="">Select Market</option>
+                {SUPPORTED_CURRENCIES.map(curr => (
+                  <option key={curr.code} value={curr.code}>
+                    {curr.country} ({curr.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Secondary Balance</label>
+              <input
+                type="number"
+                step="0.01"
+                name="secondary_balance"
+                autoComplete="off"
+                className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                placeholder="0.00"
+                required={isInternational}
+              />
+            </div>
+          </>
+        )}
+
         <div className="md:col-span-3 flex justify-end pt-2">
           <button
             type="submit"
@@ -116,6 +157,8 @@ export function AddAccountForm({ onAccountAddedAction }: { onAccountAddedAction?
 
 export function EditAccountModal({ account, onCloseAction, onAccountUpdatedAction }: { account: Account, onCloseAction: () => void, onAccountUpdatedAction?: () => void }) {
   const { refreshAccounts, setIsSaving } = useDashboard();
+  const [type, setType] = useState<string>(account.type);
+  const isInternational = type === 'International Stock Wallet';
 
   async function handleSubmit(formData: FormData) {
     setIsSaving(true);
@@ -138,43 +181,46 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-surface p-8 rounded-3xl border border-surface-border shadow-2xl max-w-lg w-full">
+      <div className="bg-surface p-8 rounded-[2.5rem] border border-surface-border shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <h3 className="text-xl font-bold text-foreground mb-6">Edit Account</h3>
-        <form action={handleSubmit} className="space-y-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80">Account Name</label>
+        <form action={handleSubmit} className="space-y-6">
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Account Name</label>
             <input
               type="text"
               name="name"
               defaultValue={account.name}
               autoComplete="off"
-              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
               required
             />
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80">Type</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Type</label>
             <select
               name="type"
-              defaultValue={account.type}
-              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
               required
             >
               <option value="Checking">Checking</option>
               <option value="Savings">Savings</option>
               <option value="Credit Card">Credit Card</option>
               <option value="Investment">Investment</option>
+              <option value="Indian Stock Wallet">Indian Stock Wallet</option>
+              <option value="International Stock Wallet">International Stock Wallet</option>
               <option value="Other">Other</option>
             </select>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80">Category</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Category</label>
             <select
               name="account_category"
               defaultValue={account.account_category}
-              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
               required
             >
               <option value="normal">Normal (Assets)</option>
@@ -182,30 +228,64 @@ export function EditAccountModal({ account, onCloseAction, onAccountUpdatedActio
             </select>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground/80">Balance</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Balance</label>
             <input
               type="number"
               step="0.01"
               name="balance"
               defaultValue={account.balance}
               autoComplete="off"
-              className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+              className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
               required
             />
           </div>
+
+          {isInternational && (
+            <>
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Market / Currency</label>
+                <select
+                  name="secondary_currency"
+                  defaultValue={account.secondary_currency || ""}
+                  className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                  required={isInternational}
+                >
+                  <option value="">Select Market</option>
+                  {SUPPORTED_CURRENCIES.map(curr => (
+                    <option key={curr.code} value={curr.code}>
+                      {curr.country} ({curr.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Secondary Balance</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  name="secondary_balance"
+                  defaultValue={account.secondary_balance || 0}
+                  autoComplete="off"
+                  className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                  placeholder="0.00"
+                  required={isInternational}
+                />
+              </div>
+            </>
+          )}
 
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onCloseAction}
-              className="px-6 py-2 bg-background text-foreground/80 font-semibold rounded-lg transition-colors text-sm"
+              className="px-6 py-3 text-xs font-black uppercase tracking-widest text-text-muted hover:text-foreground transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg transition-colors text-sm"
+              className="px-8 py-3 bg-primary hover:scale-105 active:scale-95 text-white font-black uppercase tracking-widest rounded-2xl transition-all text-xs shadow-lg shadow-primary/20"
             >
               Save Changes
             </button>

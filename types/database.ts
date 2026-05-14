@@ -12,6 +12,7 @@ export interface Transaction {
   id: string;
   user_id: string;
   amount: number;
+  secondary_amount?: number | null;
   date: string; // This will now include time information
   category_id?: string | null;
   investment_id?: string | null;
@@ -28,9 +29,13 @@ export interface Transaction {
   } | null;
   accounts?: {
     name: string;
+    type: string;
+    secondary_currency?: string | null;
   } | null;
   to_accounts?: {
     name: string;
+    type: string;
+    secondary_currency?: string | null;
   } | null;
 }
 
@@ -121,6 +126,25 @@ export interface Account {
   type: string;
   account_category: 'normal' | 'debt';
   balance: number;
+  secondary_balance?: number;
+  secondary_currency?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface SIP {
+  id: string;
+  user_id: string;
+  investment_id: string;
+  amount: number;
+  frequency: string;
+  next_date: string;
+  status: 'active' | 'paused' | 'completed';
+  created_at: string;
+  updated_at: string;
+  // Relation fields
+  investments?: {
+    asset_name: string;
+    investment_type: string;
+  } | null;
 }

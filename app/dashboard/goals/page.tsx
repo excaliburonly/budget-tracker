@@ -6,6 +6,7 @@ import { FlagIcon, PlusIcon, ChartBarIcon, BanknotesIcon, PencilIcon } from "@he
 import { useState, useMemo } from "react";
 import { AddGoalForm, EditGoalModal, ManageAllocationsModal } from "@/components/forms/GoalForms";
 import { Goal, Account, Investment } from "@/types/database";
+import { LoadingSpinner } from "@/components/theme/Loading";
 
 export default function GoalsPage() {
     const { 
@@ -48,7 +49,7 @@ export default function GoalsPage() {
     }, [goals, goalAllocations, accounts, investments]);
 
     if (loading) {
-        return <div className="p-8 text-center text-text-muted font-bold animate-pulse">Loading your financial goals...</div>;
+        return <div className="p-20"><LoadingSpinner label="Loading your financial goals..." /></div>;
     }
 
     return (

@@ -200,7 +200,10 @@ export async function runWhatIfSimulation(params: WhatIfParams) {
     currency: userCurrency
   };
 
-  const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+  const model = genAI.getGenerativeModel(
+    { model: "gemini-flash-latest" },
+    { apiVersion: "v1beta" }
+  );
 
   const prompt = `
     You are a high-level financial strategist for the "Ledgr" app. 
@@ -321,7 +324,10 @@ export async function suggestTransactionCategory(note: string, type: string) {
 
   if (!categories || categories.length === 0) return null;
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel(
+    { model: "gemini-flash-latest" },
+    { apiVersion: "v1beta" }
+  );
 
   const prompt = `
     You are a financial assistant for the "Ledgr" app. 
@@ -345,10 +351,14 @@ export async function suggestTransactionCategory(note: string, type: string) {
     
     // Validate that the returned text is one of the category IDs
     const matchedCategory = categories.find(c => text.includes(c.id));
-    return matchedCategory ? matchedCategory.id : null;
+    if (!matchedCategory) {
+        console.warn("AI did not return a valid category ID:", text);
+        return { error: "NO_MATCH", message: "Could not automatically categorize this transaction." };
+    }
+    return matchedCategory.id;
   } catch (error) {
     console.error("Auto-categorization error:", error);
-    return null;
+    return { error: "AI_ERROR", message: "AI service is currently unavailable." };
   }
 }
 
@@ -421,7 +431,10 @@ export async function generateFinancialHealthReport() {
     currency
   };
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel(
+    { model: "gemini-flash-latest" },
+    { apiVersion: "v1beta" }
+  );
 
   const prompt = `
     You are an expert financial analyst. Generate a "State of the Union" financial health report for a user based on their data for ${currentMonth} compared to ${prevMonth}.

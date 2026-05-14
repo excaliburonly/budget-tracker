@@ -10,6 +10,7 @@ import { useParams } from "next/navigation";
 import { formatCurrency } from "@/utils/format";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import { syncMutualFundNAVs, syncStockPrices } from "@/actions/investments";
+import { LoadingSpinner } from "@/components/theme/Loading";
 
 export default function InvestmentTypePage() {
     const params = useParams();
@@ -59,7 +60,7 @@ export default function InvestmentTypePage() {
     }, [filteredInvestments, type]);
 
     if (loading) {
-        return <div className="p-8 text-center text-text-muted">Loading {typeDisplayName}...</div>;
+        return <div className="p-20"><LoadingSpinner label={`Loading ${typeDisplayName}...`} /></div>;
     }
 
     return (

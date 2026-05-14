@@ -9,6 +9,7 @@ import { useDashboard } from "@/providers/dashboard-provider";
 import { formatCurrency } from "@/utils/format";
 import Link from "next/link";
 import { syncMutualFundNAVs, syncStockPrices } from "@/actions/investments";
+import { LoadingSpinner } from "@/components/theme/Loading";
 
 export default function InvestmentsPage() {
     const { 
@@ -51,7 +52,7 @@ export default function InvestmentsPage() {
     }, [investments]);
 
     if (loading) {
-        return <div className="p-8 text-center text-text-muted">Loading investments...</div>;
+        return <div className="p-20"><LoadingSpinner label="Loading investments..." /></div>;
     }
 
     return (
@@ -65,6 +66,12 @@ export default function InvestmentsPage() {
                     </div>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                    <Link
+                        href="/dashboard/investments/sips"
+                        className="flex items-center justify-center gap-2 px-6 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl font-bold transition-all border border-primary/20"
+                    >
+                        SIP Dashboard
+                    </Link>
                     <button
                         onClick={handleSync}
                         disabled={isSyncing}

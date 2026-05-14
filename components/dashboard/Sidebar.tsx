@@ -56,6 +56,7 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
         }));
         
         return [
+            { name: 'SIP Dashboard', href: '/dashboard/investments/sips' },
             { name: 'Transactions', href: '/dashboard/investments/transactions' },
             ...items
         ];

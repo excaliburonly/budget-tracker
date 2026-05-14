@@ -58,11 +58,14 @@ export default async function DashboardPage() {
     .filter((t) => t.type === "expense" && t.date.startsWith(currentMonth))
     .reduce((acc, t) => acc + Number(t.amount), 0);
 
-  const totalBalance = accounts.reduce((acc, a) => acc + Number(a.balance), 0);
+  // totalBalance for daily calculation should exclude stock wallets
+  const totalBalance = accounts
+    .filter(a => a.type !== 'Indian Stock Wallet' && a.type !== 'International Stock Wallet')
+    .reduce((acc, a) => acc + Number(a.balance), 0);
 
   // Net Worth Calculations
   const liquidCash = accounts
-    .filter(a => a.type !== 'Credit Card')
+    .filter(a => a.account_category === 'normal')
     .reduce((acc, a) => acc + Number(a.balance), 0);
   
   const investmentValue = investments.reduce((acc, inv) => acc + (Number(inv.current_value) * Number(inv.quantity)), 0);

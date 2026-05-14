@@ -12,6 +12,8 @@ import {
     SparklesIcon 
 } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
+import { useEffect } from "react";
+import { getExchangeRate } from "@/utils/exchange-rates";
 
 export function AddTransactionForm({ onTransactionAddedAction }: { onTransactionAddedAction?: () => void }) {
     const { categories, accounts, refreshTransactions, setIsSaving, profile } = useDashboard();
@@ -19,6 +21,10 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
     const [notes, setNotes] = useState("");
     const [categoryId, setCategoryId] = useState("");
     const [isSuggesting, setIsSuggesting] = useState(false);
+    const [fromAccountId, setFromAccountId] = useState("");
+    const [toAccountId, setToAccountId] = useState("");
+    const [exchangeRate, setExchangeRate] = useState<number>(83.5);
+    const [isFetchingRate, setIsFetchingRate] = useState(false);
 
     const isPremium = profile?.subscription_tier === 'premium';
 
@@ -47,9 +53,36 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
         }
     };
 
+    const fromAccount = accounts.find(a => a.id === fromAccountId);
+    const toAccount = accounts.find(a => a.id === toAccountId);
+    const isInternational = fromAccount?.type === 'International Stock Wallet';
+
+    // Fetch exchange rate automatically when account changes
+    useEffect(() => {
+        if (isInternational && fromAccount?.secondary_currency) {
+            const fetchRate = async () => {
+                setIsFetchingRate(true);
+                const rate = await getExchangeRate(fromAccount.secondary_currency!, profile?.currency || 'INR');
+                setExchangeRate(rate);
+                setIsFetchingRate(false);
+            };
+            fetchRate();
+        }
+    }, [fromAccountId, isInternational, fromAccount?.secondary_currency, profile?.currency]);
+
     const handleSubmit = async (formData: FormData) => {
         setIsSaving(true);
         try {
+            // Adjust amounts if it's an international wallet and NOT a transfer
+            if (isInternational && type !== 'transfer') {
+                const secondaryAmount = parseFloat(formData.get("amount") as string);
+                const rate = parseFloat(formData.get("exchange_rate") as string || exchangeRate.toString());
+                const primaryAmount = secondaryAmount * rate;
+                
+                formData.set("secondary_amount", secondaryAmount.toString());
+                formData.set("amount", primaryAmount.toString());
+            }
+
             await addTransaction(formData);
             await refreshTransactions();
             if (onTransactionAddedAction) onTransactionAddedAction();
@@ -58,10 +91,14 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
             setType("expense");
             setNotes("");
             setCategoryId("");
+            setFromAccountId("");
+            setToAccountId("");
         } finally {
             setIsSaving(false);
         }
     };
+
+    const showSecondaryAmountField = type === 'transfer' && toAccount?.type === 'International Stock Wallet';
 
     return (
         <div className="bg-surface/80 backdrop-blur-sm p-8 rounded-[2.5rem] border border-surface-border/50 shadow-sm h-full">
@@ -73,7 +110,9 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
             </h3>
             <form id="add-transaction-form" action={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
-                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Amount</label>
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
+                        {isInternational && type !== 'transfer' ? `Amount (${fromAccount.secondary_currency})` : 'Amount'}
+                    </label>
                     <input
                         type="number"
                         step="0.01"
@@ -84,6 +123,24 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                         required
                     />
                 </div>
+
+                {isInternational && type !== 'transfer' && (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">
+                            Exchange Rate (1 {fromAccount.secondary_currency} = ? {profile?.currency || 'INR'})
+                            {isFetchingRate && <span className="ml-2 animate-pulse text-primary font-bold">Fetching Live Rate...</span>}
+                        </label>
+                        <input
+                            type="number"
+                            step="0.0001"
+                            name="exchange_rate"
+                            value={exchangeRate}
+                            onChange={(e) => setExchangeRate(parseFloat(e.target.value))}
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                            required
+                        />
+                    </div>
+                )}
 
                 <div className="flex flex-col gap-2">
                     <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Type</label>
@@ -100,7 +157,27 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     </select>
                 </div>
 
-                {type !== 'transfer' ? (
+                {type === 'transfer' && (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">To Account (Destination)</label>
+                        <select
+                            name="to_account_id"
+                            value={toAccountId}
+                            onChange={(e) => setToAccountId(e.target.value)}
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                            required
+                        >
+                            <option value="">Select destination</option>
+                            {accounts.map((a) => (
+                                <option key={a.id} value={a.id}>
+                                    {a.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {type !== 'transfer' && (
                     <div className="flex flex-col gap-2">
                         <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Category</label>
                         <select
@@ -119,22 +196,6 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                                 ))}
                         </select>
                     </div>
-                ) : (
-                    <div className="flex flex-col gap-2">
-                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">To Account (Destination)</label>
-                        <select
-                            name="to_account_id"
-                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
-                            required
-                        >
-                            <option value="">Select destination</option>
-                            {accounts.map((a) => (
-                                <option key={a.id} value={a.id}>
-                                    {a.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
                 )}
 
                 <div className="flex flex-col gap-2">
@@ -143,6 +204,8 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     </label>
                     <select
                         name="account_id"
+                        value={fromAccountId}
+                        onChange={(e) => setFromAccountId(e.target.value)}
                         className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                     >
                         <option value="">Select account</option>
@@ -153,6 +216,20 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                         ))}
                     </select>
                 </div>
+
+                {showSecondaryAmountField && (
+                    <div className="flex flex-col gap-2">
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Secondary Amount ({toAccount?.secondary_currency})</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="secondary_amount"
+                            autoComplete="off"
+                            className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-muted/40 font-bold"
+                            placeholder="0.00"
+                        />
+                    </div>
+                )}
 
                 <div className="flex flex-col gap-2">
                     <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Date</label>
@@ -230,8 +307,59 @@ export function EditTransactionModal({
     onCloseAction: () => void,
     onTransactionUpdatedAction?: () => void
 }) {
-    const { categories, accounts, refreshTransactions, setIsSaving } = useDashboard();
+    const { categories, accounts, refreshTransactions, setIsSaving, profile } = useDashboard();
     const [type, setType] = useState<"income" | "expense" | "transfer" | "investment">(transaction.type);
+    const [notes, setNotes] = useState(transaction.notes || "");
+    const [categoryId, setCategoryId] = useState(transaction.category_id || "");
+    const [fromAccountId, setFromAccountId] = useState(transaction.account_id || "");
+    const [toAccountId, setToAccountId] = useState(transaction.to_account_id || "");
+    const [isSuggesting, setIsSuggesting] = useState(false);
+
+    const isPremium = profile?.subscription_tier === 'premium';
+
+    const handleSuggestCategory = async () => {
+        if (!notes || notes.length < 2 || type === 'transfer' || !isPremium) return;
+        
+        setIsSuggesting(true);
+        try {
+            const result = await suggestTransactionCategory(notes, type);
+            if (result && typeof result === 'object' && 'error' in result) {
+                alert(result.message);
+                return;
+            }
+            if (typeof result === 'string') {
+                setCategoryId(result);
+            }
+        } catch (error) {
+            console.error("Suggestion failed:", error);
+        } finally {
+            setIsSuggesting(false);
+        }
+    };
+
+    const [isFetchingRate, setIsFetchingRate] = useState(false);
+
+    const fromAccount = accounts.find(a => a.id === fromAccountId);
+    const toAccount = accounts.find(a => a.id === toAccountId);
+    const isInternational = fromAccount?.type === 'International Stock Wallet';
+    const [exchangeRate, setExchangeRate] = useState<number>(
+        transaction.secondary_amount && transaction.amount 
+        ? transaction.amount / transaction.secondary_amount 
+        : 83.5
+    );
+
+    // Fetch exchange rate automatically when account changes (if it's a new selection)
+    useEffect(() => {
+        if (isInternational && fromAccount?.secondary_currency && fromAccountId !== transaction.account_id) {
+            const fetchRate = async () => {
+                setIsFetchingRate(true);
+                const rate = await getExchangeRate(fromAccount.secondary_currency!, profile?.currency || 'INR');
+                setExchangeRate(rate);
+                setIsFetchingRate(false);
+            };
+            fetchRate();
+        }
+    }, [fromAccountId, isInternational, fromAccount?.secondary_currency, profile?.currency, transaction.account_id]);
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -240,6 +368,16 @@ export function EditTransactionModal({
                 <form action={async (formData) => {
                     setIsSaving(true);
                     try {
+                        // Adjust amounts if it's an international wallet and NOT a transfer
+                        if (isInternational && type !== 'transfer') {
+                            const secondaryAmount = parseFloat(formData.get("amount") as string);
+                            const rate = parseFloat(formData.get("exchange_rate") as string || exchangeRate.toString());
+                            const primaryAmount = secondaryAmount * rate;
+                            
+                            formData.set("secondary_amount", secondaryAmount.toString());
+                            formData.set("amount", primaryAmount.toString());
+                        }
+
                         await updateTransaction(transaction.id, formData);
                         await refreshTransactions();
                         if (onTransactionUpdatedAction) {
@@ -254,24 +392,47 @@ export function EditTransactionModal({
                     }
                 }} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-foreground/80">Amount</label>
+                        <label className="text-sm font-medium text-foreground/80">
+                            {isInternational && type !== 'transfer' ? `Amount (${fromAccount.secondary_currency})` : 'Amount'}
+                        </label>
                         <input
                             type="number"
                             step="0.01"
                             name="amount"
                             autoComplete="off"
-                            defaultValue={transaction.amount}
+                            defaultValue={isInternational && type !== 'transfer' ? transaction.secondary_amount || transaction.amount : transaction.amount}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                             required
                         />
                     </div>
+
+                    {isInternational && type !== 'transfer' && (
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-sm font-medium text-foreground/80">
+                                Exchange Rate
+                                {isFetchingRate && <span className="ml-2 animate-pulse text-primary font-bold text-xs">Fetching...</span>}
+                            </label>
+                            <input
+                                type="number"
+                                step="0.0001"
+                                name="exchange_rate"
+                                value={exchangeRate}
+                                onChange={(e) => setExchangeRate(parseFloat(e.target.value))}
+                                className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                required
+                            />
+                        </div>
+                    )}
 
                     <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-foreground/80">Type</label>
                         <select
                             name="type"
                             value={type}
-                            onChange={(e) => setType(e.target.value as "income" | "expense" | "transfer" | "investment")}
+                            onChange={(e) => {
+                                setType(e.target.value as "income" | "expense" | "transfer" | "investment");
+                                setCategoryId("");
+                            }}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         >
                             <option value="expense">Expense</option>
@@ -281,30 +442,13 @@ export function EditTransactionModal({
                         </select>
                     </div>
 
-                    {type !== 'transfer' ? (
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium text-foreground/80">Category</label>
-                            <select
-                                name="category_id"
-                                defaultValue={transaction.category_id || ""}
-                                className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
-                            >
-                                <option value="">No category</option>
-                                {categories
-                                    .filter((c) => c.type === type)
-                                    .map((c) => (
-                                        <option key={c.id} value={c.id}>
-                                            {c.name}
-                                        </option>
-                                    ))}
-                            </select>
-                        </div>
-                    ) : (
+                    {type === 'transfer' && (
                         <div className="flex flex-col gap-1.5">
                             <label className="text-sm font-medium text-foreground/80">To Account</label>
                             <select
                                 name="to_account_id"
-                                defaultValue={transaction.to_account_id || ""}
+                                value={toAccountId}
+                                onChange={(e) => setToAccountId(e.target.value)}
                                 className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-indigo-500/20 outline-none"
                                 required
                             >
@@ -318,11 +462,33 @@ export function EditTransactionModal({
                         </div>
                     )}
 
+                    {type !== 'transfer' && (
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-sm font-medium text-foreground/80">Category</label>
+                            <select
+                                name="category_id"
+                                value={categoryId}
+                                onChange={(e) => setCategoryId(e.target.value)}
+                                className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                            >
+                                <option value="">No category</option>
+                                {categories
+                                    .filter((c) => c.type === type)
+                                    .map((c) => (
+                                        <option key={c.id} value={c.id}>
+                                            {c.name}
+                                        </option>
+                                    ))}
+                            </select>
+                        </div>
+                    )}
+
                     <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-foreground/80">Account</label>
                         <select
                             name="account_id"
-                            defaultValue={transaction.account_id || ""}
+                            value={fromAccountId}
+                            onChange={(e) => setFromAccountId(e.target.value)}
                             className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
                         >
                             <option value="">Select account</option>
@@ -333,6 +499,20 @@ export function EditTransactionModal({
                             ))}
                         </select>
                     </div>
+
+                    {type === 'transfer' && toAccount?.type === 'International Stock Wallet' && (
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-sm font-medium text-foreground/80">Secondary Amount ({toAccount.secondary_currency})</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                name="secondary_amount"
+                                defaultValue={transaction.secondary_amount || 0}
+                                autoComplete="off"
+                                className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                            />
+                        </div>
+                    )}
 
                     <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-foreground/80">Date</label>
@@ -358,13 +538,34 @@ export function EditTransactionModal({
 
                     <div className="flex flex-col gap-1.5">
                         <label className="text-sm font-medium text-foreground/80">Notes</label>
-                        <input
-                            type="text"
-                            name="notes"
-                            autoComplete="off"
-                            defaultValue={transaction.notes || ""}
-                            className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
-                        />
+                        <div className="relative group">
+                            <input
+                                type="text"
+                                name="notes"
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                autoComplete="off"
+                                className="w-full px-4 py-2 pr-10 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                placeholder="Lunch, Salary, Rent..."
+                            />
+                            {type !== 'transfer' && (
+                                <button
+                                    type="button"
+                                    onClick={handleSuggestCategory}
+                                    disabled={isSuggesting || notes.length < 2 || !isPremium}
+                                    className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all ${
+                                        isSuggesting 
+                                            ? 'bg-primary/10 text-primary animate-pulse' 
+                                            : !isPremium
+                                                ? 'bg-background text-text-muted/30 cursor-not-allowed'
+                                                : 'bg-background hover:bg-primary/10 text-text-muted hover:text-primary disabled:opacity-0'
+                                    }`}
+                                    title={isPremium ? "AI Suggest Category" : "AI Auto-categorization (Premium Only)"}
+                                >
+                                    <SparklesIcon className={`w-3.5 h-3.5 ${isSuggesting ? 'animate-spin' : ''}`} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <input type="hidden" name="timezoneOffset" value={new Date().getTimezoneOffset()} />

@@ -7,6 +7,7 @@ import {useState, useMemo} from "react";
 import {ArrowsRightLeftIcon, PencilIcon} from "@heroicons/react/24/outline";
 import {useDashboard} from "@/providers/dashboard-provider";
 import {TransactionFilters} from "@/components/dashboard/TransactionFilters";
+import { LoadingSpinner } from "@/components/theme/Loading";
 
 export default function TransactionsPage() {
     const {
@@ -88,7 +89,7 @@ export default function TransactionsPage() {
     };
 
     if (loading) {
-        return <div className="p-8 text-center text-text-muted">Loading transactions...</div>;
+        return <div className="p-20"><LoadingSpinner label="Loading transactions..." /></div>;
     }
 
     return (<div className="max-w-7xl mx-auto space-y-10 animate-fade-in-up pb-10">

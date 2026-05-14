@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ChartPieIcon } from "@heroicons/react/24/outline";
 import { useDashboard } from "@/providers/dashboard-provider";
 import BudgetProgressChart from "@/components/charts/BudgetProgressChart";
+import { LoadingSpinner } from "@/components/theme/Loading";
 
 export default function BudgetsPage() {
     const { 
@@ -40,7 +41,7 @@ export default function BudgetsPage() {
     }));
 
     if (loading) {
-        return <div className="p-8 text-center text-text-muted">Loading budgets...</div>;
+        return <div className="p-20"><LoadingSpinner label="Loading budgets..." /></div>;
     }
 
     return (

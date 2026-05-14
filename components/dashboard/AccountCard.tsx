@@ -60,6 +60,11 @@ export function AccountCard({ account, currency, onEditAction, onRefreshAction, 
       <div className="text-2xl font-extrabold text-foreground">
         {formatCurrency(account.balance, currency)}
       </div>
+      {account.secondary_balance !== undefined && account.secondary_balance !== null && account.secondary_currency && (
+        <div className="text-sm font-bold text-primary mt-1">
+          {formatCurrency(account.secondary_balance, account.secondary_currency)}
+        </div>
+      )}
       <div className="flex justify-between items-end mt-1">
         <p className="text-xs text-text-muted/60">Current Balance</p>
         {account.account_category === 'debt' && onPayAction && (

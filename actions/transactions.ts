@@ -57,6 +57,7 @@ export async function addTransaction(formData: FormData) {
   const investment_id = formData.get("investment_id") as string;
   const account_id = formData.get("account_id") as string;
   const to_account_id = formData.get("to_account_id") as string;
+  const secondary_amount = parseFloat(formData.get("secondary_amount") as string || "0");
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
   const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
@@ -69,6 +70,7 @@ export async function addTransaction(formData: FormData) {
   const { error } = await supabase.from("transactions").insert({
     user_id: user.id,
     amount,
+    secondary_amount: type === 'transfer' ? (secondary_amount || null) : null,
     type,
     category_id: type === 'transfer' ? null : (category_id || null),
     investment_id: investment_id || null,
@@ -97,6 +99,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   const investment_id = formData.get("investment_id") as string;
   const account_id = formData.get("account_id") as string;
   const to_account_id = formData.get("to_account_id") as string;
+  const secondary_amount = parseFloat(formData.get("secondary_amount") as string || "0");
   const date = formData.get("date") as string;
   const time = formData.get("time") as string;
   const timezoneOffset = parseInt(formData.get("timezoneOffset") as string || "0");
@@ -109,6 +112,7 @@ export async function updateTransaction(id: string, formData: FormData) {
     .from("transactions")
     .update({
       amount,
+      secondary_amount: type === 'transfer' ? (secondary_amount || null) : null,
       type,
       category_id: type === 'transfer' ? null : (category_id || null),
       investment_id: investment_id || null,
@@ -222,10 +226,14 @@ export async function getTransactions(): Promise<Transaction[]> {
         color
       ),
       accounts:account_id (
-        name
+        name,
+        type,
+        secondary_currency
       ),
       to_accounts:to_account_id (
-        name
+        name,
+        type,
+        secondary_currency
       )
     `)
     .order("date", { ascending: false });
