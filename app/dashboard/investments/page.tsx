@@ -56,72 +56,87 @@ export default function InvestmentsPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="flex items-center gap-3">
-                    <ChartBarSquareIcon className="w-8 h-8 text-primary" />
+        <div className="max-w-7xl mx-auto space-y-10 animate-fade-in-up">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-2xl">
+                        <ChartBarSquareIcon className="w-8 h-8 text-primary" />
+                    </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">Investment Portfolio</h1>
-                        <p className="text-text-muted mt-1">Summary of all your assets</p>
+                        <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">Investments</h1>
+                        <p className="text-text-muted mt-1 font-medium">Grow your wealth and track your assets</p>
                     </div>
                 </div>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+
+                <div className="flex flex-wrap items-center gap-3">
                     <Link
                         href="/dashboard/investments/sips"
-                        className="flex items-center justify-center gap-2 px-6 py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl font-bold transition-all border border-primary/20"
+                        className="px-6 py-3 bg-background border border-surface-border text-xs font-black uppercase tracking-widest text-text-muted hover:text-primary hover:border-primary/30 rounded-2xl transition-all flex items-center gap-2"
                     >
+                        <ArrowPathIcon className="w-4 h-4" />
                         SIP Dashboard
                     </Link>
-                    <button
-                        onClick={handleSync}
-                        disabled={isSyncing}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-surface hover:bg-surface-hover text-text-muted border border-surface-border rounded-xl transition-colors disabled:opacity-50 min-h-[44px]"
-                    >
-                        <ArrowPathIcon className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
-                        {isSyncing ? 'Syncing...' : 'Sync All Prices'}
-                    </button>
-                    <div className="bg-surface p-4 rounded-2xl border border-input-border text-center sm:text-right">
-                        <p className="text-sm text-text-muted mb-1">Total Portfolio Value</p>
-                        <p className="text-2xl font-bold text-primary">{formatCurrency(totalPortfolioValue, currency)}</p>
+                    <div className="bg-surface/80 backdrop-blur-sm px-6 py-3 rounded-2xl border border-surface-border/50 shadow-sm">
+                        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Portfolio Value</p>
+                        <p className="text-xl font-black text-primary tracking-tight">{formatCurrency(totalPortfolioValue, currency)}</p>
                     </div>
                 </div>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-12">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-black text-foreground tracking-tight">Asset Distribution</h2>
+                        <button
+                            onClick={handleSync}
+                            disabled={isSyncing}
+                            className="flex items-center gap-2 px-4 py-2 bg-background hover:bg-surface-hover text-[10px] font-black uppercase tracking-widest text-text-muted border border-surface-border rounded-xl transition-all disabled:opacity-50"
+                        >
+                            <ArrowPathIcon className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
+                            {isSyncing ? 'Syncing...' : 'Sync Prices'}
+                        </button>
+                    </div>
+
                     {Object.entries(investmentsByType).map(([type, typeInvestments]) => (
-                        <section key={type} className="space-y-4">
-                            <div className="flex items-center justify-between border-b border-surface-border pb-2">
-                                <h2 className="text-xl font-bold text-foreground">{type}</h2>
+                        <section key={type} className="space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 rounded-full bg-primary" />
+                                <h3 className="text-lg font-black text-foreground tracking-tight">{type}</h3>
+                                <div className="flex-1 h-px bg-surface-border/50" />
                                 <Link 
                                     href={`/dashboard/investments/${type.toLowerCase().replace(/\s+/g, '-')}`}
-                                    className="text-sm font-medium text-primary hover:underline"
+                                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:text-primary-hover"
                                 >
-                                    View Detailed {type} →
+                                    View Details →
                                 </Link>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {typeInvestments.map((investment) => (
-                                    <InvestmentCard
-                                        key={investment.id}
-                                        investment={investment}
-                                        currency={currency}
-                                        onEditAction={() => setEditingInvestment(investment)}
-                                        onRefreshAction={refreshInvestments}
-                                    />
+                                    <div key={investment.id} className="transition-all hover:-translate-y-1 duration-300">
+                                        <InvestmentCard
+                                            investment={investment}
+                                            currency={currency}
+                                            onEditAction={() => setEditingInvestment(investment)}
+                                            onRefreshAction={refreshInvestments}
+                                        />
+                                    </div>
                                 ))}
                             </div>
                         </section>
                     ))}
                     
                     {investments.length === 0 && (
-                        <div className="text-center py-20 bg-surface rounded-3xl border border-dashed border-input-border">
-                            <p className="text-text-muted">No investments added yet.</p>
+                        <div className="text-center py-24 bg-surface/40 rounded-[2.5rem] border-2 border-dashed border-surface-border/50">
+                            <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mx-auto mb-4">
+                                <ChartBarSquareIcon className="w-8 h-8 text-text-muted" />
+                            </div>
+                            <p className="text-text-muted font-bold">No investments found</p>
+                            <p className="text-xs text-text-muted mt-1">Add your first investment to start tracking your growth.</p>
                         </div>
                     )}
                 </div>
 
-                <div>
+                <div className="lg:col-span-1">
                     <AddInvestmentForm />
                 </div>
             </div>
@@ -138,3 +153,4 @@ export default function InvestmentsPage() {
         </div>
     );
 }
+
