@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { Profile } from "@/types/database";
+import { getUserCurrentMonth } from "@/utils/date-utils";
 
 export async function getProfile(): Promise<Profile | null> {
   const cookieStore = await cookies();
@@ -35,6 +36,7 @@ export async function updateProfile(formData: FormData) {
 
   const fullName = formData.get("fullName") as string;
   const currency = formData.get("currency") as string;
+  const timezone = formData.get("timezone") as string;
   const avatarFile = formData.get("avatarFile") as File;
   let avatarUrl = formData.get("avatarUrl") as string;
 
@@ -69,6 +71,7 @@ export async function updateProfile(formData: FormData) {
     .update({
       full_name: fullName,
       currency,
+      timezone,
       avatar_url: avatarUrl,
       updated_at: new Date().toISOString(),
     })
@@ -113,6 +116,14 @@ export async function updateNetWorthSnapshot() {
   if (!user) return { error: "Unauthorized" };
 
   // Fetch current liquid cash from accounts
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user.id)
+    .single();
+
+  const userTimezone = profileData?.timezone || "UTC";
+
   const { data: accounts } = await supabase
     .from("accounts")
     .select("balance")
@@ -129,7 +140,7 @@ export async function updateNetWorthSnapshot() {
   const investedValue = investments?.reduce((acc, inv) => acc + (Number(inv.current_value) * Number(inv.quantity)), 0) || 0;
 
   const totalNetWorth = liquidCash + investedValue;
-  const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+  const month = getUserCurrentMonth(userTimezone);
 
   const { error } = await supabase
     .from("net_worth_history")

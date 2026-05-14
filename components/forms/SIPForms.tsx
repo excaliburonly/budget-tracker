@@ -85,7 +85,7 @@ export function LogSIPPaymentForm({ sip, accounts, onLoggedAction }: { sip: SIP,
             <div className="flex flex-col gap-4 grid grid-cols-2">
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium">Date</label>
-                    <input type="date" name="date" defaultValue={new Date().toISOString().split('T')[0]} className="px-4 py-2 rounded-lg border bg-background" required />
+                    <input type="date" name="date" defaultValue={new Date().toLocaleDateString('en-CA')} className="px-4 py-2 rounded-lg border bg-background" required />
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="text-sm font-medium">Time</label>

@@ -236,7 +236,7 @@ export function AddTransactionForm({ onTransactionAddedAction }: { onTransaction
                     <input
                         type="date"
                         name="date"
-                        defaultValue={new Date().toISOString().split("T")[0]}
+                        defaultValue={new Date().toLocaleDateString('en-CA')}
                         className="px-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                         required
                     />

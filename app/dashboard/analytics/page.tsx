@@ -46,6 +46,8 @@ export default async function AnalyticsPage(props: { searchParams: Promise<{ tab
   );
 }
 
+import { getUserCurrentMonth, getUserToday } from "@/utils/date-utils";
+
 async function AnalyticsContent({ activeTab }: { activeTab: string }) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -53,13 +55,15 @@ async function AnalyticsContent({ activeTab }: { activeTab: string }) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('currency, subscription_tier')
+    .select('currency, subscription_tier, timezone')
     .eq('id', user?.id)
     .single();
 
   const currency = profile?.currency || 'INR';
   const subscriptionTier = profile?.subscription_tier || 'free';
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const userTimezone = profile?.timezone || 'UTC';
+  const currentMonth = getUserCurrentMonth(userTimezone);
+  const today = getUserToday(userTimezone);
 
   if (activeTab === "ai") {
     return (
@@ -186,14 +190,14 @@ async function AnalyticsContent({ activeTab }: { activeTab: string }) {
 
   const months = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date();
-    d.setMonth(d.getMonth() - i);
+    const d = new Date(today);
+    d.setUTCMonth(d.getUTCMonth() - i);
     months.push(d.toISOString().slice(0, 7));
   }
   const incomeExpenseData = months.map(m => {
     const monthIncome = transactions.filter(t => t.date.startsWith(m) && t.type === 'income').reduce((acc, t) => acc + Number(t.amount), 0);
     const monthExpense = transactions.filter(t => t.date.startsWith(m) && (t.type === 'expense' || t.type === 'investment')).reduce((acc, t) => acc + Number(t.amount), 0);
-    return { name: new Date(m + "-01").toLocaleDateString(undefined, { month: 'short' }), income: monthIncome, expense: monthExpense };
+    return { name: new Date(m + "-01").toLocaleDateString(undefined, { month: 'short', timeZone: 'UTC' }), income: monthIncome, expense: monthExpense };
   });
 
   const processCategoryData = (type: 'income' | 'expense' | 'investment') => {

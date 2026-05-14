@@ -5,6 +5,7 @@ import {cookies} from "next/headers";
 import {revalidatePath} from "next/cache";
 import {Investment, InvestmentTransaction} from "@/types/database";
 import {fetchMutualFundNAV, fetchHistoricalNAVs, fetchHistoricalStockPrices} from "@/utils/nav-api";
+import { getUserToday } from "@/utils/date-utils";
 
 export interface PerformancePoint {
     date: string;
@@ -26,6 +27,14 @@ export async function getInvestmentPerformance(type?: string): Promise<Performan
     const {data: investments} = await invQuery;
     if (!investments || investments.length === 0) return [];
 
+    const { data: profile } = await supabase
+        .from("profiles")
+        .select("timezone")
+        .eq("id", user.id)
+        .single();
+    
+    const userTimezone = profile?.timezone || "UTC";
+
     const {data: allTransactions} = await supabase.from("investment_transactions").select(`
             *,
             investments!inner (
@@ -42,14 +51,16 @@ export async function getInvestmentPerformance(type?: string): Promise<Performan
     if (!allTransactions || allTransactions.length === 0) {
         const totalInvested = investments.reduce((acc, i) => acc + (Number(i.invested_value) || 0), 0);
         const totalValue = investments.reduce((acc, i) => acc + (Number(i.current_value) * Number(i.quantity)), 0);
+        const yesterday = new Date(getUserToday(userTimezone));
+        yesterday.setUTCDate(yesterday.getUTCDate() - 1);
         return [
-            { date: new Date(Date.now() - 86400000).toISOString().split('T')[0], invested: totalInvested, value: totalInvested },
-            { date: new Date().toISOString().split('T')[0], invested: totalInvested, value: totalValue }
+            { date: yesterday.toISOString().split('T')[0], invested: totalInvested, value: totalInvested },
+            { date: getUserToday(userTimezone).toISOString().split('T')[0], invested: totalInvested, value: totalValue }
         ];
     }
 
     const startDate = new Date(allTransactions[0].date);
-    const endDate = new Date();
+    const endDate = getUserToday(userTimezone);
     const days: string[] = [];
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
         days.push(d.toISOString().split('T')[0]);

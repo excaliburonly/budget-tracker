@@ -24,6 +24,8 @@ import IncomeExpenseChart from "@/components/charts/IncomeExpenseChart";
 import AccountsPieChart from "@/components/charts/AccountsPieChart";
 import CategoryBreakdownChart from "@/components/charts/CategoryBreakdownChart";
 
+import { getUserCurrentMonth, getUserToday } from "@/utils/date-utils";
+
 export default async function DashboardPage() {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -31,16 +33,19 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Get user profile for currency
+  // Get user profile for currency and timezone
   const { data: profile } = await supabase
     .from("profiles")
-    .select("currency")
+    .select("currency, timezone")
     .eq("id", user?.id)
     .single();
 
   const currency = profile?.currency || "INR";
+  const userTimezone = profile?.timezone || "UTC";
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  // Get current month in user's timezone
+  const currentMonth = getUserCurrentMonth(userTimezone);
+  
   const [transactions, budgets, accounts, investments, goals, allocations] = await Promise.all([
     getTransactions(),
     getBudgets(currentMonth),
@@ -96,29 +101,29 @@ export default async function DashboardPage() {
   });
 
   // Calculate money left per day based on last working day of the month
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Create 'today' as a UTC date representing the start of the day in user's timezone
+  const today = getUserToday(userTimezone);
 
   const getLastWorkingDay = (date: Date) => {
-    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    while (lastDay.getDay() === 0 || lastDay.getDay() === 6) {
-      lastDay.setDate(lastDay.getDate() - 1);
+    // Use UTC methods to avoid server timezone interference
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0));
+    while (lastDay.getUTCDay() === 0 || lastDay.getUTCDay() === 6) {
+      lastDay.setUTCDate(lastDay.getUTCDate() - 1);
     }
-    lastDay.setHours(0, 0, 0, 0);
     return lastDay;
   };
 
   let targetDate = getLastWorkingDay(today);
   let startDate: Date;
 
-  if (today >= targetDate) {
+  if (today.getTime() >= targetDate.getTime()) {
     // If we've reached or passed the last working day, the next period ends at next month's last working day
     startDate = targetDate;
-    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const nextMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 1));
     targetDate = getLastWorkingDay(nextMonth);
   } else {
     // Current period started at last month's last working day
-    const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonth = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, 1));
     startDate = getLastWorkingDay(lastMonth);
   }
 
@@ -140,8 +145,8 @@ export default async function DashboardPage() {
   // Prepare data for IncomeExpenseChart (last 6 months)
   const months = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date();
-    d.setMonth(d.getMonth() - i);
+    const d = new Date(today);
+    d.setUTCMonth(d.getUTCMonth() - i);
     months.push(d.toISOString().slice(0, 7));
   }
 
@@ -233,6 +238,7 @@ export default async function DashboardPage() {
         <div className="hidden md:block">
           <span className="text-xs font-bold text-text-muted uppercase tracking-widest bg-surface px-3 py-1.5 rounded-full border border-surface-border">
             {new Date().toLocaleDateString(undefined, {
+              timeZone: userTimezone,
               weekday: "long",
               year: "numeric",
               month: "long",

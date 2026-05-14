@@ -4,6 +4,7 @@ import {createClient} from "@/utils/supabase/server";
 import {cookies} from "next/headers";
 import {revalidatePath} from "next/cache";
 import { Budget } from "@/types/database";
+import { getUserCurrentMonth } from "@/utils/date-utils";
 
 export async function getBudgets(month?: string): Promise<Budget[]> {
   const cookieStore = await cookies();
@@ -43,7 +44,14 @@ export async function createBudget(formData: FormData): Promise<{ error?: string
 
   const category_id = formData.get("category_id") as string;
   const amount = parseFloat(formData.get("amount") as string);
-  const month = formData.get("month") as string || new Date().toISOString().slice(0, 7);
+  
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user.id)
+    .single();
+  
+  const month = formData.get("month") as string || getUserCurrentMonth(profile?.timezone || "UTC");
 
   const { error } = await supabase
     .from("budgets")

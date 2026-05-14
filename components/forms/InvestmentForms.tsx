@@ -576,7 +576,7 @@ export function AddInvestmentTransactionModal({
                 type="date"
                 name="date"
                 required
-                defaultValue={new Date().toISOString().split('T')[0]}
+                defaultValue={new Date().toLocaleDateString('en-CA')}
                 className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
               />
             </div>

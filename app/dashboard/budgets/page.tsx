@@ -14,13 +14,12 @@ export default function BudgetsPage() {
         budgets, 
         transactions, 
         currency, 
+        currentMonth,
         loading, 
         refreshBudgets 
     } = useDashboard();
     
     const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
-
-    const currentMonth = new Date().toISOString().slice(0, 7); // e.g. "2026-04"
 
     // Filter transactions for current month and expenses
     const currentMonthTransactions = transactions.filter(t => t.date.startsWith(currentMonth) && t.type === 'expense');

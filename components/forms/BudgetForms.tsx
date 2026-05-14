@@ -82,7 +82,7 @@ export function AddBudgetForm({ onBudgetAddedAction }: BudgetFormProps) {
             type="month"
             name="month"
             id="month"
-            defaultValue={new Date().toISOString().slice(0, 7)}
+            defaultValue={`${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`}
             required
             className="w-full px-4 py-2 rounded-lg border-input-border bg-input text-foreground focus:ring-blue-500 focus:border-blue-500"
           />

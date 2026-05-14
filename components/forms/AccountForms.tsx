@@ -366,7 +366,7 @@ export function LogDebtPaymentModal({ debtAccount, accounts, onCloseAction, onPa
             <input
               type="date"
               name="date"
-              defaultValue={new Date().toISOString().split('T')[0]}
+              defaultValue={new Date().toLocaleDateString('en-CA')}
               className="px-4 py-2 rounded-lg border border-input-border bg-input text-sm focus:ring-2 focus:ring-blue-500/20 outline-none"
               required
             />

@@ -60,7 +60,8 @@ export default function AIInsights() {
     if (!insights || saved) return;
     setSaving(true);
     try {
-      const month = new Date().toISOString().slice(0, 7);
+      const now = new Date();
+      const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       const res = await saveFinancialInsight(month, insights);
       if (res.success) {
         setSaved(true);

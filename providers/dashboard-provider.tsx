@@ -49,6 +49,7 @@ interface DashboardContextType {
   budgets: Budget[];
   profile: Profile | null;
   currency: string;
+  currentMonth: string;
   loading: boolean;
   isSaving: boolean;
   setIsSaving: (saving: boolean) => void;
@@ -90,7 +91,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     setConfirmation(null);
   }, []);
 
-  const currentMonth = new Date().toISOString().slice(0, 7);
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   const refreshProfile = useCallback(async () => {
     const supabase = createClient();
@@ -196,6 +198,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         budgets,
         profile,
         currency,
+        currentMonth,
         loading,
         isSaving,
         setIsSaving,

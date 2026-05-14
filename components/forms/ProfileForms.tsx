@@ -3,9 +3,9 @@
 import { updateProfile } from "@/actions/profiles";
 import { Profile } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
-import { UserCircleIcon, BanknotesIcon, CameraIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, BanknotesIcon, CameraIcon, XMarkIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { getInitials } from "@/utils/format";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
 export function ProfileForm({ profile }: { profile: Profile }) {
@@ -13,7 +13,19 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(profile.avatar_url);
+  const [timezone, setTimezone] = useState(profile.timezone || (typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC'));
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const timezones = typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl 
+    ? (Intl as unknown as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf('timeZone')
+    : ['UTC'];
+
+  useEffect(() => {
+    if (!profile.timezone) {
+      const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      setTimezone(browserTimezone);
+    }
+  }, [profile.timezone]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -155,6 +167,26 @@ export function ProfileForm({ profile }: { profile: Profile }) {
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
                 <option value="JPY">JPY (¥)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] ml-1">Timezone</label>
+            <div className="relative">
+              <ClockIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted/50" />
+              <select
+                name="timezone"
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="w-full pl-12 pr-5 py-3 rounded-2xl border border-surface-border/50 bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold appearance-none"
+                required
+              >
+                {timezones.map((tz) => (
+                  <option key={tz} value={tz}>
+                    {tz}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
