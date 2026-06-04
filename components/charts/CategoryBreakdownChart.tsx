@@ -21,14 +21,14 @@ interface CategoryBreakdownChartProps {
 }
 
 const DEFAULT_COLORS = [
-  '#2563eb', // blue-600
-  '#10b981', // emerald-500
-  '#f59e0b', // amber-500
-  '#ef4444', // red-500
-  '#8b5cf6', // violet-500
-  '#ec4899', // pink-500
-  '#06b6d4', // cyan-500
-  '#84cc16', // lime-500
+  '#4f46e5', // premium indigo
+  '#10b981', // emerald
+  '#f59e0b', // amber
+  '#f43f5e', // crimson
+  '#8b5cf6', // purple
+  '#06b6d4', // cyan
+  '#a3be8c', // sage
+  '#ebcb8b', // gold
 ];
 
 export default function CategoryBreakdownChart({ data, currency, title }: CategoryBreakdownChartProps) {

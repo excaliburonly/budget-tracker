@@ -5,7 +5,7 @@ import { Profile } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
 import { UserCircleIcon, BanknotesIcon, CameraIcon, XMarkIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { getInitials } from "@/utils/format";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 
 export function ProfileForm({ profile }: { profile: Profile }) {
@@ -20,12 +20,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     ? (Intl as unknown as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf('timeZone')
     : ['UTC'];
 
-  useEffect(() => {
-    if (!profile.timezone) {
-      const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      setTimezone(browserTimezone);
-    }
-  }, [profile.timezone]);
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

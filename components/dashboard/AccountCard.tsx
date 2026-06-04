@@ -30,13 +30,13 @@ export function AccountCard({ account, currency, onEditAction, onRefreshAction, 
   };
 
   return (
-    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm transition-all hover:shadow-md relative group">
+    <div className="glass-panel hover-lift p-6 rounded-2xl relative group">
       <div className="flex justify-between items-start mb-4">
         <div className="min-w-0 pr-4">
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider bg-link-hover-bg px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/10">
             {account.type}
           </span>
-          <h4 className="text-xl font-bold text-foreground mt-1 truncate" title={account.name}>{account.name}</h4>
+          <h4 className="text-xl font-bold text-foreground mt-3.5 truncate" title={account.name}>{account.name}</h4>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">

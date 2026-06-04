@@ -69,13 +69,13 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
     };
 
     return (
-        <>
+        <div className="flex flex-col h-full bg-sidebar/50 backdrop-blur-md">
             <div className="p-8 flex items-center justify-between">
                 <div className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 bg-primary shadow-lg shadow-primary/30 rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-12">
-                        <Logo size={24} />
+                    <div className="w-10 h-10 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center transition-all group-hover:scale-105 group-hover:rotate-6">
+                        <Logo size={22} />
                     </div>
-                    <h2 className="text-2xl font-black text-primary tracking-tighter">Ledgr</h2>
+                    <h2 className="text-2xl font-black text-foreground tracking-tighter">Ledgr</h2>
                 </div>
                 {onCloseAction && (
                     <button onClick={onCloseAction} className="lg:hidden p-2.5 text-text-muted hover:bg-primary/10 hover:text-primary rounded-xl transition-all">
@@ -99,9 +99,9 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                                         onClick={onCloseAction}
                                         className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm ${
                                             isExactActive
-                                                ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                                ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                                 : isActive 
-                                                    ? 'bg-primary/10 text-primary'
+                                                    ? 'bg-primary/10 text-primary border border-primary/10'
                                                     : 'text-foreground/70 hover:bg-primary/5 hover:text-primary'
                                         }`}
                                     >
@@ -128,7 +128,7 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                                                     onClick={onCloseAction}
                                                     className={`px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all ${
                                                         isSubActive
-                                                            ? 'text-primary bg-primary/10'
+                                                            ? 'text-primary bg-primary/10 border border-primary/15'
                                                             : 'text-text-muted hover:text-primary hover:bg-primary/5'
                                                     }`}
                                                 >
@@ -149,7 +149,7 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                             onClick={onCloseAction}
                             className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-sm ${
                                 isActive
-                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
                                     : 'text-foreground/70 hover:bg-primary/5 hover:text-primary'
                             }`}
                         >
@@ -160,7 +160,7 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                 })}
             </nav>
 
-            <div className="p-6 border-t border-sidebar-border/50 flex flex-col gap-4 bg-sidebar/50 backdrop-blur-sm mt-auto">
+            <div className="p-6 border-t border-sidebar-border/50 flex flex-col gap-4 bg-sidebar/30 backdrop-blur-sm mt-auto">
                 <div className="flex items-center gap-3 px-2">
                     <div className="w-10 h-10 rounded-xl overflow-hidden border border-primary/20 bg-primary/10 flex items-center justify-center shrink-0 relative">
                         {profile?.avatar_url ? (
@@ -189,7 +189,7 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <div className="bg-background/50 p-1.5 rounded-2xl border border-sidebar-border/30">
+                    <div className="bg-background/40 p-1.5 rounded-2xl border border-sidebar-border/30">
                         <ThemeToggle align="top" showLabelOnMobile={true} />
                     </div>
                     <form action={signOut}>
@@ -200,7 +200,7 @@ function SidebarContent({ pathname, onCloseAction }: { pathname: string | null; 
                     </form>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
@@ -210,7 +210,7 @@ export function Sidebar({ isOpen, onCloseAction }: { isOpen?: boolean; onCloseAc
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:flex w-64 bg-sidebar border-r border-sidebar-border flex-col sticky top-0 h-screen">
+            <aside className="hidden lg:flex w-64 bg-sidebar/55 backdrop-blur-md border-r border-sidebar-border/50 flex-col sticky top-0 h-screen">
                 <SidebarContent pathname={pathname} />
             </aside>
 

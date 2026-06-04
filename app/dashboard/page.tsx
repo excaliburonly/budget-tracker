@@ -230,13 +230,13 @@ export default async function DashboardPage() {
           <h1 className="text-3xl md:text-4xl font-black text-foreground tracking-tight">
             Dashboard Overview
           </h1>
-          <p className="text-text-muted mt-2 text-sm md:text-base font-medium">
+          <p className="text-text-muted mt-2 text-sm md:text-base font-semibold">
             Welcome back,{" "}
             <span className="text-primary">{user?.user_metadata?.full_name || 'User'}</span>
           </p>
         </div>
         <div className="hidden md:block">
-          <span className="text-xs font-bold text-text-muted uppercase tracking-widest bg-surface px-3 py-1.5 rounded-full border border-surface-border">
+          <span className="text-xs font-black text-text-muted uppercase tracking-widest bg-surface/50 backdrop-blur-xs px-4 py-2 rounded-full border border-surface-border">
             {new Date().toLocaleDateString(undefined, {
               timeZone: userTimezone,
               weekday: "long",
@@ -249,8 +249,8 @@ export default async function DashboardPage() {
       </header>
 
       {/* Net Worth Bar */}
-      <section className="bg-linear-to-r from-primary/10 via-primary/5 to-surface p-1 rounded-[2.5rem] border border-primary/20 shadow-xl shadow-primary/5">
-        <div className="bg-surface/80 backdrop-blur-md rounded-[2.3rem] p-6 md:p-8 flex flex-col lg:flex-row items-center justify-between gap-8">
+      <section className="bg-linear-to-r from-primary/15 via-primary/5 to-surface-border/5 p-[1px] rounded-[2.5rem] border border-primary/20 shadow-xl shadow-primary/5 overflow-hidden">
+        <div className="glass-panel rounded-[2.4rem] p-6 md:p-8 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-6">
             <div className="w-16 h-16 bg-primary shadow-lg shadow-primary/30 rounded-2xl flex items-center justify-center shrink-0">
               <WalletIcon className="w-8 h-8 text-white" />
@@ -285,12 +285,12 @@ export default async function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group">
+        <div className="glass-panel hover-lift p-6 rounded-3xl group">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-primary/10 rounded-2xl group-hover:bg-primary/20 transition-colors">
               <BanknotesIcon className="w-6 h-6 text-primary" />
             </div>
-            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">
+            <span className="text-xs font-black text-text-muted uppercase tracking-widest">
               Total Balance
             </span>
           </div>
@@ -299,18 +299,18 @@ export default async function DashboardPage() {
           >
             {formatCurrency(totalBalance, currency)}
           </div>
-          <div className="flex items-center gap-1.5 mt-3 text-[10px] font-bold text-text-muted uppercase tracking-wider bg-background/50 w-fit px-2 py-1 rounded-md">
+          <div className="flex items-center gap-1.5 mt-3 text-[10px] font-black text-text-muted uppercase tracking-wider bg-background/50 w-fit px-2 py-1 rounded-md">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             Sum of all accounts
           </div>
         </div>
 
-        <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group">
+        <div className="glass-panel hover-lift p-6 rounded-3xl group">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-amber-500/10 rounded-2xl group-hover:bg-amber-500/20 transition-colors">
               <ClockIcon className="w-6 h-6 text-amber-600" />
             </div>
-            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">
+            <span className="text-xs font-black text-text-muted uppercase tracking-widest">
               Daily Budget
             </span>
           </div>
@@ -334,36 +334,36 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group">
+        <div className="glass-panel hover-lift p-6 rounded-3xl group">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-emerald-500/10 rounded-2xl group-hover:bg-emerald-500/20 transition-colors">
               <ArrowTrendingUpIcon className="w-6 h-6 text-emerald-600" />
             </div>
-            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">
+            <span className="text-xs font-black text-text-muted uppercase tracking-widest">
               Monthly Income
             </span>
           </div>
           <div className="text-3xl font-black tracking-tight text-emerald-600">
             {formatCurrency(income, currency)}
           </div>
-          <span className="text-[10px] font-bold text-text-muted mt-3 inline-block uppercase tracking-wider">
+          <span className="text-[10px] font-black text-text-muted mt-3 inline-block uppercase tracking-wider">
             Earned this month
           </span>
         </div>
 
-        <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 group">
+        <div className="glass-panel hover-lift p-6 rounded-3xl group">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 bg-red-500/10 rounded-2xl group-hover:bg-red-500/20 transition-colors">
               <ArrowTrendingDownIcon className="w-6 h-6 text-red-600" />
             </div>
-            <span className="text-xs font-bold text-text-muted uppercase tracking-widest">
+            <span className="text-xs font-black text-text-muted uppercase tracking-widest">
               Monthly Expenses
             </span>
           </div>
           <div className="text-3xl font-black tracking-tight text-red-600">
             {formatCurrency(expenses, currency)}
           </div>
-          <span className="text-[10px] font-bold text-text-muted mt-3 inline-block uppercase tracking-wider">
+          <span className="text-[10px] font-black text-text-muted mt-3 inline-block uppercase tracking-wider">
             Spent this month
           </span>
         </div>
@@ -373,28 +373,28 @@ export default async function DashboardPage() {
         {/* Visual Insights */}
         <section className="lg:col-span-2 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <ArrowTrendingUpIcon className="w-6 h-6 text-primary" />
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <ArrowTrendingUpIcon className="w-5 h-5 text-primary" />
             </div>
             <h3 className="text-xl font-black text-foreground tracking-tight">
               Income vs Expenses
             </h3>
           </div>
-          <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm">
+          <div className="glass-panel p-6 rounded-3xl">
             <IncomeExpenseChart data={incomeExpenseData} currency={currency} />
           </div>
         </section>
 
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-xl">
-              <CreditCardIcon className="w-6 h-6 text-primary" />
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <CreditCardIcon className="w-5 h-5 text-primary" />
             </div>
             <h3 className="text-xl font-black text-foreground tracking-tight">
               Asset Distribution
             </h3>
           </div>
-          <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm">
+          <div className="glass-panel p-6 rounded-3xl">
             <AccountsPieChart data={accountData} currency={currency} />
           </div>
         </section>
@@ -404,14 +404,14 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-red-500/10 rounded-xl">
-                  <ChartPieIcon className="w-6 h-6 text-red-600" />
+                <div className="p-2.5 bg-red-500/10 rounded-xl">
+                  <ChartPieIcon className="w-5 h-5 text-red-600" />
                 </div>
                 <h3 className="text-xl font-black text-foreground tracking-tight">
                   Spending by Category
                 </h3>
               </div>
-              <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm">
+              <div className="glass-panel p-6 rounded-3xl">
                 <CategoryBreakdownChart
                   data={expenseByCategoryData}
                   currency={currency}
@@ -421,14 +421,14 @@ export default async function DashboardPage() {
             </div>
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-emerald-500/10 rounded-xl">
-                  <ChartPieIcon className="w-6 h-6 text-emerald-600" />
+                <div className="p-2.5 bg-emerald-500/10 rounded-xl">
+                  <ChartPieIcon className="w-5 h-5 text-emerald-600" />
                 </div>
                 <h3 className="text-xl font-black text-foreground tracking-tight">
                   Income by Category
                 </h3>
               </div>
-              <div className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm">
+              <div className="glass-panel p-6 rounded-3xl">
                 <CategoryBreakdownChart
                   data={incomeByCategoryData}
                   currency={currency}
@@ -443,8 +443,8 @@ export default async function DashboardPage() {
         <section className="lg:col-span-3 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <CreditCardIcon className="w-6 h-6 text-primary" />
+              <div className="p-2.5 bg-primary/10 rounded-xl">
+                <CreditCardIcon className="w-5 h-5 text-primary" />
               </div>
               <h3 className="text-xl font-black text-foreground tracking-tight">
                 Your Accounts
@@ -452,7 +452,7 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/dashboard/accounts"
-              className="text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2 rounded-xl flex items-center gap-2"
+              className="text-xs font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2.5 rounded-xl flex items-center gap-2"
             >
               Manage Accounts
               <ChevronRightIcon className="w-4 h-4" />
@@ -462,15 +462,15 @@ export default async function DashboardPage() {
             {accounts.slice(0, 4).map((account) => (
               <div
                 key={account.id}
-                className="bg-surface/80 backdrop-blur-sm p-5 rounded-2xl border border-surface-border/50 shadow-sm hover:shadow-md transition-all"
+                className="glass-panel hover-lift p-5 rounded-2xl"
               >
-                <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+                <span className="text-[9px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">
                   {account.type}
                 </span>
-                <h4 className="text-sm font-bold text-foreground truncate mt-1">
+                <h4 className="text-sm font-bold text-foreground truncate mt-3.5" title={account.name}>
                   {account.name}
                 </h4>
-                <div className="text-xl font-black text-foreground mt-2 tracking-tight">
+                <div className="text-xl font-black text-foreground mt-1.5 tracking-tight">
                   {formatCurrency(account.balance, currency)}
                 </div>
               </div>
@@ -487,8 +487,8 @@ export default async function DashboardPage() {
         <section className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <ClockIcon className="w-6 h-6 text-primary" />
+              <div className="p-2.5 bg-primary/10 rounded-xl">
+                <ClockIcon className="w-5 h-5 text-primary" />
               </div>
               <h3 className="text-xl font-black text-foreground tracking-tight">
                 Recent Transactions
@@ -496,19 +496,19 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/dashboard/transactions"
-              className="text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2 rounded-xl flex items-center gap-2"
+              className="text-xs font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2.5 rounded-xl flex items-center gap-2"
             >
               View All
               <ChevronRightIcon className="w-4 h-4" />
             </Link>
           </div>
-          <div className="bg-surface/80 backdrop-blur-sm rounded-3xl border border-surface-border/50 shadow-sm overflow-hidden min-h-64">
+          <div className="glass-panel rounded-3xl overflow-hidden min-h-64">
             {transactions.length === 0 ? (
               <div className="h-64 flex flex-col items-center justify-center space-y-4">
                 <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center">
                   <ClockIcon className="w-8 h-8 text-text-muted" />
                 </div>
-                <p className="text-sm font-medium text-text-muted">
+                <p className="text-sm font-semibold text-text-muted">
                   No recent transactions to display.
                 </p>
               </div>
@@ -521,7 +521,7 @@ export default async function DashboardPage() {
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-sm font-black shadow-lg transition-transform group-hover:scale-110"
+                        className="w-11 h-11 rounded-2xl flex items-center justify-center text-white text-sm font-black shadow-md transition-transform group-hover:scale-110"
                         style={{
                           backgroundColor: t.categories?.color || "#3b82f6",
                         }}
@@ -532,7 +532,7 @@ export default async function DashboardPage() {
                         <span className="text-sm font-bold text-foreground leading-tight truncate">
                           {t.notes || t.categories?.name || "Uncategorized"}
                         </span>
-                        <span className="text-xs text-text-muted font-bold mt-1 uppercase tracking-wider">
+                        <span className="text-[10px] text-text-muted font-bold mt-1 uppercase tracking-wider">
                           {new Date(t.date).toLocaleDateString(undefined, {
                             month: "short",
                             day: "numeric",
@@ -557,8 +557,8 @@ export default async function DashboardPage() {
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <ChartPieIcon className="w-6 h-6 text-primary" />
+              <div className="p-2.5 bg-primary/10 rounded-xl">
+                <ChartPieIcon className="w-5 h-5 text-primary" />
               </div>
               <h3 className="text-xl font-black text-foreground tracking-tight">
                 Budget Status
@@ -566,13 +566,13 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/dashboard/budgets"
-              className="text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2 rounded-xl flex items-center gap-2"
+              className="text-xs font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2.5 rounded-xl flex items-center gap-2"
             >
               View Details
               <ChevronRightIcon className="w-4 h-4" />
             </Link>
           </div>
-          <div className="bg-surface/80 backdrop-blur-sm rounded-3xl border border-surface-border/50 shadow-sm p-6 min-h-64">
+          <div className="glass-panel rounded-3xl p-6 min-h-64">
             {budgets.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center space-y-6 py-10">
                 <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center">
@@ -588,7 +588,7 @@ export default async function DashboardPage() {
                 </div>
                 <Link
                   href="/dashboard/budgets"
-                  className="text-xs font-bold text-primary bg-primary/10 px-6 py-3 rounded-xl hover:bg-primary hover:text-white transition-all"
+                  className="text-xs font-black uppercase tracking-widest text-primary bg-primary/10 px-6 py-3 rounded-xl hover:bg-primary hover:text-white transition-all"
                 >
                   Set a Budget Now
                 </Link>
@@ -598,7 +598,7 @@ export default async function DashboardPage() {
                 {budgets.slice(0, 4).map((budget: Budget) => {
                   const spent = spendingByCategory[budget.category_id] || 0;
                   const percentage = Math.min(
-                    (spent / budget.amount) * 100,
+                     (spent / budget.amount) * 100,
                     100,
                   );
                   const isOver = spent > budget.amount;
@@ -647,8 +647,8 @@ export default async function DashboardPage() {
         <section className="lg:col-span-3 space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <FlagIcon className="w-6 h-6 text-primary" />
+              <div className="p-2.5 bg-primary/10 rounded-xl">
+                <FlagIcon className="w-5 h-5 text-primary" />
               </div>
               <h3 className="text-xl font-black text-foreground tracking-tight">
                 Savings Goals
@@ -656,7 +656,7 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/dashboard/goals"
-              className="text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2 rounded-xl flex items-center gap-2"
+              className="text-xs font-black uppercase tracking-widest text-primary hover:bg-primary hover:text-white transition-all bg-primary/10 px-4 py-2.5 rounded-xl flex items-center gap-2"
             >
               Manage Goals
               <ChevronRightIcon className="w-4 h-4" />
@@ -666,7 +666,7 @@ export default async function DashboardPage() {
             {goalsWithProgress.slice(0, 3).map((goal) => (
               <div
                 key={goal.id}
-                className="bg-surface/80 backdrop-blur-sm p-6 rounded-3xl border border-surface-border/50 shadow-sm transition-all hover:shadow-md group"
+                className="glass-panel hover-lift p-6 rounded-3xl group"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -679,7 +679,7 @@ export default async function DashboardPage() {
                       </p>
                     )}
                   </div>
-                  <div className="bg-primary/10 text-primary px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest">
+                  <div className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-primary/10">
                     {Math.round(goal.percentage)}%
                   </div>
                 </div>
@@ -710,7 +710,7 @@ export default async function DashboardPage() {
             {goals.length > 3 && (
                 <Link 
                     href="/dashboard/goals"
-                    className="flex flex-col items-center justify-center p-6 rounded-3xl border border-dashed border-surface-border/50 hover:border-primary/50 transition-all group bg-surface/20"
+                    className="flex flex-col items-center justify-center p-6 rounded-3xl border border-dashed border-surface-border/50 hover:border-primary/50 transition-all group bg-surface/20 hover:bg-surface/30"
                 >
                     <span className="text-xs font-black text-primary uppercase tracking-widest group-hover:underline">
                         View All {goals.length} Goals

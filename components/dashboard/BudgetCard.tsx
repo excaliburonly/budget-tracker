@@ -32,7 +32,7 @@ export function BudgetCard({ budget, spent, currency, onEditAction, onRefreshAct
   };
 
   return (
-    <div className="bg-surface p-6 rounded-2xl border border-surface-border shadow-sm relative group overflow-hidden">
+    <div className="glass-panel hover-lift p-6 rounded-2xl relative group overflow-hidden">
       {isOver && (
         <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold uppercase tracking-wider">
           Over Budget
@@ -77,9 +77,9 @@ export function BudgetCard({ budget, spent, currency, onEditAction, onRefreshAct
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-background rounded-full h-2.5 overflow-hidden">
+        <div className="w-full bg-background rounded-full h-2.5 overflow-hidden border border-surface-border/30">
           <div
-            className={`h-full transition-all duration-500 ease-out ${isOver ? 'bg-red-500' : percentage > 85 ? 'bg-amber-500' : 'bg-blue-500'}`}
+            className={`h-full transition-all duration-500 ease-out ${isOver ? 'bg-red-500' : percentage > 85 ? 'bg-amber-500' : 'bg-primary'}`}
             style={{ width: `${percentage}%` }}
           />
         </div>

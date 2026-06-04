@@ -78,14 +78,17 @@ export function Features() {
   ]
 
   return (
-    <section id="features" className="w-full py-24 lg:py-32 bg-background">
-      <div className="container px-4 md:px-6 mx-auto">
+    <section id="features" className="w-full py-24 lg:py-32 bg-background relative overflow-hidden">
+      {/* Decorative Background Blob */}
+      <div className="absolute right-0 bottom-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="container px-4 md:px-6 mx-auto relative z-10">
         <div className="flex flex-col items-center justify-center space-y-4 text-center mb-16">
           <div className="space-y-2">
-            <div className="inline-block rounded-lg bg-primary/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-primary border border-primary/20">
+            <div className="inline-block rounded-full bg-primary/10 px-4.5 py-1.5 text-xs font-black uppercase tracking-widest text-primary border border-primary/20">
               Platform Features
             </div>
-            <h2 className="text-4xl font-black tracking-tight sm:text-6xl text-foreground">
+            <h2 className="text-4xl font-black tracking-tight sm:text-5xl text-foreground">
               Everything you need to <span className="text-primary italic">thrive</span>
             </h2>
             <p className="max-w-[800px] text-text-muted md:text-xl font-medium">
@@ -95,25 +98,25 @@ export function Features() {
           </div>
         </div>
         
-        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
+        <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-3">
           {features.map((feature) => (
             <div 
               key={feature.name} 
-              className="group relative bg-surface/50 backdrop-blur-sm p-8 rounded-[2.5rem] border border-surface-border/50 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5"
+              className="glass-panel hover-lift p-8 rounded-[2.5rem]"
             >
-              <div className={`w-14 h-14 rounded-2xl ${feature.color} flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-500`}>
-                <feature.icon className="w-7 h-7" />
+              <div className={`w-12 h-12 rounded-2xl ${feature.color} flex items-center justify-center mb-6 border border-current/10`}>
+                <feature.icon className="w-6 h-6" />
               </div>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-black text-foreground tracking-tight">{feature.name}</h3>
+                  <h3 className="text-lg font-black text-foreground tracking-tight">{feature.name}</h3>
                   {feature.premium && (
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full border border-amber-500/20">
+                    <span className="text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded-full border border-amber-500/20">
                       Premium
                     </span>
                   )}
                 </div>
-                <p className="text-text-muted font-medium leading-relaxed">
+                <p className="text-text-muted font-medium text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -124,4 +127,3 @@ export function Features() {
     </section>
   )
 }
-

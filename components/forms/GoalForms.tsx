@@ -3,7 +3,7 @@
 import { createGoal, updateGoal, deleteGoal, saveAllocations } from "@/actions/goals";
 import { Goal } from "@/types/database";
 import { useDashboard } from "@/providers/dashboard-provider";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TrashIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export function AddGoalForm({ onGoalAddedAction }: { onGoalAddedAction?: () => void }) {
@@ -189,16 +189,13 @@ export function EditGoalModal({ goal, onCloseAction, onGoalUpdatedAction }: { go
 
 export function ManageAllocationsModal({ goal, onCloseAction, onAllocationsSavedAction }: { goal: Goal, onCloseAction: () => void, onAllocationsSavedAction: () => void }) {
     const { accounts, investments, goalAllocations, setIsSaving } = useDashboard();
-    const [localAllocations, setLocalAllocations] = useState<{ asset_type: 'account' | 'investment', asset_id: string, percentage: number }[]>([]);
-    
-    useEffect(() => {
-        const existing = goalAllocations.filter(a => a.goal_id === goal.id).map(a => ({
+    const [localAllocations, setLocalAllocations] = useState<{ asset_type: 'account' | 'investment', asset_id: string, percentage: number }[]>(() => {
+        return goalAllocations.filter(a => a.goal_id === goal.id).map(a => ({
             asset_type: a.asset_type,
             asset_id: a.asset_id,
             percentage: Number(a.percentage)
         }));
-        setLocalAllocations(existing);
-    }, [goal.id, goalAllocations]);
+    });
 
     const handleAddAllocation = () => {
         setLocalAllocations([...localAllocations, { asset_type: 'account', asset_id: '', percentage: 10 }]);

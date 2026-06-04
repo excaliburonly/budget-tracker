@@ -27,14 +27,16 @@ export default function AIInsights() {
   const [showHistory, setShowHistory] = useState(false);
   const [viewingHistoryId, setViewingHistoryId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchHistory();
-  }, []);
-
   const fetchHistory = async () => {
     const data = await getSavedInsights();
     setHistory(data as SavedInsight[]);
   };
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      fetchHistory();
+    });
+  }, []);
 
   const handleGenerate = async () => {
     setLoading(true);

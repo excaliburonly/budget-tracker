@@ -182,7 +182,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   useEffect(() => {
-    refreshAll();
+    Promise.resolve().then(() => {
+      refreshAll();
+    });
   }, [refreshAll]);
 
   return (
